@@ -1,5 +1,37 @@
-﻿namespace ArtemisBanking.Infrastructure.Persistence;
+﻿using System.Reflection;
+using ArtemisBanking.Core.Domain.Interfaces;
+using ArtemisBanking.Infrastructure.Persistence.Context;
+using ArtemisBanking.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-public class ServiceRegistration
+namespace ArtemisBanking.Infrastructure.Persistence;
+
+public static class ServiceRegistration
 {
+    public static void AddPersistenceLayerIoc(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddDbContext<ArtemisContext>(
+            opt =>
+            {
+                opt.EnableSensitiveDataLogging();
+                opt.UseSqlServer(
+                    config.GetConnectionString("DefaultConnection"),
+                    m => m.MigrationsAssembly(Assembly.GetExecutingAssembly())
+                );
+            } 
+        );
+        
+        services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+        services.AddScoped<IBeneficiaryRepository, BeneficiaryRepository>();
+        services.AddScoped<ICardTransactionRepository, CardTransactionRepository>();
+        services.AddScoped<ICommerceRepository, CommerceRepository>();
+        services.AddScoped<ICreditCardRepository, CreditCardRepository>();
+        services.AddScoped<ILoanInstallmentRepository, LoanInstallmentRepository>();
+        services.AddScoped<ILoanRepository, LoanRepository>();
+        services.AddScoped<ISavingAccountRepository, SavingAccountRepository>();
+        services.AddScoped<ITransactionRepository, TransactionRepository>();
+    }
 }
