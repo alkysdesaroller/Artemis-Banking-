@@ -5,12 +5,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace ArtemisBanking.Infrastructure.Persistence
 {
-    public class LinkUpContextFactory : IDesignTimeDbContextFactory<ArtemisContext>
+    public class ArtemisContextFactory : IDesignTimeDbContextFactory<ArtemisContext>
     {
         public ArtemisContext CreateDbContext(string[] args)
         {
             // Buscar el appsettings.json del proyecto WebApp (1 nivel arriba)
-            var basePath = Path.Combine(Directory.GetCurrentDirectory(), "../LinkUp");
+            var basePath = Path.Combine(Directory.GetCurrentDirectory(), "../ArtemisBanking");
 
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(basePath)

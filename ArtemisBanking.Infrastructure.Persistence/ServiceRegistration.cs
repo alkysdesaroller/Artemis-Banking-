@@ -19,7 +19,7 @@ public static class ServiceRegistration
                 opt.EnableSensitiveDataLogging();
                 opt.UseSqlServer(
                     config.GetConnectionString("DefaultConnection"),
-                    m => m.MigrationsAssembly(Assembly.GetExecutingAssembly())
+                    m => m.MigrationsAssembly(typeof(ArtemisContext).Assembly.FullName)
                 );
             } 
         );
