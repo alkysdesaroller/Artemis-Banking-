@@ -14,4 +14,11 @@
       <ProjectReference Include="..\ArtemisBanking.Infrastructure.Shared\ArtemisBanking.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
 </Project>
