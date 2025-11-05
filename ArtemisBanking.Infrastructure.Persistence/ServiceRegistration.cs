@@ -1,5 +1,5 @@
 ﻿namespace ArtemisBanking.Infrastructure.Persistence;
 
-public class Class1
+public class ServiceRegistration
 {
 }
