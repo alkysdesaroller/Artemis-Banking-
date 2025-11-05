@@ -13,5 +13,5 @@ public class CreditCard
     public required DateTime CreatedAt { get; set; } = DateTime.Now;
     public required bool IsActive { get; set; }
 
-    public ICollection<CardTransaction> Transactions { get; set; } = [];
+    public ICollection<CardTransaction> CardTransactions { get; set; } = [];
 }

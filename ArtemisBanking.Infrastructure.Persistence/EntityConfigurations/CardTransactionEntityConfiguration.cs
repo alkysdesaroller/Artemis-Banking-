@@ -16,6 +16,6 @@ public class CardTransactionEntityConfiguration : IEntityTypeConfiguration<CardT
         builder.Property(x => x.Date).IsRequired();
         builder.Property(x => x.Status).IsRequired();
 
-        builder.HasOne(x => x.Commerce).WithMany(c => c.CardTransactions);
+        builder.HasOne(x => x.Commerce).WithMany(c => c.CardTransactions).OnDelete(DeleteBehavior.Restrict);
     }
 }

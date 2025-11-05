@@ -12,6 +12,6 @@ public class BeneficiaryEntityConfiguration : IEntityTypeConfiguration<Beneficia
         builder.Property(x => x.UserId).IsRequired().HasMaxLength(450);
         builder.Property(x => x.SavingAccountId).IsRequired();
 
-        builder.HasOne(b => b.SavingAccount).WithOne();
+        builder.HasOne(b => b.SavingAccount).WithOne().OnDelete(DeleteBehavior.Restrict);
     }
 }

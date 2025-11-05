@@ -20,6 +20,9 @@ public class CreditCardEntityConfiguration : IEntityTypeConfiguration<CreditCard
         builder.Property(x => x.ExpirationYear).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();
         
-        builder.HasMany(x => x.Transactions).WithOne(x => x.CreditCard).HasForeignKey(x => x.CreditCardNumber);
+        builder.HasMany(x => x.CardTransactions)
+            .WithOne(x => x.CreditCard)
+            .HasForeignKey(x => x.CreditCardNumber)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

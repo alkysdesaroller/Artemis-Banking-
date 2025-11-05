@@ -17,6 +17,9 @@ public class LoanEntityConfiguration : IEntityTypeConfiguration<Loan>
         builder.Property(x => x.Completed).IsRequired().HasDefaultValue(false);
         builder.Property(x => x.IsDue).IsRequired().HasDefaultValue(false);
         
-        builder.HasMany(x => x.LoanInstallments).WithOne(x => x.Loan).HasForeignKey(x => x.LoanId);
+        builder.HasMany(x => x.LoanInstallments)
+            .WithOne(x => x.Loan)
+            .HasForeignKey(x => x.LoanId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
