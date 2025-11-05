@@ -6,4 +6,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ArtemisBanking.Core.Application\ArtemisBanking.Core.Application.csproj" />
+      <ProjectReference Include="..\ArtemisBanking.Core.Domain\ArtemisBanking.Core.Domain.csproj" />
+      <ProjectReference Include="..\ArtemisBanking.Infrastructure.Identity\ArtemisBanking.Infrastructure.Identity.csproj" />
+      <ProjectReference Include="..\ArtemisBanking.Infrastructure.Persistence\ArtemisBanking.Infrastructure.Persistence.csproj" />
+      <ProjectReference Include="..\ArtemisBanking.Infrastructure.Shared\ArtemisBanking.Infrastructure.Shared.csproj" />
+    </ItemGroup>
+
 </Project>
