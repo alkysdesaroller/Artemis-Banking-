@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Folder Include="Dtos\" />
       <Folder Include="Mappings\" />
       <Folder Include="Services\" />
       <Folder Include="ViewModels\" />
@@ -18,8 +19,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ArtemisBanking.Core.Domain\ArtemisBanking.Core.Domain.csproj" />
-      <ProjectReference Include="..\ArtemisBanking.Infrastructure.Identity\ArtemisBanking.Infrastructure.Identity.csproj" />
-      <ProjectReference Include="..\ArtemisBanking.Infrastructure.Shared\ArtemisBanking.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
 </Project>
