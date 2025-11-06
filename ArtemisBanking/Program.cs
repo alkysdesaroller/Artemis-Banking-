@@ -1,15 +1,20 @@
+using ArtemisBanking.Core.Application;
 using ArtemisBanking.Infrastructure.Identity;
 using ArtemisBanking.Infrastructure.Persistence;
+using ArtemisBanking.Infrastructure.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddApplicationLayerIoc(builder.Configuration);
 builder.Services.AddPersistenceLayerIoc(builder.Configuration);
 builder.Services.AddIdentityLayerIocForWebApp(builder.Configuration);
+builder.Services.AddSharedLayerIoc();
 
 
 var app = builder.Build();
+await app.Services.RunIdentitySeedAsync();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -28,7 +33,7 @@ app.MapStaticAssets();
 
 app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}")
+        pattern: "{controller=Login}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 

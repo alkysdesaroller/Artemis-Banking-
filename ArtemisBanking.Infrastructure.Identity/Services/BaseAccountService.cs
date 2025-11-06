@@ -42,6 +42,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
             AppUser user = new AppUser
             {
+                IdentityCardNumber = saveDto.IdentityCardNumber,
                 FirstName = saveDto.FirstName,
                 LastName = saveDto.LastName,
                 Email = saveDto.Email,
@@ -119,7 +120,8 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             {
                 return Result<UserDto>.Fail( $"There is no account registered with this user");
             }
-            
+
+            user.IdentityCardNumber = saveDto.IdentityCardNumber;
             user.FirstName = saveDto.FirstName;
             user.LastName = saveDto.LastName;
             user.UserName = saveDto.UserName;
@@ -287,7 +289,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             
             if (user == null)
             {
-                return Result<UserDto>.Fail("There is no account registered with this user");
+                return Result<UserDto>.Fail("There is no account registered with this id");
             }
 
             var rolesList = await _userManager.GetRolesAsync(user);
