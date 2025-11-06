@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using ArtemisBanking.Core.Application;
+using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Infrastructure.Identity.Entities;
-using LinkUp.Core.Application.Dtos.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;

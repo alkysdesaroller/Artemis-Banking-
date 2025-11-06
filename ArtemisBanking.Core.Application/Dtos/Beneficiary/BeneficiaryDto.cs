@@ -1,11 +1,14 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.Beneficiary;
+﻿using ArtemisBanking.Core.Application.Dtos.SavingAccount;
+using ArtemisBanking.Core.Application.Dtos.User;
+
+namespace ArtemisBanking.Core.Application.Dtos.Beneficiary;
 
 public class BeneficiaryDto
 {
     public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public string AccountNumber { get; set; } = string.Empty;
-    public string BeneficiaryName { get; set; } = string.Empty;
-    public string BeneficiaryLastName { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; }
+    public required string UserId { get; set; }
+    public required string SavingAccountId { get; set; }
+    
+    public SavingAccountDto? SavingAccount { get; set; }
+    public UserDto? User { get; set; }
 }

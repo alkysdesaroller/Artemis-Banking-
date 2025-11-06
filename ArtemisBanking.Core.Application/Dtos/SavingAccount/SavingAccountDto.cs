@@ -1,18 +1,12 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos;
+﻿namespace ArtemisBanking.Core.Application.Dtos.SavingAccount;
 
 public class SavingAccountDto
 {
-    public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public string UserFullName { get; set; } = string.Empty;
-    public string UserCedula { get; set; } = string.Empty;
-    public string AccountNumber { get; set; } = string.Empty;
-    public decimal Balance { get; set; }
-    public bool IsMainAccount { get; set; }
-    public bool IsActive { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public string CreatedBy { get; set; } = string.Empty;
-        
-    // Propiedades calculadas
-    public string AccountType => IsMainAccount ? "Principal" : "Secundaria";
+    public required string Id { get; set; } // Las cuentas y prestamos obtienen su ID de la secuencia global
+    public required string ClientId { get; set; } // Es un UserId
+    public required decimal Balance { get; set; } // Saldo de la cuenta
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
+    public required string AssignedByUserId { get; set; }
+    public required bool IsPrincipalAccount { get; set; }
+    public required bool IsActive { get; set; }
 }

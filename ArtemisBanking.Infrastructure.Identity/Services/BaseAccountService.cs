@@ -1,10 +1,11 @@
 ﻿using System.Text;
 using ArtemisBanking.Core.Application;
+using ArtemisBanking.Core.Application.Dtos.Email;
+using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Infrastructure.Identity.Context;
 using ArtemisBanking.Infrastructure.Identity.Entities;
-using LinkUp.Core.Application.Dtos.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -387,7 +388,6 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             {
                 return Result<UserDto>.Fail("There is no account registered with this user");
             }
-
 
             token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
             var result = await _userManager.ConfirmEmailAsync(user, token);

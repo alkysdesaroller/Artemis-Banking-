@@ -1,6 +1,6 @@
-﻿using ArtemisBanking.Core.Application.Interfaces;
+﻿using ArtemisBanking.Core.Application.Dtos.Email;
+using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Settings;
-using LinkUp.Core.Application.Dtos.Email;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;

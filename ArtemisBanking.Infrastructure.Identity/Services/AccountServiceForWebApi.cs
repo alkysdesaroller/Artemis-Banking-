@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using ArtemisBanking.Core.Application;
+using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Settings;

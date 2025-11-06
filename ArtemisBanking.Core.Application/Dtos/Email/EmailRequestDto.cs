@@ -1,4 +1,4 @@
-namespace LinkUp.Core.Application.Dtos.Email;
+namespace ArtemisBanking.Core.Application.Dtos.Email;
 
 public class EmailRequestDto
 {

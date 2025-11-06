@@ -1,13 +1,15 @@
-﻿using System.Xml.Linq;
-using ArtemisBanking.Core.Application.Dtos;
-using ArtemisBanking.Core.Application.Dtos.Beneficiary;
-using ArtemisBanking.Core.Application.Dtos.Saves;
-using ArtemisBanking.Core.Domain.Entities;
+﻿using ArtemisBanking.Core.Application.Dtos.Beneficiary;
 
 namespace ArtemisBanking.Core.Application.Interfaces;
 
-public interface IBeneficiaryService : IGenericService<Beneficiary, SaveBeneficiaryDto,  BeneficiaryDto>
+public interface IBeneficiaryService : IGenericService<int, BeneficiaryDto>
 {
-    Task<List<BeneficiaryDto>> GetByUserId(string userId);
+    // Te recomiendo que te centres en generar las interfaces faltantes de los otros servicios.
+    // Puedes dejar la creación de métodos especificos para cuando estemos trabajando los modulos cada uno.
+    
+    // Recuerda que casi todos los metodos deberian de ser Result<> o Result. 
+    // Usa Result<> cuando tengas que devolver un objeto junto al resultado, usa Result cuando solamente quieres expresar
+    // si la tarea fallo o no.
+    Task<Result<List<BeneficiaryDto>>> GetByUserId(string userId);
     Task<bool> AccountNumberExists(string accountNumber);
 }

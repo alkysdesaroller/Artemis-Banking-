@@ -1,4 +1,4 @@
-using LinkUp.Core.Application.Dtos.Email;
+using ArtemisBanking.Core.Application.Dtos.Email;
 
 namespace ArtemisBanking.Core.Application.Interfaces;
 

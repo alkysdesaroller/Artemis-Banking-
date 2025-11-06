@@ -1,4 +1,4 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.User
+﻿namespace ArtemisBanking.Core.Application.Dtos.Login
 {
     public class LoginResponseForApiDto
     {

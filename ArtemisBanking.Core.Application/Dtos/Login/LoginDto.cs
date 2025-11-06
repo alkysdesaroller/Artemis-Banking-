@@ -1,7 +1,7 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.Login;
+namespace ArtemisBanking.Core.Application.Dtos.Login;
 
 public class LoginDto
 {
-    public string UserName { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    public required string UserName { get; set; }
+    public required string Password { get; set; }
 }

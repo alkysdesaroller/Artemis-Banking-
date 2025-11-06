@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ArtemisBanking.Core.Application.Dtos.Saves;
+﻿namespace ArtemisBanking.Core.Application.Dtos.Beneficiary;
 
 public class SaveBeneficiaryDto
 {

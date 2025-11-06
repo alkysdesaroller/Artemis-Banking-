@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using ArtemisBanking.Core.Application.Interfaces;
+using ArtemisBanking.Core.Application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +11,8 @@ namespace ArtemisBanking.Core.Application
         //Extension method - Decorator pattern
         public static void AddApplicationLayerIoc(this IServiceCollection services, IConfiguration config)
         {
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddScoped<IBeneficiaryService, BeneficiaryService>();
         }
     }
 }

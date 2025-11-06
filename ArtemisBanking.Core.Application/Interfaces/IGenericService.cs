@@ -1,15 +1,24 @@
 ﻿using System.Linq.Expressions;
+using ArtemisBanking.Core.Domain.Entities;
 
 namespace ArtemisBanking.Core.Application.Interfaces;
 
-public interface IGenericService<TEntity, in TSaveDto, TDto>
-where  TEntity : class
+// La interfaz realmente solamente usa 2 tipos, la implementacion de la intefaz si usa 3 tipos.
+public interface IGenericService<in TKey, TDtoModel>
+where TDtoModel: class
 {
-    Task<TDto> Add(TSaveDto dto);
-    Task Update(TSaveDto dto, int id);
-    Task Delete(int id);
-    Task<TDto> GetById(int id);
-    Task<List<TDto>>  GetAll();
-    Task<List<TDto>> GetAllWithInclude(List<string> properties);
-    Task<bool> Exists(Expression<Func<TEntity, bool>> predicate);  
+    Task<Result<TDtoModel>> GetByIdAsync(TKey id);
+    Task<Result<List<TDtoModel>>> GetAllAsync();
+    Task<Result<TDtoModel>> AddAsync(TDtoModel dto);
+    Task<Result<List<TDtoModel>>> AddRangeAsync(List<TDtoModel> dto);
+    Task<Result<TDtoModel>> UpdateAsync(TKey id, TDtoModel dto);
+    Task<Result> DeleteAsync(TKey id);
+
+    
+    /* Debemos de borrar este metodo. Usa un TEntity, es decir una clase entidad de la DB.
+     * No podemos acceder a la capa de persistencia desde aplicacion. Aun si pudieramos no deberiamos.
+     * Opta por crear un metodo que revise si existe una entidad tal cual al llamar al GetAllQueryable del repo
+     * 
+     * Task<bool> Exists(Expression<Func<TEntity, bool>> predicate);
+     */
 }
