@@ -1,0 +1,20 @@
+﻿using ArtemisBanking.Core.Application.Dtos.Loan;
+
+namespace ArtemisBanking.Core.Application.Interfaces;
+
+public interface ILoanService : IGenericService<int, LoanDto>
+{
+    Task<Result<List<LoanDto>>> GetByUserIdAsync(string userId, bool? isActive = null);
+    Task<Result> UpdateInterestRateAsync(int id, decimal newRate);
+    Task<Result<LoanDto>> AssignLoanAsync(AssignLoanDto dto);
+    Task<Result<decimal>> GetAverageClientDebtAsync();
+    Task<Result<bool>> IsHighRiskClientAsync(string userId, decimal newLoanAmount);
+    Task<Result<bool>> HasActiveLoanAsync(string userId);
+    Task<Result<LoanDto>> GetByLoanNumberAsync(string loanNumber);
+    Task<Result<string>> GenerateUniqueLoanNumberAsync();
+    
+    
+    /*
+     * Task<PagedResult<LoanDto>> GetPagedAsync(int page, int pageSize, string cedula = null, string status = null);
+     */
+}
