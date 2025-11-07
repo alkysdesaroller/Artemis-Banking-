@@ -1,18 +1,16 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.Transaction;
+﻿using ArtemisBanking.Core.Domain.Common.Enums;
+using TransactionStatus = System.Transactions.TransactionStatus;
 
+namespace ArtemisBanking.Core.Application.Dtos.Transaction;
+
+// Modificado para que sea simetrico con la clase entidad
 public class TransactionDto
 {
-    public int Id { get; set; }
-    public string AccountNumber { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public string TransactionType { get; set; } = string.Empty;
-    public string Beneficiary { get; set; } = string.Empty;
-    public string Source { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
-    public DateTime TransactionDate { get; set; }
-        
-    // Propiedades calculadas para mejor presentación
-    public string FormattedAmount => TransactionType == "DÉBITO" 
-        ? $"-RD${Amount:N2}" 
-        : $"+RD${Amount:N2}";
+    public required int Id { get; set; }
+    public required decimal Amount { get; set; }
+    public required TransactionType Type { get; set; }
+    public required string Beneficiary  { get; set; } // En este contexto, es el destino de la transaccion
+    public required string Origin  { get; set; }
+    public required DateTime Date { get; set; }
+    public required TransactionStatus Status { get; set; }
 }

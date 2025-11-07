@@ -1,18 +1,23 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.CreditCard;
+﻿using ArtemisBanking.Core.Application.Dtos.CardTransaction;
+using ArtemisBanking.Core.Application.Dtos.User;
 
+namespace ArtemisBanking.Core.Application.Dtos.CreditCard;
+
+// Modificado para que sea simetrico con la clase entidad
 public class CreditCardDto
 {
-    public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public string UserFullName { get; set; } = string.Empty;
-    public string UserCedula { get; set; } = string.Empty;
-    public string CardNumber { get; set; } = string.Empty;
-    public string LastFourDigits => CardNumber?.Length >= 4 ? CardNumber.Substring(CardNumber.Length - 4) : CardNumber!;
-    public decimal CreditLimit { get; set; }
-    public decimal CurrentDebt { get; set; }
-    public decimal AvailableCredit => CreditLimit - CurrentDebt;
-    public string ExpirationDate { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public string CreatedBy { get; set; } = string.Empty;
+    public required string CardNumber { get; set; } // tambien es la PK
+    public required string ClientId { get; set; } // UserID
+    public required string ApprovedByUserId { get; set; }
+    public required decimal CreditLimit { get; set; } // limite de la tarjetta
+    public required decimal Balance { get; set; } // el mounto adeudado
+    public required string CvcHashed  { get; set; }
+    public required int ExpirationMonth { get; set; } // TinyInt
+    public required int ExpirationYear { get; set; } // Smallint
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
+    public required bool IsActive { get; set; }
+    
+    public UserDto? CreatedByUser { get; set; }
+    public UserDto? Client { get; set; }
+    public ICollection<CardTransactionDto> CardTransactions { get; set; } = [];
 }

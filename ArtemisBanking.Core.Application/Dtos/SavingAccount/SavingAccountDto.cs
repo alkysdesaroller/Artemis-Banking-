@@ -1,5 +1,8 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.SavingAccount;
+﻿using ArtemisBanking.Core.Application.Dtos.User;
 
+namespace ArtemisBanking.Core.Application.Dtos.SavingAccount;
+
+// Modificado para que sea simetrico con la clase entidad
 public class SavingAccountDto
 {
     public required string Id { get; set; } // Las cuentas y prestamos obtienen su ID de la secuencia global
@@ -9,4 +12,7 @@ public class SavingAccountDto
     public required string AssignedByUserId { get; set; }
     public required bool IsPrincipalAccount { get; set; }
     public required bool IsActive { get; set; }
+    
+    public UserDto? AssignedByUser { get; set; }
+    public UserDto? Client { get; set; }
 }

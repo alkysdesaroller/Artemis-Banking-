@@ -1,24 +1,18 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.Loan;
+﻿using ArtemisBanking.Core.Application.Dtos.LoanInstallment;
 
+namespace ArtemisBanking.Core.Application.Dtos.Loan;
+
+// Modificado para que sea simetrico con la clase entidad
 public class LoanDto
 {
-    public int Id { get; set; }
-    public string UserId { get; set; } = string.Empty;
-    public string UserFullName { get; set; } = string.Empty;
-    public string UserCedula { get; set; } = string.Empty;
-    public string LoanNumber { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-    public decimal RemainingAmount { get; set; }
-    public int DurationMonths { get; set; }
-    public decimal AnnualInterestRate { get; set; }
-    public int TotalInstallments { get; set; }
-    public int PaidInstallments { get; set; }
-    public bool IsOverdue { get; set; }
-    public bool IsActive { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public string CreatedBy { get; set; } = string.Empty;
-        
-    // Propiedades calculadas
-    public bool IsUpToDate => !IsOverdue;
-    public int PendingInstallments => TotalInstallments - PaidInstallments;
+    public required string Id { get; set; } // Recuerda, el ID de las cuentas y prestamo viene de la secuencia
+    public required string ClientId { get; set; }
+    public required string ApprovedByUserId { get; set; }
+    public required decimal Amount { get; set; }
+    public required int TermMonths { get; set; } // Plazos en meses
+    public required decimal AnualRate { get; set; }
+    public required bool Completed { get; set; }
+    public required bool IsDue { get; set; } // si esta atrasada
+
+    public ICollection<LoanInstallmentDto> LoanInstallments { get; set; } = [];
 }

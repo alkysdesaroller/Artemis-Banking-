@@ -1,13 +1,14 @@
 using ArtemisBanking.Core.Application.Dtos.Beneficiary;
+using ArtemisBanking.Core.Application.Dtos.Commerce;
 using ArtemisBanking.Core.Domain.Entities;
 using AutoMapper;
 
 namespace ArtemisBanking.Core.Application.Mappings.DtosAndEntities;
 
-public class BeneficiaryMappingProfile : Profile 
+public class CommerceMappingProfile : Profile 
 {
-    public BeneficiaryMappingProfile()
+    public CommerceMappingProfile()
     {
-        CreateMap<Beneficiary, BeneficiaryDto>().ReverseMap();
+        CreateMap<Commerce, CommerceDto>().ReverseMap();
     }
 }

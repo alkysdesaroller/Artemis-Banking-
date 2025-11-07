@@ -5,9 +5,9 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 
 public interface ICommerceService : IGenericService<int , CommerceDto> 
 {
-    Task<Result> ChangeStatusAsync(int id, bool status);
-    Task<Result<bool>> RNCExistsAsync(string rnc, int? excludeId = null);
-    Task<Result<bool>> HasAssociatedUserAsync(int commerceId);
+    //Task<Result> ChangeStatusAsync(int id, bool status);
+    //Task<Result<bool>> RNCExistsAsync(string rnc, int? excludeId = null);
+    //Task<Result<bool>> HasAssociatedUserAsync(int commerceId);
     
     /*
      * --Task<PagedResult<CommerceDto>> GetPagedAsync(int page = 1, int pageSize = 20);--

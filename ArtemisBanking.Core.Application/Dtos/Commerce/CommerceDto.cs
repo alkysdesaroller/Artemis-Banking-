@@ -1,20 +1,15 @@
-﻿namespace ArtemisBanking.Core.Application.Dtos.Commerce;
+﻿using ArtemisBanking.Core.Application.Dtos.CardTransaction;
 
+namespace ArtemisBanking.Core.Application.Dtos.Commerce;
+
+// Modificado para que sea simetrico con la clase entidad
 public class CommerceDto
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string RNC { get; set; } = string.Empty;
-    public string Address { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public bool IsActive { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public string CreatedBy { get; set; } = string.Empty;
-    public DateTime? ModifiedDate { get; set; }
-    public string ModifiedBy { get; set; } = string.Empty;
-        
-    // Información del usuario asociado
-    public string AssociatedUserId { get; set; } = string.Empty;
-    public string AssociatedUserName { get; set; } = string.Empty;
+    public required int Id { get; set; }
+    public required string Name { get; set; }
+    public required string Description { get; set; }
+    public required string Logo { get; set; }
+    public required bool IsActive { get; set; }
+
+    public ICollection<CardTransactionDto> CardTransactions { get; set; } = [];
 }

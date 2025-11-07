@@ -8,7 +8,12 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 
 public interface ITransactionService : IGenericService<int, TransactionDto>
 {
-
+    
+    /*
+     * Veo bien la idea de que por cada tipo de transaccion haiga un DTO especifico.
+     * He comentado los metodos para que el compilador no me pida implementarlos.
+     * Pero si necesitas uno, descomentalo e implementalo - Luis
+     * 
     Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber);
     Task<Result<TransactionDto>> ProcessExpressTransferAsync(ExpressTransferDto dto);
     Task<Result<TransactionDto>> ProcessBeneficiaryTransferAsync(BeneficiaryTransferDto dto);
@@ -22,4 +27,6 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
     Task<Result<TransactionDto>> ProcessTellerLoanPaymentAsync(TellerLoanPaymentDto dto);
     Task<Result<TransactionSummaryDto>> GetTransactionSummaryAsync();
     Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId);
+    */
+    
 }
