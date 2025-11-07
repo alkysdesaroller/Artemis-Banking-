@@ -10,5 +10,8 @@ public class AppUserEntityConfiguration : IEntityTypeConfiguration<AppUser>
     {
         builder.Property(a =>  a.FirstName).IsRequired().HasMaxLength(200);
         builder.Property(a =>  a.LastName).IsRequired().HasMaxLength(200);
+        builder.Property(a => a.IdentityCardNumber).IsRequired().HasMaxLength(12);
+        
+        builder.HasIndex(a => a.IdentityCardNumber).IsUnique();
     }
 }

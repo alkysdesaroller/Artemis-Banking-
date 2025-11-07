@@ -1,5 +1,8 @@
-﻿using ArtemisBanking.Infrastructure.Identity.Context;
+﻿using ArtemisBanking.Core.Application.Interfaces;
+using ArtemisBanking.Infrastructure.Identity.Context;
 using ArtemisBanking.Infrastructure.Identity.Entities;
+using ArtemisBanking.Infrastructure.Identity.Seeds;
+using ArtemisBanking.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -60,7 +63,20 @@ namespace ArtemisBanking.Infrastructure.Identity
                 opt.AccessDeniedPath = "/Login/AccessDenied";
             });
 
-            //services.AddScoped<IAccountServiceForWebApp, AccountServiceForWebApp>();
+            services.AddScoped<IAccountServiceForWebApp, AccountServiceForWebApp>();
+        }
+        
+        public static async Task RunIdentitySeedAsync(this IServiceProvider service)
+        {
+            using var scope = service.CreateScope();
+            var services = scope.ServiceProvider;
+            
+            var userManager =  services.GetRequiredService<UserManager<AppUser>>();
+            var roleManager =  services.GetRequiredService<RoleManager<IdentityRole>>();
+            
+            await DefaultRoles.SeedAsync(roleManager);
+            await DefaultAdminUser.SeedAsync(userManager);
+            await DefaultCommerceUser.SeedAsync(userManager);
         }
 
         private static void GeneralConfiguration(IServiceCollection services, IConfiguration config)
