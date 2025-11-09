@@ -14,31 +14,31 @@ public class GenericRepository<TKey,TEntity> : IGenericRepository<TKey,TEntity> 
         this.Context = context;
     }
 
-    public async Task<List<TEntity>> GetAllAsync()
+    public virtual async Task<List<TEntity>> GetAllAsync()
     {
         return await Context.Set<TEntity>().ToListAsync();
     }
 
-    public async Task<TEntity?> GetByIdAsync(TKey id)
+    public virtual async Task<TEntity?> GetByIdAsync(TKey id) // Esto trae un registro, en base a su PK
     {
         return await Context.Set<TEntity>().FindAsync(id);
     }
 
-    public async Task<TEntity> AddAsync(TEntity entity)
+    public virtual async Task<TEntity> AddAsync(TEntity entity)
     {
         await Context.Set<TEntity>().AddAsync(entity);
         await Context.SaveChangesAsync();
         return entity;
     }
 
-    public async Task<List<TEntity>> AddRangeAsync(List<TEntity> entities)
+    public virtual async Task<List<TEntity>> AddRangeAsync(List<TEntity> entities)
     {
         await Context.Set<TEntity>().AddRangeAsync(entities);
         await Context.SaveChangesAsync();
         return entities;
     }
 
-    public async Task<TEntity?> UpdateAsync(TKey id, TEntity entity)
+    public virtual async Task<TEntity?> UpdateAsync(TKey id, TEntity entity)
     {
         var entityToUpdate = await Context.Set<TEntity>().FindAsync(id);
         if (entityToUpdate != null)
@@ -51,7 +51,7 @@ public class GenericRepository<TKey,TEntity> : IGenericRepository<TKey,TEntity> 
         return null;
     }
 
-    public async Task DeleteAsync(TKey entity)
+    public virtual async Task DeleteAsync(TKey entity)
     {
         var entityToDelete = await Context.Set<TEntity>().FindAsync(entity);
         if (entityToDelete != null)

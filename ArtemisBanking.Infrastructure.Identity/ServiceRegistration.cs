@@ -76,6 +76,8 @@ namespace ArtemisBanking.Infrastructure.Identity
             
             await DefaultRoles.SeedAsync(roleManager);
             await DefaultAdminUser.SeedAsync(userManager);
+            await DefaultAtmUser.SeedAsync(userManager);
+            await DefaultClientUser.SeedAsync(userManager);
             await DefaultCommerceUser.SeedAsync(userManager);
         }
 

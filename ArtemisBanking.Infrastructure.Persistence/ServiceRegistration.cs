@@ -2,6 +2,7 @@
 using ArtemisBanking.Core.Domain.Interfaces;
 using ArtemisBanking.Infrastructure.Persistence.Context;
 using ArtemisBanking.Infrastructure.Persistence.Repositories;
+using ArtemisBanking.Infrastructure.Persistence.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -33,5 +34,6 @@ public static class ServiceRegistration
         services.AddScoped<ILoanRepository, LoanRepository>();
         services.AddScoped<ISavingAccountRepository, SavingAccountRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IIdentifierService, IdentifierService>();
     }
 }

@@ -6,7 +6,14 @@ namespace ArtemisBanking.Infrastructure.Persistence.Repositories;
 
 public class LoanRepository : GenericRepository<string, Loan>, ILoanRepository 
 {
-    public LoanRepository(ArtemisContext context) : base(context)
+    private readonly IIdentifierService _identifierService;
+    public LoanRepository(ArtemisContext context, IIdentifierService identifierService) : base(context)
     {
+        _identifierService = identifierService;
+    }
+    public override async Task<Loan> AddAsync(Loan entity)
+    {
+        entity.Id = await _identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
+        return await base.AddAsync(entity);
     }
 }

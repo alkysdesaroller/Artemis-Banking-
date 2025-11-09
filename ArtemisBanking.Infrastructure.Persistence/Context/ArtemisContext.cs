@@ -7,14 +7,14 @@ namespace ArtemisBanking.Infrastructure.Persistence.Context;
 public class ArtemisContext : DbContext
 {
     
-    public DbSet<Beneficiary>  Beneficiaries { get; set; }
-    public DbSet<CardTransaction> CardTransactions { get; set; }
-    public DbSet<Commerce> Commerces { get; set; }
-    public DbSet<CreditCard> CreditCards { get; set; }
-    public DbSet<Loan> Loans { get; set; }
-    public DbSet<LoanInstallment> LoanInstallments { get; set; }
-    public DbSet<SavingAccount> SavingAccounts { get; set; }
-    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Beneficiary>  Beneficiaries { get; set; } // Beneficiarios
+    public DbSet<CardTransaction> CardTransactions { get; set; } // Transacciones de tarjeta
+    public DbSet<Commerce> Commerces { get; set; } // comercios
+    public DbSet<CreditCard> CreditCards { get; set; } // Tarjetas de credito
+    public DbSet<Loan> Loans { get; set; } // Prestamos
+    public DbSet<LoanInstallment> LoanInstallments { get; set; } // Cuottas de los prestamos
+    public DbSet<SavingAccount> SavingAccounts { get; set; } // Cuentas de ahorro
+    public DbSet<Transaction> Transactions { get; set; } // transacciones
     
     public ArtemisContext(DbContextOptions<ArtemisContext> options) : base(options)
     {
@@ -25,6 +25,12 @@ public class ArtemisContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.HasSequence<long>("SeqLoanAndAccountNumbersID")
+            .StartsAt(1)
+            .IncrementsBy(1)
+            .HasMax(999999999)
+            .IsCyclic(false);
+        
+        modelBuilder.HasSequence<long>("SeqCreditCardsID")
             .StartsAt(1)
             .IncrementsBy(1)
             .HasMax(999999999)

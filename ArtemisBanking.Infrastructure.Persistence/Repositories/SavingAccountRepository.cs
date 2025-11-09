@@ -6,7 +6,15 @@ namespace ArtemisBanking.Infrastructure.Persistence.Repositories;
 
 public class SavingAccountRepository : GenericRepository<string, SavingAccount>, ISavingAccountRepository
 {
-    public SavingAccountRepository(ArtemisContext context) : base(context)
+    private readonly IIdentifierService _identifierService;
+    public SavingAccountRepository(ArtemisContext context, IIdentifierService identifierService) : base(context)
     {
+        _identifierService = identifierService;
+    }
+
+    public override async Task<SavingAccount> AddAsync(SavingAccount entity)
+    {
+        entity.Id = await _identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
+        return await base.AddAsync(entity);
     }
 }

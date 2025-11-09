@@ -1,3 +1,4 @@
+using System.Reflection;
 using ArtemisBanking.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -18,6 +19,7 @@ public class IdentityContext : IdentityDbContext<AppUser>
         builder.Entity<IdentityRole>().ToTable("Roles");
         builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles"); 
         builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
         
 }

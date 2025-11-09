@@ -5,7 +5,7 @@ namespace ArtemisBanking.Core.Application.Dtos.Loan;
 // Modificado para que sea simetrico con la clase entidad
 public class LoanDto
 {
-    public required string Id { get; set; } // Recuerda, el ID de las cuentas y prestamo viene de la secuencia
+    public string Id { get; set; } // Recuerda, el ID de las cuentas y prestamo viene de la secuencia
     public required string ClientId { get; set; }
     public required string ApprovedByUserId { get; set; }
     public required decimal Amount { get; set; }

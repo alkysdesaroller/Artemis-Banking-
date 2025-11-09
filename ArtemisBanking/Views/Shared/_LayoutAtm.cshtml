@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ArtemisBanking</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ArtemisBanking.styles.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- NAV SUPERIOR -->
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">ArtemisBanking</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="topNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Login" asp-action="LogOut">LogOut</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="container-fluid flex-grow-1">
+        <div class="row h-100">
+
+            <!-- SIDEBAR IZQUIERDO -->
+            <nav class="col-12 col-md-3 col-lg-2 bg-light border-end p-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Accounts" asp-action="Index">Cuentas</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Transactions" asp-action="Index">Transacciones</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Settings" asp-action="Index">Configuración</a></li>
+                </ul>
+            </nav>
+
+            <!-- CONTENIDO -->
+            <main class="col-12 col-md-9 col-lg-10 p-4">
+                @RenderBody()
+            </main>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-top text-center py-3 mt-auto bg-light">
+        <div class="container">
+            &copy; 2025 - ArtemisBanking -
+            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

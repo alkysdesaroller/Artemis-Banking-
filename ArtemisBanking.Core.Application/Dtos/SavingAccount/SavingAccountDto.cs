@@ -5,7 +5,7 @@ namespace ArtemisBanking.Core.Application.Dtos.SavingAccount;
 // Modificado para que sea simetrico con la clase entidad
 public class SavingAccountDto
 {
-    public required string Id { get; set; } // Las cuentas y prestamos obtienen su ID de la secuencia global
+    public string Id { get; set; } // Las cuentas y prestamos obtienen su ID de la secuencia global
     public required string ClientId { get; set; } // Es un UserId
     public required decimal Balance { get; set; } // Saldo de la cuenta
     public required DateTime CreatedAt { get; set; } = DateTime.Now;

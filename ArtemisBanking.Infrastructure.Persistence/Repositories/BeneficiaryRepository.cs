@@ -4,7 +4,7 @@ using ArtemisBanking.Infrastructure.Persistence.Context;
 
 namespace ArtemisBanking.Infrastructure.Persistence.Repositories;
 
-public class BeneficiaryRepository : GenericRepository<int, Beneficiary>,IBeneficiaryRepository
+public class BeneficiaryRepository : GenericRepository<int, Beneficiary>, IBeneficiaryRepository
 {
     public BeneficiaryRepository(ArtemisContext context) : base(context)
     {
