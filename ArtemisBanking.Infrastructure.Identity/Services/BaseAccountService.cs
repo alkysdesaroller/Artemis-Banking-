@@ -81,7 +81,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             }
             
             var rolesList = await _userManager.GetRolesAsync(user);
-            var userDto = new UserDto()
+            var userDto = new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -89,9 +89,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
-                Phone = user.PhoneNumber,
                 RegisteredAt = user.RegisteredAt,
-                Role = rolesList[0] // Asumimos que en este sistema solamente se tiene un rol
+                Role = rolesList[0], // Asumimos que en este sistema solamente se tiene un rol
+                IdentityCardNumber = user.IdentityCardNumber 
             };
             
             return Result<UserDto>.Ok(userDto);
@@ -176,7 +176,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             }             
 
             var updatedRolesList = await _userManager.GetRolesAsync(user);
-            var userDto = new UserDto()
+            var userDto = new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -184,9 +184,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
-                Phone = user.PhoneNumber,
                 RegisteredAt = user.RegisteredAt,
-                Role = updatedRolesList[0], // un solo rol por usuario
+                Role = updatedRolesList[0],// un solo rol por usuario
+                IdentityCardNumber = user.IdentityCardNumber
             };
 
             return Result<UserDto>.Ok(userDto);
@@ -271,7 +271,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
             var rolesList = await _userManager.GetRolesAsync(user);
 
-            var userDto = new UserDto()
+            var userDto = new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -279,9 +279,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
-                Phone = user.PhoneNumber,
                 RegisteredAt = user.RegisteredAt,
-                Role = rolesList[0]
+                Role = rolesList[0],
+                IdentityCardNumber = user.IdentityCardNumber
             };
             return Result<UserDto>.Ok(userDto);
         }
@@ -297,7 +297,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
             var rolesList = await _userManager.GetRolesAsync(user);
 
-            var userDto = new UserDto()
+            var userDto = new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -305,9 +305,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
-                Phone = user.PhoneNumber,
                 RegisteredAt = user.RegisteredAt,
-                Role = rolesList[0]
+                Role = rolesList[0],
+                IdentityCardNumber = user.IdentityCardNumber
             };
             
             return Result<UserDto>.Ok(userDto);
@@ -316,7 +316,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
         public virtual async Task<Result<List<UserDto>>> GetUsersByIds(List<string> ids)
         {
             var users = await _userManager.Users.Where(u => ids.Contains(u.Id))
-                .Select(user => new UserDto()
+                .Select(user => new UserDto
                 {
                     Id = user.Id,
                     Email = user.Email ?? "",
@@ -324,9 +324,11 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                     FirstName = user.FirstName ?? "",
                     LastName = user.LastName,
                     IsVerified = user.EmailConfirmed,
-                    Phone = user.PhoneNumber,
                     RegisteredAt = user.RegisteredAt,
-                    Role = _userManager.GetRolesAsync(user).Result.FirstOrDefault() ?? ""
+                    Role = _userManager.GetRolesAsync(user)
+                               .Result.FirstOrDefault() ??
+                           "",
+                    IdentityCardNumber = user.IdentityCardNumber
                 })
                 .ToListAsync();
             return Result<List<UserDto>>.Ok(users);
@@ -343,7 +345,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
             var rolesList = await _userManager.GetRolesAsync(user);
 
-            var userDto = new UserDto()
+            var userDto = new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -351,9 +353,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
-                Phone = user.PhoneNumber,
                 RegisteredAt = user.RegisteredAt,
-                Role = rolesList[0]
+                Role = rolesList[0],
+                IdentityCardNumber = user.IdentityCardNumber
             };
 
             return Result<UserDto>.Ok(userDto);
@@ -374,7 +376,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             foreach (var user in listUser)
             {
                 var roleList = await _userManager.GetRolesAsync(user);
-                listUsersDtos.Add(new UserDto()
+                listUsersDtos.Add(new UserDto
                 {
                     Id = user.Id,
                     Email = user.Email ?? "",
@@ -382,9 +384,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                     FirstName = user.FirstName ?? "",
                     LastName = user.LastName,
                     IsVerified = user.EmailConfirmed,
-                    Phone = user.PhoneNumber,
                     RegisteredAt = user.RegisteredAt,
-                    Role = roleList[0]
+                    Role = roleList[0],
+                    IdentityCardNumber = user.IdentityCardNumber
                 });
             }
             return Result<List<UserDto>>.Ok(listUsersDtos);

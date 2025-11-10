@@ -57,7 +57,7 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
         }
 
         var rolesList = await _userManager.GetRolesAsync(user);
-        var userDto = new UserDto()
+        var userDto = new UserDto
         {
             Id = user.Id,
             Email = user.Email ?? "",
@@ -65,8 +65,9 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
             FirstName = user.FirstName ?? "",
             LastName = user.LastName,
             IsVerified = user.EmailConfirmed,
-            Phone = user.PhoneNumber,
-            Role = rolesList[0]
+            Role = rolesList[0],
+            IdentityCardNumber = user.IdentityCardNumber, 
+            RegisteredAt = user.RegisteredAt
         };
 
         return Result<UserDto>.Ok(userDto);
