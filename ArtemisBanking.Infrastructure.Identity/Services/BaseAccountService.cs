@@ -4,7 +4,6 @@ using ArtemisBanking.Core.Application.Dtos.Email;
 using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
-using ArtemisBanking.Infrastructure.Identity.Context;
 using ArtemisBanking.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -49,6 +48,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 UserName = saveDto.UserName,
                 EmailConfirmed = false,
                 PhoneNumber = saveDto.Phone,
+                RegisteredAt = DateTime.Now,
             };
 
             var result = await _userManager.CreateAsync(user, saveDto.Password);
@@ -90,6 +90,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 Phone = user.PhoneNumber,
+                RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0] // Asumimos que en este sistema solamente se tiene un rol
             };
             
@@ -184,6 +185,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 Phone = user.PhoneNumber,
+                RegisteredAt = user.RegisteredAt,
                 Role = updatedRolesList[0], // un solo rol por usuario
             };
 
@@ -278,6 +280,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 Phone = user.PhoneNumber,
+                RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0]
             };
             return Result<UserDto>.Ok(userDto);
@@ -303,6 +306,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 Phone = user.PhoneNumber,
+                RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0]
             };
             
@@ -321,6 +325,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                     LastName = user.LastName,
                     IsVerified = user.EmailConfirmed,
                     Phone = user.PhoneNumber,
+                    RegisteredAt = user.RegisteredAt,
                     Role = _userManager.GetRolesAsync(user).Result.FirstOrDefault() ?? ""
                 })
                 .ToListAsync();
@@ -347,6 +352,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 Phone = user.PhoneNumber,
+                RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0]
             };
 
@@ -377,6 +383,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                     LastName = user.LastName,
                     IsVerified = user.EmailConfirmed,
                     Phone = user.PhoneNumber,
+                    RegisteredAt = user.RegisteredAt,
                     Role = roleList[0]
                 });
             }

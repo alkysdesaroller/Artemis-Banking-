@@ -17,7 +17,8 @@ namespace ArtemisBanking.Infrastructure.Identity.Seeds
                 Email = "Atm@email.com",
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
-                UserName = "atm"
+                UserName = "atm",
+                RegisteredAt = DateTime.Now 
             };
 
             if (await userManager.Users.AllAsync(u => u.Id != user.Id))
