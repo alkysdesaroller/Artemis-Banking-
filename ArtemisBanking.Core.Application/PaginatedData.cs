@@ -13,6 +13,7 @@ public class PaginatedData<T>
         Pagination = new Pagination(totalCount, currentPage, pageSize);
     }
 
+    // Para consultas a la DB.
     public static async Task<PaginatedData<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
         var totalCount = await source.CountAsync();
@@ -20,6 +21,18 @@ public class PaginatedData<T>
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        return new PaginatedData<T>(items, totalCount, pageNumber, pageSize);
+    }
+    
+    // Para colecciones ya cargadas en memoria.
+    public static PaginatedData<T> Create(IEnumerable<T> source, int pageNumber, int pageSize)
+    {
+        var totalCount = source.Count();
+        var items = source
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
 
         return new PaginatedData<T>(items, totalCount, pageNumber, pageSize);
     }
