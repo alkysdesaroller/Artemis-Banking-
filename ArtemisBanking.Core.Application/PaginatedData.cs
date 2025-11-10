@@ -13,6 +13,12 @@ public class PaginatedData<T>
         Pagination = new Pagination(totalCount, currentPage, pageSize);
     }
 
+    public PaginatedData(IEnumerable<T> items, Pagination pagination)
+    {
+        Items = items;
+        Pagination = pagination;
+    }
+
     // Para consultas a la DB.
     public static async Task<PaginatedData<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
@@ -24,6 +30,7 @@ public class PaginatedData<T>
 
         return new PaginatedData<T>(items, totalCount, pageNumber, pageSize);
     }
+    
     
     // Para colecciones ya cargadas en memoria.
     public static PaginatedData<T> Create(IEnumerable<T> source, int pageNumber, int pageSize)

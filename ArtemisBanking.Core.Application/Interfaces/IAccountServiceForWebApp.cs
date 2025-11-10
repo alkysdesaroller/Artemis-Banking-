@@ -7,4 +7,5 @@ public interface IAccountServiceForWebApp : IBaseAccountService
 {
     Task<Result<UserDto>> AuthenticateAsync(LoginDto loginDto);
     Task SignOutAsync();
+    Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId, int pageNumber = 1, int pageSize = 20);
 }

@@ -1,0 +1,87 @@
+@model PaginatedData<UserViewModel>
+
+@{
+    ViewBag.Title = "Mantenimiento de clientes";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="card">
+    <div class="card-header">
+        <div class="card-title h5">usuarios</div>
+    </div>
+    <div class="card-body">
+        @if (Model.Items.Count() == 0)
+        {
+            <div class="card-text text-muted text-center">No existe informacion de usuarios</div>
+        }
+        else
+        {
+
+            <table class="table table-striped w-100">
+                <thead>
+                <tr>
+                    <th>UserName</th>
+                    <th>Cédula</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Correo</th>
+                    <th>Rol</th>
+                    <th>creación</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var user in Model.Items)
+                {
+                    <tr>
+                        <td>@user.UserName</td>
+                        <td>@user.IdentityCardNumber</td>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.RoleDisplayName</td>
+                        <td>@user.RegisteredAt.ToShortDateString()</td>
+                        <td>@(user.IsVerified ? "Activo" : "Inactivo")</td>
+                    </tr>
+
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+    <div class="card-footer d-flex justify-content-center">
+        @{
+            int previosPageIndex = Model.Pagination.CurrentPage - 1;
+            int nextPageIndex = Model.Pagination.CurrentPage + 1;
+        }
+        <ul class="pagination">
+            @if (Model.Pagination.CurrentPage > 1)
+            {
+                <li class="page-item"><a class="page-link" asp-controller="HomeAdmin" asp-action="Clients" asp-route-page="@previosPageIndex">Anterior</a></li>
+                <li class="page-item"><a class="page-link" asp-controller="HomeAdmin" asp-action="Clients" asp-route-page="@previosPageIndex">@previosPageIndex</a></li>
+            }
+            else
+            {
+                // Desactivados
+                <li class="page-item"><a class="page-link disabled">Anterior</a></li>
+                <li class="page-item"><a class="page-link disabled">@previosPageIndex</a></li>
+            }
+           
+            <li class="page-item active"><a class="page-link" asp-controller="HomeAdmin" asp-action="Clients" asp-route-page="@Model.Pagination.CurrentPage">@Model.Pagination.CurrentPage</a></li>
+            
+            @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+            {
+                
+                <li class="page-item"><a class="page-link" asp-controller="HomeAdmin" asp-action="Clients" asp-route-page="@nextPageIndex">@nextPageIndex</a></li>
+                <li class="page-item"><a class="page-link" asp-controller="HomeAdmin" asp-action="Clients" asp-route-page="@(Model.Pagination.CurrentPage + 1)">Siguiente</a></li>
+            }
+            else
+            {
+                //Desactivados
+                <li class="page-item"><a class="page-link">@nextPageIndex</a></li>
+                <li class="page-item"><a class="page-link">Siguiente</a></li>
+            }
+        </ul>
+    </div>
+</div>
+

@@ -3,6 +3,7 @@ using ArtemisBanking.Core.Application;
 using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
+using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -76,6 +77,38 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
     public async Task SignOutAsync()
     {
         await _signInManager.SignOutAsync();
+    }
+
+    public async Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId, int pageNumber = 1, int pageSize = 20)
+    {
+        var commerces = await _userManager.GetUsersInRoleAsync(nameof(Roles.Commerce));
+        
+        var allUsers = await _userManager.Users
+            .Where(u => u.EmailConfirmed)
+            .Where(u => u.Id != userId)
+           .ToListAsync();
+        var usersToReturn = allUsers.Except(commerces).OrderByDescending(u => u.RegisteredAt);
+
+        var userDtos = new List<UserDto>();
+        foreach (var user in usersToReturn)
+        {
+            var roles =  await _userManager.GetRolesAsync(user);
+            userDtos.Add(new UserDto()
+            {
+                Id = user.Id,
+                Email = user.Email ?? "",
+                UserName = user.UserName ?? "",
+                FirstName = user.FirstName ?? "",
+                LastName = user.LastName,
+                IsVerified = user.EmailConfirmed,
+                Role = roles.Single(),
+                IdentityCardNumber = user.IdentityCardNumber,
+                RegisteredAt = user.RegisteredAt 
+            });
+        }
+        
+        var data = PaginatedData<UserDto>.Create(userDtos, pageNumber, pageSize);
+        return data;
     }
 }
 
