@@ -8,6 +8,9 @@ public class UserDto
     public required string LastName { get; set; }
     public required string Email { get; set; }
     public required string UserName { get; set; }
+    public required string IdentityCardNumber { get; set; }
+    public required DateTime RegisteredAt { get; set; }
+    public bool IsVerified { get; set; }
     public required DateTime RegisteredAt { get; set; } 
     public bool? IsVerified { get; set; }
     public required string Role { get; set; }

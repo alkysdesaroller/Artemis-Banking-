@@ -84,6 +84,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             var userDto = new UserDto
             {
                 Id = user.Id,
+                IdentityCardNumber = user.IdentityCardNumber,
                 Email = user.Email ?? "",
                 UserName = user.UserName ?? "",
                 FirstName = user.FirstName ?? "",
@@ -179,6 +180,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             var userDto = new UserDto
             {
                 Id = user.Id,
+                IdentityCardNumber = user.IdentityCardNumber,
                 Email = user.Email ?? "",
                 UserName = user.UserName ?? "",
                 FirstName = user.FirstName ?? "",
@@ -274,6 +276,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             var userDto = new UserDto
             {
                 Id = user.Id,
+                IdentityCardNumber = user.IdentityCardNumber,
                 Email = user.Email ?? "",
                 UserName = user.UserName ?? "",
                 FirstName = user.FirstName ?? "",
@@ -301,6 +304,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
+                IdentityCardNumber = user.IdentityCardNumber,
                 UserName = user.UserName ?? "",
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
@@ -320,6 +324,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 {
                     Id = user.Id,
                     Email = user.Email ?? "",
+                    IdentityCardNumber = user.IdentityCardNumber,
                     UserName = user.UserName ?? "",
                     FirstName = user.FirstName ?? "",
                     LastName = user.LastName,
@@ -349,6 +354,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
+                IdentityCardNumber = user.IdentityCardNumber,
                 UserName = user.UserName ?? "",
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
@@ -380,6 +386,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 {
                     Id = user.Id,
                     Email = user.Email ?? "",
+                    IdentityCardNumber = user.IdentityCardNumber,
                     UserName = user.UserName ?? "",
                     FirstName = user.FirstName ?? "",
                     LastName = user.LastName,
