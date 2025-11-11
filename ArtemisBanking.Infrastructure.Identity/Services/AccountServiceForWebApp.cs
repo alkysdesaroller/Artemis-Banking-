@@ -84,7 +84,6 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
         var commerces = await _userManager.GetUsersInRoleAsync(nameof(Roles.Commerce));
         
         var allUsers = await _userManager.Users
-            .Where(u => u.EmailConfirmed)
             .Where(u => u.Id != userId)
            .ToListAsync();
         var usersToReturn = allUsers.Except(commerces).OrderByDescending(u => u.RegisteredAt);
@@ -109,6 +108,24 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
         
         var data = PaginatedData<UserDto>.Create(userDtos, pageNumber, pageSize);
         return data;
+    }
+
+    public async Task<Result> SetStateOnUser(string userId, bool state)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null) 
+            return Result.Fail($"There is no account registered with this username: {userId}");
+        
+        user.EmailConfirmed = state;
+        var updateResult = await _userManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
+        {
+            return Result.Fail(updateResult.Errors.Select(s => s.Description).ToList());
+        }
+        
+        return Result.Ok();
     }
 }
 

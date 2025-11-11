@@ -97,5 +97,37 @@ public class HomeAdminController : Controller
         return RedirectToRoute(new {controller="HomeAdmin", action="Users"});
     }
 
+    public async Task<IActionResult> EditUser(int userId)
+    {
+        return View();
+    }
+    
 
+    public async Task<IActionResult> ChangeUserState(string userId, bool state)
+    {
+        var userResult = await _accountServiceForWebApp.GetUserById(userId);
+        if (userResult.IsFailure)
+        {
+            this.SendValidationErrorMessages(userResult);
+        }
+        var user =  userResult.Value!;
+        return View(new ChangeUserStateViewModel
+        {
+            UserId = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            State = state
+        });
+    }
+    [HttpPost]
+    public async Task<IActionResult> ChangeUserState(ChangeUserStateViewModel model)
+    {
+        var stateResult = await _accountServiceForWebApp.SetStateOnUser(model.UserId, model.State);
+        if (stateResult.IsFailure)
+        {
+            this.SendValidationErrorMessages(stateResult);
+            return View(model);
+        }
+        return RedirectToRoute(new {controller = "HomeAdmin", action = "Users"});
+    }
 }

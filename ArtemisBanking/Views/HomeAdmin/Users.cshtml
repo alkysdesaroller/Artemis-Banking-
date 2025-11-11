@@ -49,7 +49,7 @@
             else
             {
 
-                <table class="table table-striped w-100">
+                <table class="table table-sm table-striped w-100">
                     <thead>
                     <tr>
                         <th>UserName</th>
@@ -75,7 +75,22 @@
                             <td>@user.RoleDisplayName</td>
                             <td>@user.RegisteredAt.ToShortDateString()</td>
                             <td>@(user.IsVerified ? "Activo" : "Inactivo")</td>
-                            <td><a class="btn"></a></td>
+                            <td>
+                                <div class="me-2">
+                                    <a class="btn  @(user.IsVerified ? "btn-outline-danger" : "btn-outline-success")"
+                                       asp-controller="HomeAdmin"
+                                       asp-action="ChangeUserState"
+                                       asp-route-userId="@user.Id"
+                                       asp-route-state="@(!user.IsVerified)">
+                                        @(user.IsVerified ? "Desactivar" : "Activar")
+                                    </a>
+                                </div>
+                                <div>
+                                    <a class="btn btn-outline-warning" asp-controller="HomeAdmin" asp-action="EditUser">
+                                        Editar
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
 
                     }

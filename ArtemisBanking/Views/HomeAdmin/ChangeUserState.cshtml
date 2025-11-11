@@ -14,7 +14,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form asp-controller="HomeAdmin" asp-action="ChangeState" method="post">
+                <form asp-controller="HomeAdmin" asp-action="ChangeUserState" method="post">
                     <input type="hidden" asp-for="UserId" value="@Model.UserId"/>
                     <input type="hidden" asp-for="State" value="@Model.State"/>
                     <div class="d-flex justify-content-center">
