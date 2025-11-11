@@ -1,67 +1,70 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using System.Security.Claims
+@using ArtemisBanking.Core.Application.Interfaces
+@using ArtemisBanking.Infrastructure.Identity.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<AppUser> UserManager;
+@{
+    Layout = null;
+    var user = await UserManager.GetUserAsync(User);
+}
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ArtemisBanking</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ArtemisBanking.styles.css" asp-append-version="true" />
+    <title>@ViewData["Title"] - Panel Administrativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
 </head>
-<body class="d-flex flex-column min-vh-100">
-
-    <!-- NAV SUPERIOR -->
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">ArtemisBanking</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="topNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Login" asp-action="LogOut">LogOut</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="container-fluid flex-grow-1">
-        <div class="row h-100">
-
-            <!-- SIDEBAR IZQUIERDO -->
-            <nav class="col-12 col-md-3 col-lg-2 bg-light border-end p-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Accounts" asp-action="Index">Cuentas</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Transactions" asp-action="Index">Transacciones</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Settings" asp-action="Index">Configuración</a></li>
-                </ul>
-            </nav>
-
-            <!-- CONTENIDO -->
-            <main class="col-12 col-md-9 col-lg-10 p-4">
-                @RenderBody()
-            </main>
-
+<body>
+    <!-- ======= NAVBAR SUPERIOR ======= -->
+    <nav class="top-header">
+        <div class="logo-section">
+            <i class="bi bi-bank"></i>
+            <span class="logo-text">Artemis Banking</span>
         </div>
+
+        <div class="user-section">
+            <span class="user-name">Hola, <strong>@($"{user?.FirstName} {user?.LastName}")</strong></span>
+            <a asp-controller="Login" asp-action="LogOut" class="btn btn-light btn-sm">
+                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+            </a>
+        </div>
+    </nav>
+
+    <!-- ======= SIDEBAR ======= -->
+    <div class="sidebar">
+        <a asp-controller="HomeAdmin" asp-action="Index"
+           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+            <i class="bi bi-house"></i>
+            <span>Inicio</span>
+        </a>
+        <a asp-controller="HomeAdmin" asp-action="Clients"
+           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Clients" ? "active" : "")">
+            <i class="bi bi-people"></i>
+            <span>Clientes</span>
+        </a>
+        <a asp-controller="HomeAdmin" asp-action="Products"
+           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
+            <i class="bi bi-box-seam"></i>
+            <span>Productos</span>
+        </a>
+        <a asp-controller="HomeAdmin" asp-action="Reports"
+           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")">
+            <i class="bi bi-bar-chart"></i>
+            <span>Reportes</span>
+        </a>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="border-top text-center py-3 mt-auto bg-light">
-        <div class="container">
-            &copy; 2025 - ArtemisBanking -
-            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- ======= CONTENIDO PRINCIPAL ======= -->
+    <main class="main-content">
+        <div class="container-fluid">
+            @RenderBody()
         </div>
-    </footer>
+    </main>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
