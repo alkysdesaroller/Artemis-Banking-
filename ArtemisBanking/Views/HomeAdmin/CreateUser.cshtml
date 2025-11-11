@@ -1,0 +1,119 @@
+﻿@model CreateUserViewModel
+@{
+    ViewData["Title"] = "Crear usuario";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="row">
+    <div class="d-flex justify-content-center">
+        <div class="col-md-5">
+            @* Mensaje de información *@
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @if (ViewBag.Message is string)
+                    {
+                        <p class="text-center">@Html.Raw(ViewBag.Message.Replace("\n", "<br />"))</p>
+                    }
+                    else
+                    {
+                        @foreach (var line in ViewBag.Message)
+                        {
+                            <p class="text-center">@line</p>
+                        }
+                    }
+                    <br />
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-light text-center">
+                    <h3 class="card-title">Rellena este formulario</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="HomeAdmin" asp-action="CreateUser" method="post">
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="FirstName">Nombre:</label>
+                            <input class="form-control" asp-for="FirstName" />
+                            <span class="text-danger" asp-validation-for="FirstName"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="LastName">Apellidos:</label>
+                            <input class="form-control" asp-for="LastName" />
+                            <span class="text-danger" asp-validation-for="LastName"></span>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="IdentityCardNumber">Cédula:</label>
+                            <input class="form-control" asp-for="IdentityCardNumber" />
+                            <span class="text-danger" asp-validation-for="IdentityCardNumber"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="Email">Email:</label>
+                            <input class="form-control" asp-for="Email" />
+                            <span class="text-danger" asp-validation-for="Email"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="UserName">Nombre de usuario:</label>
+                            <input class="form-control" asp-for="UserName" />
+                            <span class="text-danger" asp-validation-for="UserName"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="Password">Contraseña:</label>
+                            <input class="form-control" asp-for="Password" />
+                            <span class="text-danger" asp-validation-for="Password"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="ConfirmPassword">Confirmar contraseña:</label>
+                            <input class="form-control" asp-for="ConfirmPassword" />
+                            <span class="text-danger" asp-validation-for="ConfirmPassword"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="Role">Rol:</label>
+                            <select class="form-select" asp-for="Role" asp-items="ViewBag.Roles" id="roleSelect"></select>
+                            <span class="text-danger" asp-validation-for="Role"></span>
+                        </div>
+
+                        @* Campo oculto por defecto *@
+                        <div class="mt-2" id="saldoContainer" style="display:none;">
+                            <label class="form-label" for="initialAmount">Saldo inicial:</label>
+                            <input class="form-control" type="number" value="0" id="initialAmount" name="initialAmount" />
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-4">
+                            <button class="btn btn-success w-75" type="submit">Crear usuario</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const roleSelect = document.getElementById("roleSelect");
+            const saldoContainer = document.getElementById("saldoContainer");
+
+            function toggleSaldo() {
+                if (roleSelect.value === "Client") {
+                    saldoContainer.style.display = "block";
+                } else {
+                    saldoContainer.style.display = "none";
+                }
+            }
+
+            roleSelect.addEventListener("change", toggleSaldo);
+            toggleSaldo(); // Verifica al cargar por si ya está seleccionado "Client"
+        });
+    </script>
+}
+

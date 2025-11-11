@@ -6,7 +6,6 @@ public interface ISavingAccountService : IGenericService<string, SavingAccountDt
 { 
     //
     // Task<Result<List<SavingAccountDto>>> GetByUserIdAsync(string userId, bool? isActive = null, bool? isMainAccount = null);
-    // Task<Result<string>> GenerateUniqueAccountNumberAsync();
     // Task<Result<bool>> HasSufficientBalanceAsync(string accountNumber, decimal amount);
     // Task<Result> UpdateBalanceAsync(string accountNumber, decimal amount, bool isCredit);
     // Task<Result> CancelAccountAsync(int id);
@@ -18,4 +17,5 @@ public interface ISavingAccountService : IGenericService<string, SavingAccountDt
     /*
      *  Task<PagedResult<SavingAccountDto>> GetPagedAsync(int page, int pageSize, string cedula = null, string status = null, string type = null);
      */
+
 }

@@ -13,6 +13,13 @@ namespace ArtemisBanking.Core.Application
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddScoped<IBeneficiaryService, BeneficiaryService>();
+            services.AddScoped<ICreditCardService, CreditCardService>();
+            services.AddScoped<ICommerceService, CommerceService>();
+            services.AddScoped<ICreditCardService, CreditCardService>();
+            services.AddScoped<ILoanService, LoanService >();
+            services.AddScoped<ILoanInstallmentService, LoanInstallmentService>();
+            services.AddScoped<ISavingAccountService, SavingAccountService>();
+            services.AddScoped<ITransactionService, TransactionService>();
         }
     }
 }

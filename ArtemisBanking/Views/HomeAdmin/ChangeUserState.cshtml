@@ -1,0 +1,29 @@
+@model ChangeUserStateViewModel
+
+@{
+    ViewBag.Title = "Cambiar estado";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="row">
+    <div class="col-12 col-md-4 offset-4">
+        <div class="card">
+            <div class="card-header text-center text-light @(Model.State ? "bg-success" : "bg-danger")">
+                <h5 class="card-title">
+                    ¿Esta seguro de que desea @(Model.State? "activar" : "desactivar") al usuario @($"{Model.FirstName} {Model.LastName}")?
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="HomeAdmin" asp-action="ChangeState" method="post">
+                    <input type="hidden" asp-for="UserId" value="@Model.UserId"/>
+                    <input type="hidden" asp-for="State" value="@Model.State"/>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn  @(Model.State ? "btn-outline-success" : "btn-outline-danger") me-2">Aceptar</button>
+                        <a asp-controller="HomeAdmin" asp-action="Users" class="btn btn-outline-warning">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
