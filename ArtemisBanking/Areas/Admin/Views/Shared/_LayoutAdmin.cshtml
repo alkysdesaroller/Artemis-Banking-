@@ -27,7 +27,7 @@
 
         <div class="user-section">
             <span class="user-name">Hola, <strong>@($"{user?.FirstName} {user?.LastName}")</strong></span>
-            <a asp-controller="Login" asp-action="LogOut" class="btn btn-light btn-sm">
+            <a asp-area="" asp-controller="Login" asp-action="LogOut" class="btn btn-light btn-sm">
                 <i class="bi bi-box-arrow-right"></i> Cerrar sesión
             </a>
         </div>
@@ -35,25 +35,34 @@
 
     <!-- ======= SIDEBAR ======= -->
     <div class="sidebar">
-        <a asp-controller="Users" asp-action="Index"
-           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+        <a asp-area="Admin" asp-controller="Home" asp-action="Index"
+           class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
             <i class="bi bi-house"></i>
-            <span>Inicio</span>
+            <span class="text-center">Inicio</span>
         </a>
-        <a asp-controller="Users" asp-action="Clients"
-           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Clients" ? "active" : "")">
+
+        <a asp-area="Admin" asp-controller="Users" asp-action="Index"
+           class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
             <i class="bi bi-people"></i>
-            <span>Clientes</span>
+            <span class="text-center">Usuarios</span>
         </a>
-        <a asp-controller="Users" asp-action="Products"
-           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
+
+        <a asp-area="Admin" asp-controller="Loans" asp-action="Index"
+           class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Loans" ? "active" : "")">
             <i class="bi bi-box-seam"></i>
-            <span>Productos</span>
+            <span class="text-center">Préstamos</span>
         </a>
-        <a asp-controller="Users" asp-action="Reports"
-           class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")">
-            <i class="bi bi-bar-chart"></i>
-            <span>Reportes</span>
+
+        <a asp-area="Admin" asp-controller="CreditCards" asp-action="Index"
+           class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "CreditCards" ? "active" : "")">
+            <i class="bi bi-credit-card"></i>
+            <span class="text-center">Tarjetas de crédito</span>
+        </a>
+
+        <a asp-area="Admin" asp-controller="SavingAccounts" asp-action="Index"
+           class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SavingAccounts" ? "active" : "")">
+            <i class="bi bi-piggy-bank"></i>
+            <span class="text-center">Cuentas de ahorro</span>
         </a>
     </div>
 

@@ -1,10 +1,10 @@
 ﻿using ArtemisBanking.Core.Application.Dtos.LoanInstallment;
-using ArtemisBanking.Core.Application.Dtos.User;
+using ArtemisBanking.Core.Application.ViewModels.Users;
 
-namespace ArtemisBanking.Core.Application.Dtos.Loan;
+namespace ArtemisBanking.Core.Application.ViewModels.Loan;
 
 // Modificado para que sea simetrico con la clase entidad
-public class LoanDto
+public class LoanViewModel
 {
     public string Id { get; set; } // Recuerda, el ID de las cuentas y prestamo viene de la secuencia
     public required string ClientId { get; set; }
@@ -14,8 +14,8 @@ public class LoanDto
     public required decimal AnualRate { get; set; }
     public required bool Completed { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
-    
-    public UserDto? Client { get; set; }
-    public UserDto? ApprovedByUser { get; set; }
+
+    public UserViewModel? Client { get; set; }
+    public UserViewModel? ApprovedByUser { get; set; }
     public ICollection<LoanInstallmentDto> LoanInstallments { get; set; } = [];
 }

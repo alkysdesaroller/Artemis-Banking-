@@ -42,7 +42,7 @@ public class LoginController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+    public async Task<IActionResult> LogIn(LoginViewModel loginViewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -140,16 +140,14 @@ public class LoginController : Controller
             switch (userRole)
             {
                 case Roles.Admin:
-                    return RedirectToRoute(new { controller = "HomeAdmin", action = "Index" });
+                    return RedirectToRoute(new { area="Admin" ,controller = "Home", action = "Index" });
                     break;
 
                 case Roles.Atm:
-                    return RedirectToRoute(new { controller = "HomeAtm", action = "Index" });
-                    break;
+                    return RedirectToRoute(new { area="Cashier" ,controller = "Home", action = "Index" });
                 
                 case Roles.Client:
-                    return RedirectToRoute(new { controller = "HomeClient", action = "Index" });
-                    break;
+                    return RedirectToRoute(new { area="Client" ,controller = "Home", action = "Index" });
            }
         }
         

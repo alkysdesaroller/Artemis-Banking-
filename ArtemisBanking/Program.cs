@@ -32,9 +32,19 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
+        name: "areas",
+        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Login}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapGet("/", context =>
+{
+    context.Response.Redirect($"/Login");
+    return Task.CompletedTask;
+});
 
 app.Run();

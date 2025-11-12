@@ -14,16 +14,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace ArtemisBanking.Controllers;
+namespace ArtemisBanking.Areas.Admin.Controllers;
+
+[Area("Admin")]
 [Authorize(Roles = $"{nameof(Roles.Admin)}")] // Recuerda leer el apartado de seguridad de los requerimientos
-public class HomeAdminController : Controller
+public class UsersController : Controller
 {
     private readonly IMapper _mapper;
     private readonly IAccountServiceForWebApp _accountServiceForWebApp;
     private readonly ISavingAccountService _savingAccountService;
     private readonly RoleManager<IdentityRole> _roleManager;
 
-    public HomeAdminController(IMapper mapper, IAccountServiceForWebApp accountServiceForWebApp, RoleManager<IdentityRole> roleManager, ISavingAccountService savingAccountService)
+    public UsersController(IMapper mapper, IAccountServiceForWebApp accountServiceForWebApp, RoleManager<IdentityRole> roleManager, ISavingAccountService savingAccountService)
     {
         _mapper = mapper;
         _accountServiceForWebApp = accountServiceForWebApp;
@@ -31,13 +33,7 @@ public class HomeAdminController : Controller
         _savingAccountService = savingAccountService;
     }
 
-    // GET
-    public async Task<IActionResult> Index()
-    {
-        return View();
-    }
-
-    public async Task<IActionResult> Users(int page = 1, int pageSize = 20, string? role = null)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 20, string? role = null)
     {
         
         await FillRolesViewBag(); 
@@ -80,7 +76,7 @@ public class HomeAdminController : Controller
         {
             var account = new SavingAccountDto
             {
-                ClientId = createdUser!.Id,
+                ClientId = createdUser.Id,
                 Balance = amount,
                 CreatedAt = DateTime.Now,
                 AssignedByUserId = userInSessionId,
@@ -95,7 +91,7 @@ public class HomeAdminController : Controller
                 return View(model);
             }           
         }
-        return RedirectToRoute(new {controller="HomeAdmin", action="Users"});
+        return RedirectToRoute(new {controller="Users", action="Index"});
     }
 
     private async Task FillRolesViewBag()
@@ -169,7 +165,7 @@ public class HomeAdminController : Controller
 
         }
         
-        return RedirectToRoute(new {controller="HomeAdmin", action="Users"});
+        return RedirectToRoute(new {controller="Users", action="Index"});
     }
 
     public async Task<IActionResult> ChangeUserState(string userId, bool state)
@@ -197,6 +193,6 @@ public class HomeAdminController : Controller
             this.SendValidationErrorMessages(stateResult);
             return View(model);
         }
-        return RedirectToRoute(new {controller = "HomeAdmin", action = "Users"});
+        return RedirectToRoute(new {controller = "Users", action = "Index"});
     }
 }

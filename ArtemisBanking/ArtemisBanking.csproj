@@ -23,8 +23,19 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Views\HomeClient\Index.cshtml" />
-      <AdditionalFiles Include="Views\HomeClient\Privacy.cshtml" />
+      <AdditionalFiles Include="Areas\Admin\Views\Shared\Error.cshtml" />
+      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutAdmin.cshtml" />
+      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutAnonymous.cshtml" />
+      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutAtm.cshtml" />
+      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutClient.cshtml" />
+      <AdditionalFiles Include="Areas\Admin\Views\Shared\_ValidationScriptsPartial.cshtml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Privacy.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Client\Views\Shared\_LayoutAdmin.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Client\Views\Shared\_ValidationScriptsPartial.cshtml" />
     </ItemGroup>
 
 </Project>

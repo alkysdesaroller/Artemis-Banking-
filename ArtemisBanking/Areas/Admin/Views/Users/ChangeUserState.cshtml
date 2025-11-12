@@ -14,12 +14,12 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form asp-controller="HomeAdmin" asp-action="ChangeUserState" method="post">
+                <form asp-controller="Users" asp-action="ChangeUserState" method="post">
                     <input type="hidden" asp-for="UserId" value="@Model.UserId"/>
                     <input type="hidden" asp-for="State" value="@Model.State"/>
                     <div class="d-flex justify-content-center">
                         <button type="submit" class="btn  @(Model.State ? "btn-outline-success" : "btn-outline-danger") me-2">Aceptar</button>
-                        <a asp-controller="HomeAdmin" asp-action="Users" class="btn btn-outline-warning">Cancelar</a>
+                        <a asp-controller="Users" asp-action="Index" class="btn btn-outline-warning">Cancelar</a>
                     </div>
                 </form>
             </div>

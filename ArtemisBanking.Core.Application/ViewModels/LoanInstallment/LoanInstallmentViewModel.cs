@@ -1,8 +1,9 @@
 ﻿using ArtemisBanking.Core.Application.Dtos.Loan;
+using ArtemisBanking.Core.Application.ViewModels.Loan;
 
-namespace ArtemisBanking.Core.Application.Dtos.LoanInstallment;
+namespace ArtemisBanking.Core.Application.ViewModels.LoanInstallment;
 
-public class LoanInstallmentDto
+public class LoanInstallmentViewModel
 {
     public required int Id { get; set; }
     public required DateTime PaymentDay { get; set; }
@@ -10,5 +11,5 @@ public class LoanInstallmentDto
     public required decimal Amount { get; set; }
     public required bool IsPaid { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
-    public LoanDto? Loan { get; set; }
+    public LoanViewModel? Loan { get; set; }
 }
