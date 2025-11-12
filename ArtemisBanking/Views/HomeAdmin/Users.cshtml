@@ -37,11 +37,32 @@
 </div>
 
 <div class="row">
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title h5">usuarios</div>
+    <div class="card mb-3 w-50">
+        <div class="card-header fw-bold">
+            Filtros
         </div>
         <div class="card-body">
+            <form asp-controller="HomeAdmin" asp-action="Users" method="get">
+                <div class="d-flex justify-content-between">
+                    <div class="input-group me-1">
+                        <span class="input-group-text">Rol</span>
+                        <select class="form-select" name="role" asp-items="@ViewBag.Roles">
+                            <option value="">--Seleccione un rol--</option>
+                        </select>
+                        <button type="submit" class="btn btn-outline-primary">
+                            Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+<div class="card">
+    <div class="card-body">
+    <div>
             @if (Model.Items.Count() == 0)
             {
                 <div class="card-text text-muted text-center">No existe informacion de usuarios</div>
@@ -133,4 +154,5 @@
             }
         </ul>
     </div>
+</div>
 </div>

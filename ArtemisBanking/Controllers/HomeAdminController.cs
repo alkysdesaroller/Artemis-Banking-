@@ -32,35 +32,34 @@ public class HomeAdminController : Controller
     }
 
     // GET
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         return View();
     }
 
-    public async Task<IActionResult> Users(int page = 1, int pageSize = 20)
+    public async Task<IActionResult> Users(int page = 1, int pageSize = 20, string? role = null)
     {
+        
+        await FillRolesViewBag(); 
         string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-        var paginatedUsersDto = await _accountServiceForWebApp.GetAllTheUsersThatArentCommercesPaginated(userId, page, pageSize);
+        var paginatedUsersDto = await _accountServiceForWebApp.GetAllTheUsersThatArentCommercesPaginated(userId, page, pageSize, role);
         var viewModels = _mapper.Map<List<UserViewModel>>(paginatedUsersDto.Items);
         var paginatedViewModel = new PaginatedData<UserViewModel>(viewModels, paginatedUsersDto.Pagination);
         return View(paginatedViewModel);
     }
 
     public async Task<IActionResult> CreateUser()
-    {
-        var roles = await _roleManager.Roles.ToListAsync();
-        roles.RemoveAll(idtRole => idtRole.Name == nameof(Roles.Commerce));
-        ViewBag.Roles = new SelectList(roles,  "Name", "NormalizedName");
+    { 
+        await FillRolesViewBag(); 
         return View();
     }
+    
     [HttpPost]
     public async Task<IActionResult> CreateUser(CreateUserViewModel model, decimal initialAmount = 0)
     {
         if (!ModelState.IsValid)
         {
-            var roles = await _roleManager.Roles.ToListAsync();
-            roles.RemoveAll(idtRole => idtRole.Name == nameof(Roles.Commerce));
-            ViewBag.Roles = new SelectList(roles,  "Name", "NormalizedName");
+            await FillRolesViewBag();
             return View(model);
         }
         var userInSessionId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
@@ -70,6 +69,7 @@ public class HomeAdminController : Controller
         
         if (createUserResult.IsFailure)
         {
+            await FillRolesViewBag(); 
             this.SendValidationErrorMessages(createUserResult);
             return View(model);
         }
@@ -90,11 +90,19 @@ public class HomeAdminController : Controller
             var accountResult = await _savingAccountService.AddAsync(account);
             if (accountResult.IsFailure)
             {
+                await FillRolesViewBag(); 
                 this.SendValidationErrorMessages(accountResult);
                 return View(model);
             }           
         }
         return RedirectToRoute(new {controller="HomeAdmin", action="Users"});
+    }
+
+    private async Task FillRolesViewBag()
+    {
+        var roles = await _roleManager.Roles.ToListAsync();
+        roles.RemoveAll(idtRole => idtRole.Name == nameof(Roles.Commerce));
+        ViewBag.Roles = new SelectList(roles,  "Name", "NormalizedName");
     }
 
     public async Task<IActionResult> EditUser(int userId)

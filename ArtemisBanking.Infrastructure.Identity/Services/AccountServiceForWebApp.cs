@@ -79,15 +79,26 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
         await _signInManager.SignOutAsync();
     }
 
-    public async Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId, int pageNumber = 1, int pageSize = 20)
+    public async Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId,
+        int pageNumber = 1, int pageSize = 20, string? role = null)
     {
         var commerces = await _userManager.GetUsersInRoleAsync(nameof(Roles.Commerce));
-        
-        var allUsers = await _userManager.Users
-            .Where(u => u.Id != userId)
-           .ToListAsync();
-        var usersToReturn = allUsers.Except(commerces).OrderByDescending(u => u.RegisteredAt);
 
+        var allUsers = new List<AppUser>();
+
+        if (string.IsNullOrWhiteSpace(role))
+        {
+            allUsers = await _userManager.Users
+                .Where(u => u.Id != userId)
+                .ToListAsync();           
+        }
+        else
+        {
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+            allUsers = usersInRole.ToList();
+        }
+
+        var usersToReturn = allUsers.Except(commerces).OrderByDescending(u => u.RegisteredAt);
         var userDtos = new List<UserDto>();
         foreach (var user in usersToReturn)
         {
