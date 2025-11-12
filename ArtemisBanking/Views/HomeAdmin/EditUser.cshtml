@@ -1,6 +1,6 @@
-﻿@model CreateUserViewModel
+﻿@model EditUserViewModel 
 @{
-    ViewData["Title"] = "Crear usuario";
+    ViewData["Title"] = "Editar usuario";
     Layout = "_LayoutAdmin";
 }
 
@@ -32,63 +32,60 @@
                     <h3 class="card-title">Rellena este formulario</h3>
                 </div>
                 <div class="card-body">
-                    <form asp-controller="HomeAdmin" asp-action="CreateUser" method="post">
+                    <form asp-controller="HomeAdmin" asp-action="EditUser" method="post">
+                        <input type="hidden" value="@Model.Id" asp-for="Id"/>
+                        <input type="hidden" value="@Model.Role" asp-for="@Model.Role" id="roleSelect"/>
                         <div class="mt-2">
                             <label class="form-label" asp-for="FirstName">Nombre:</label>
-                            <input class="form-control" asp-for="FirstName" />
+                            <input class="form-control" asp-for="FirstName"/>
                             <span class="text-danger" asp-validation-for="FirstName"></span>
                         </div>
 
                         <div class="mt-2">
                             <label class="form-label" asp-for="LastName">Apellidos:</label>
-                            <input class="form-control" asp-for="LastName" />
+                            <input class="form-control" asp-for="LastName"/>
                             <span class="text-danger" asp-validation-for="LastName"></span>
                         </div>
-                        
+
                         <div class="mt-2">
                             <label class="form-label" asp-for="IdentityCardNumber">Cédula:</label>
-                            <input class="form-control" asp-for="IdentityCardNumber" />
+                            <input class="form-control" asp-for="IdentityCardNumber"/>
                             <span class="text-danger" asp-validation-for="IdentityCardNumber"></span>
                         </div>
 
                         <div class="mt-2">
                             <label class="form-label" asp-for="Email">Email:</label>
-                            <input class="form-control" asp-for="Email" />
+                            <input class="form-control" asp-for="Email"/>
                             <span class="text-danger" asp-validation-for="Email"></span>
                         </div>
 
                         <div class="mt-2">
                             <label class="form-label" asp-for="UserName">Nombre de usuario:</label>
-                            <input class="form-control" asp-for="UserName" />
+                            <input class="form-control" asp-for="UserName"/>
                             <span class="text-danger" asp-validation-for="UserName"></span>
                         </div>
 
                         <div class="mt-2">
                             <label class="form-label" asp-for="Password">Contraseña:</label>
-                            <input class="form-control" asp-for="Password" />
+                            <input class="form-control" asp-for="Password"/>
                             <span class="text-danger" asp-validation-for="Password"></span>
                         </div>
 
                         <div class="mt-2">
                             <label class="form-label" asp-for="ConfirmPassword">Confirmar contraseña:</label>
-                            <input class="form-control" asp-for="ConfirmPassword" />
+                            <input class="form-control" asp-for="ConfirmPassword"/>
                             <span class="text-danger" asp-validation-for="ConfirmPassword"></span>
                         </div>
 
-                        <div class="mt-2">
-                            <label class="form-label" asp-for="Role">Rol:</label>
-                            <select class="form-select" asp-for="Role" asp-items="ViewBag.Roles" id="roleSelect"></select>
-                            <span class="text-danger" asp-validation-for="Role"></span>
-                        </div>
 
                         @* Campo oculto por defecto *@
                         <div class="mt-2" id="saldoContainer" style="display:none;">
-                            <label class="form-label" for="amount">Saldo inicial:</label>
-                            <input class="form-control" type="number" value="0" id="amount" name="amount" />
+                            <label class="form-label" for="amount">Monto adicional:</label>
+                            <input class="form-control" type="number" value="0" id="amount" name="amount"/>
                         </div>
 
                         <div class="d-flex justify-content-center mt-4">
-                            <button class="btn btn-success w-75" type="submit">Crear usuario</button>
+                            <button class="btn btn-success w-75" type="submit">Editar usuario</button>
                         </div>
                     </form>
                 </div>

@@ -55,7 +55,7 @@ public class HomeAdminController : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> CreateUser(CreateUserViewModel model, decimal initialAmount = 0)
+    public async Task<IActionResult> CreateUser(CreateUserViewModel model, decimal amount = 0)
     {
         if (!ModelState.IsValid)
         {
@@ -64,7 +64,7 @@ public class HomeAdminController : Controller
         }
         var userInSessionId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
         var userToCreate = _mapper.Map<UserSaveDto>(model);
-        var origin = HttpContext.Request.Headers["Origin"].FirstOrDefault() ?? "";
+        var origin = HttpContext.Request.Headers.Origin.FirstOrDefault() ?? "";
         var createUserResult = await _accountServiceForWebApp.RegisterUser(userToCreate, origin);
         
         if (createUserResult.IsFailure)
@@ -81,7 +81,7 @@ public class HomeAdminController : Controller
             var account = new SavingAccountDto
             {
                 ClientId = createdUser!.Id,
-                Balance = initialAmount,
+                Balance = amount,
                 CreatedAt = DateTime.Now,
                 AssignedByUserId = userInSessionId,
                 IsPrincipalAccount = true,
@@ -105,11 +105,72 @@ public class HomeAdminController : Controller
         ViewBag.Roles = new SelectList(roles,  "Name", "NormalizedName");
     }
 
-    public async Task<IActionResult> EditUser(int userId)
+    public async Task<IActionResult> EditUser(string userId)
     {
-        return View();
+        var userResult = await _accountServiceForWebApp.GetUserById(userId);
+        if (userResult.IsFailure)
+        {
+            this.SendValidationErrorMessages(userResult);
+            return View();
+        }
+        var user =  userResult.Value!;
+        
+        return View(new EditUserViewModel() 
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            IdentityCardNumber = user.IdentityCardNumber,
+            Email = user.Email,
+            UserName = user.UserName,
+            Password = "",
+            ConfirmPassword = "",
+            Role = user.Role,
+        });
     }
     
+    [HttpPost]
+    public async Task<IActionResult> EditUser(EditUserViewModel model, decimal amount = 0)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+        
+        var userSave = _mapper.Map<UserSaveDto>(model);
+        var origin = HttpContext.Request.Headers.Origin.FirstOrDefault() ?? "";
+        var updateResult = await _accountServiceForWebApp.EditUser(userSave, origin);
+        if (updateResult.IsFailure)
+        {
+            this.SendValidationErrorMessages(updateResult);
+            return View(model);
+        }
+        
+        if (model.Role == nameof(Roles.Client))
+        {
+            var mainAccountResult = await _savingAccountService.GetMainAccountByUserIdAsync(model.Id);
+            if (mainAccountResult.IsFailure)
+            {
+                this.SendValidationErrorMessages(mainAccountResult);
+                return View(model);
+            }
+            
+            var mainAccount = mainAccountResult.Value!;
+            var updateBalanceResult = await _savingAccountService.UpdateBalanceAsync(
+                mainAccount.Id,
+                amount: (mainAccount.Balance + amount)
+                );
+
+            if (updateBalanceResult.IsFailure)
+            {
+                this.SendValidationErrorMessages(updateBalanceResult);
+                return View(model);
+            }
+
+        }
+        
+        return RedirectToRoute(new {controller="HomeAdmin", action="Users"});
+    }
 
     public async Task<IActionResult> ChangeUserState(string userId, bool state)
     {

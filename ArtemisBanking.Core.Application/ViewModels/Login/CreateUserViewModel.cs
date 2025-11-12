@@ -15,7 +15,6 @@ namespace ArtemisBanking.Core.Application.ViewModels.Login
         [Required(ErrorMessage = "El campo cedula es requerido")]
         [DataType(DataType.Text)]
         public required string IdentityCardNumber { get; set; }
-
         
         [Required(ErrorMessage = "El campo email es requerido")]
         [DataType(DataType.EmailAddress)]

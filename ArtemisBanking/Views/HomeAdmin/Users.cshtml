@@ -70,7 +70,7 @@
             else
             {
 
-                <table class="table table-sm table-striped w-100">
+                <table class="table table-striped w-100">
                     <thead>
                     <tr>
                         <th>UserName</th>
@@ -107,7 +107,7 @@
                                     </a>
                                 </div>
                                 <div>
-                                    <a class="btn btn-outline-warning" asp-controller="HomeAdmin" asp-action="EditUser">
+                                    <a class="btn btn-outline-warning" asp-controller="HomeAdmin" asp-action="EditUser" asp-route-userId="@user.Id">
                                         Editar
                                     </a>
                                 </div>
