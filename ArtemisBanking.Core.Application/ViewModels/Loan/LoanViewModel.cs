@@ -15,6 +15,7 @@ public class LoanViewModel
     public required bool Completed { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
 
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
     public UserViewModel? Client { get; set; }
     public UserViewModel? ApprovedByUser { get; set; }
     public ICollection<LoanInstallmentDto> LoanInstallments { get; set; } = [];

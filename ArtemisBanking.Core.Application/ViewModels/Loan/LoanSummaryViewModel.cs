@@ -16,6 +16,7 @@ public class LoanSummaryViewModel
     public required bool Completed { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
     
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
     public UserDto? Client { get; set; }
     public UserDto? ApprovedByUser { get; set; }
 }

@@ -1,4 +1,4 @@
-@model PaginatedData<LoanSummaryViewModel>
+@model LoanIndexViewModel
 
 @{
     ViewBag.Title = "Mantenimiento de clientes";
@@ -37,6 +37,7 @@
 </div>
 
 <div class="row">
+    
     <div class="card mb-3 w-50">
         <div class="card-header fw-bold">
             Filtros
@@ -45,27 +46,39 @@
             <form asp-controller="Loans" asp-action="Index" method="get">
                 <div class="d-flex justify-content-between">
                     <div class="input-group me-1">
-                        <span class="input-group-text">Rol</span>
-                        <select class="form-select" name="role" asp-items="@ViewBag.Roles">
-                            <option value="">--Seleccione un rol--</option>
-                        </select>
-                        <button type="submit" class="btn btn-outline-primary">
-                            Filtrar
-                        </button>
+                        
+                        <div class="input-group me-1">
+                            <span class="input-group-text">Cédula</span>
+                            <input type="text" name="identityCardNumber" placeholder="numero de cedula"/>
+                        </div>
                     </div>
+                    
+                    <div class="input-group me-1">
+                        <select class="form-select" name="isCompleted">
+                            <option value="">Seleccione una opción</option>
+                            <option value="true">Completado</option>
+                            <option value="false">No completado</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary">
+                        Filtrar
+                    </button>
+
                 </div>
             </form>
         </div>
     </div>
+    
 </div>
 
 <div class="row">
     <div class="card">
         <div class="card-body">
             <div>
-                @if (Model.Items.Count() == 0)
+                @if (Model.Data.Items.Count() == 0)
                 {
-                    <div class="card-text text-muted text-center">No existe informacion de usuarios</div>
+                    <div class="card-text text-muted text-center">No existe informacion de prestamos</div>
                 }
                 else
                 {
@@ -81,12 +94,13 @@
                             <th>Cant. de cuotas pagadas</th>
                             <th>Tasa de interes</th>
                             <th>Plazo (Meses)</th>
+                            <th>Estado</th>
                             <th>¿Esta en mora?</th>
                             <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach (var loan in Model.Items)
+                        @foreach (var loan in Model.Data.Items)
                         {
                             <tr>
                                 <td>@loan.Id</td>
@@ -97,6 +111,7 @@
                                 <td>@loan.InstallmentsPaidCount</td>
                                 <td>@loan.AnualRate</td>
                                 <td>@loan.TermMonths</td>
+                                <td>@(loan.Completed ? "Completado" : "No completado")</td>
                                 <td>@(loan.IsDue ? "Si" : "No")</td>
                                 <td>
                                     <div class="me-2">
@@ -105,7 +120,7 @@
                                         </a>
                                     </div>
                                     <div>
-                                        <a class="btn btn-outline-warning" asp-controller="HomeAdmin" asp-action="EditUser" asp-route-userId="@loan.Id">
+                                        <a class="btn btn-outline-warning" asp-controller="Loans" asp-action="EditLoan" asp-route-userId="@loan.Id">
                                             Editar
                                         </a>
                                     </div>
@@ -121,11 +136,11 @@
     
     <div class="d-flex justify-content-center mt-2">
         @{
-            int previosPageIndex = Model.Pagination.CurrentPage - 1;
-            int nextPageIndex = Model.Pagination.CurrentPage + 1;
+            int previosPageIndex = Model.Data.Pagination.CurrentPage - 1;
+            int nextPageIndex = Model.Data.Pagination.CurrentPage + 1;
         }
         <ul class="pagination">
-            @if (Model.Pagination.CurrentPage > 1)
+            @if (Model.Data.Pagination.CurrentPage > 1)
             {
                 <li class="page-item"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@previosPageIndex">Anterior</a></li>
                 <li class="page-item"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@previosPageIndex">@previosPageIndex</a></li>
@@ -137,13 +152,13 @@
                 <li class="page-item"><a class="page-link disabled">@previosPageIndex</a></li>
             }
            
-            <li class="page-item active"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@Model.Pagination.CurrentPage">@Model.Pagination.CurrentPage</a></li>
+            <li class="page-item active"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@Model.Data.Pagination.CurrentPage">@Model.Data.Pagination.CurrentPage</a></li>
             
-            @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+            @if (Model.Data.Pagination.CurrentPage < Model.Data.Pagination.TotalPages)
             {
                 
                 <li class="page-item"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@nextPageIndex">@nextPageIndex</a></li>
-                <li class="page-item"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@(Model.Pagination.CurrentPage + 1)">Siguiente</a></li>
+                <li class="page-item"><a class="page-link" asp-controller="Loans" asp-action="Index" asp-route-page="@(Model.Data.Pagination.CurrentPage + 1)">Siguiente</a></li>
             }
             else
             {

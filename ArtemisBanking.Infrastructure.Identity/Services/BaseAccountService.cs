@@ -351,6 +351,32 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
             return Result<UserDto>.Ok(userDto);
         }
+
+        public async Task<Result<UserDto>> GetByIdentityCardNumber(string identityCardNumber)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.IdentityCardNumber == identityCardNumber);
+
+            if (user == null)
+            {
+                return Result<UserDto>.Fail("There is no account registered with that identity card number");
+            }
+            var rolesList = await _userManager.GetRolesAsync(user);
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email ?? "",
+                UserName = user.UserName ?? "",
+                FirstName = user.FirstName ?? "",
+                LastName = user.LastName,
+                IsVerified = user.EmailConfirmed,
+                RegisteredAt = user.RegisteredAt,
+                Role = rolesList[0],
+                IdentityCardNumber = user.IdentityCardNumber
+            };
+
+            return  Result<UserDto>.Ok(userDto);
+        }
+
         public virtual async Task<Result<List<UserDto>>> GetAllUser(bool? isActive = true)
         {
             List<UserDto> listUsersDtos = [];

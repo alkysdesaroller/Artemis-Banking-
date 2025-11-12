@@ -16,6 +16,7 @@ public class LoanEntityConfiguration : IEntityTypeConfiguration<Loan>
         builder.Property(x => x.AnualRate).IsRequired().HasColumnType("decimal(18,4)");
         builder.Property(x => x.Completed).IsRequired().HasDefaultValue(false);
         builder.Property(x => x.IsDue).IsRequired().HasDefaultValue(false);
+        builder.Property(x => x.CreatedAt).IsRequired();
         
         builder.HasMany(x => x.LoanInstallments)
             .WithOne(x => x.Loan)
