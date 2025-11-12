@@ -6,7 +6,7 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 public interface IBaseAccountService
 {
     Task<Result<UserDto>> RegisterUser(UserSaveDto saveDto, string? origin, bool? isApi = false);
-    Task<Result<UserDto>> EditUser(UserSaveDto saveDto, string? origin, bool? isCreated = false, bool? isApi = false);
+    Task<Result<UserDto>> EditUser(UserSaveDto saveDto, string? origin, bool? isApi = false);
     Task<Result> ForgotPasswordAsync(ForgotPasswordRequestDto request, bool? isApi = false);
     Task<Result> ResetPasswordAsync(ResetPasswordRequestDto request);
     Task<Result> DeleteAsync(string id);

@@ -1,4 +1,5 @@
 using ArtemisBanking.Core.Application.Dtos.Login;
+using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.ViewModels.Login;
 using AutoMapper;
 
@@ -10,6 +11,9 @@ public class LoginDtoMappingProfile :  Profile
     {
         
         CreateMap<LoginViewModel, LoginDto>().ReverseMap();
+        CreateMap<CreateUserViewModel, UserSaveDto>().ReverseMap();
+        CreateMap<CreateUserViewModel, EditUserViewModel>().ReverseMap();
+        CreateMap<EditUserViewModel, UserSaveDto>().ReverseMap();
     }
     
 }

@@ -1,4 +1,5 @@
 ﻿using ArtemisBanking.Core.Application.Dtos.LoanInstallment;
+using ArtemisBanking.Core.Application.Dtos.User;
 
 namespace ArtemisBanking.Core.Application.Dtos.Loan;
 
@@ -13,6 +14,8 @@ public class LoanDto
     public required decimal AnualRate { get; set; }
     public required bool Completed { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
-
+    
+    public UserDto? Client { get; set; }
+    public UserDto? ApprovedByUser { get; set; }
     public ICollection<LoanInstallmentDto> LoanInstallments { get; set; } = [];
 }

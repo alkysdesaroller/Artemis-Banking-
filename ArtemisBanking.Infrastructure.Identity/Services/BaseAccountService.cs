@@ -47,6 +47,14 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 return Result<UserDto>.Fail($"This Identity Card Number: {saveDto.IdentityCardNumber} is already taken.");
             }
 
+            var userWithSameIdentityCardNumber = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.IdentityCardNumber == saveDto.IdentityCardNumber);
+            if (userWithSameIdentityCardNumber != null)
+            {
+                
+                return Result<UserDto>.Fail($"This Identity Card Number: {saveDto.IdentityCardNumber} is already taken.");
+            }
+            
             AppUser user = new AppUser
             {
                 IdentityCardNumber = saveDto.IdentityCardNumber,
@@ -106,9 +114,8 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
         }
         
         
-        public virtual async Task<Result<UserDto>> EditUser(UserSaveDto saveDto, string? origin,bool? isCreated = false, bool? isApi = false)
+        public virtual async Task<Result<UserDto>> EditUser(UserSaveDto saveDto, string? origin, bool? isApi = false)
         {
-            bool isNotcreated = !isCreated ?? false;
 
             var userWithSameUserName = await _userManager.Users.FirstOrDefaultAsync(w => w.UserName == saveDto.UserName && w.Id != saveDto.Id);
             if (userWithSameUserName != null)
@@ -121,6 +128,14 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             if (userWithSameEmail != null)
             {
                 return Result<UserDto>.Fail($"this email: {saveDto.Email} is already taken.");
+            }
+            
+            var userWithSameIdentityCardNumber = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.IdentityCardNumber == saveDto.IdentityCardNumber && u.Id != saveDto.Id);
+            if (userWithSameIdentityCardNumber != null)
+            {
+                
+                return Result<UserDto>.Fail($"This Identity Card Number: {saveDto.IdentityCardNumber} is already taken.");
             }
 
             var user = await _userManager.FindByIdAsync(saveDto.Id);
@@ -138,7 +153,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             user.Email = saveDto.Email;
             user.PhoneNumber = saveDto.Phone;
 
-            if (!string.IsNullOrWhiteSpace(saveDto.Password) && isNotcreated)
+            if (!string.IsNullOrWhiteSpace(saveDto.Password))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var resultChange = await _userManager.ResetPasswordAsync(user, token, saveDto.Password);
@@ -158,31 +173,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             var rolesList = await _userManager.GetRolesAsync(user);
             await _userManager.RemoveFromRolesAsync(user, rolesList.ToList());
             await _userManager.AddToRoleAsync(user, saveDto.Role);
-
-            if (!user.EmailConfirmed && isNotcreated)
-            {
-                if (isApi != null && !isApi.Value)
-                {
-                    string verificationUri = await GetVerificationEmailUri(user, origin ?? "");
-                    await _emailService.SendAsync(new EmailRequestDto()
-                    {
-                        To = saveDto.Email,
-                        HtmlBody = $"Please confirm your account visiting this URL {verificationUri}",
-                        Subject = "Confirm registration"
-                    });
-                }
-                else
-                {
-                    string? verificationToken = await GetVerificationEmailToken(user);
-                    await _emailService.SendAsync(new EmailRequestDto()
-                    {
-                        To = saveDto.Email,
-                        HtmlBody = $"Please confirm your account use this token {verificationToken}",
-                        Subject = "Confirm registration"
-                    });
-                }
-            }             
-
+            
             var updatedRolesList = await _userManager.GetRolesAsync(user);
             var userDto = new UserDto
             {

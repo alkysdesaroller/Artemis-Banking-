@@ -10,6 +10,5 @@ public class LoanInstallmentDto
     public required decimal Amount { get; set; }
     public required bool IsPaid { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
-    
     public LoanDto? Loan { get; set; }
 }

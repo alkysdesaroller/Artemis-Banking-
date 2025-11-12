@@ -35,22 +35,22 @@
 
     <!-- ======= SIDEBAR ======= -->
     <div class="sidebar">
-        <a asp-controller="HomeAdmin" asp-action="Index"
+        <a asp-controller="Users" asp-action="Index"
            class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
             <i class="bi bi-house"></i>
             <span>Inicio</span>
         </a>
-        <a asp-controller="HomeAdmin" asp-action="Clients"
+        <a asp-controller="Users" asp-action="Clients"
            class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Clients" ? "active" : "")">
             <i class="bi bi-people"></i>
             <span>Clientes</span>
         </a>
-        <a asp-controller="HomeAdmin" asp-action="Products"
+        <a asp-controller="Users" asp-action="Products"
            class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Products" ? "active" : "")">
             <i class="bi bi-box-seam"></i>
             <span>Productos</span>
         </a>
-        <a asp-controller="HomeAdmin" asp-action="Reports"
+        <a asp-controller="Users" asp-action="Reports"
            class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")">
             <i class="bi bi-bar-chart"></i>
             <span>Reportes</span>

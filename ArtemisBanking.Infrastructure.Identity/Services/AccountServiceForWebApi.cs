@@ -69,9 +69,9 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return await base.RegisterUser(saveDto, null, isApi);
         }
 
-        public override async Task<Result<UserDto>> EditUser(UserSaveDto saveDto, string? origin, bool? isCreated = false, bool? isApi = false)
+        public override async Task<Result<UserDto>> EditUser(UserSaveDto saveDto, string? origin, bool? isApi = false)
         {
-            return await base.EditUser(saveDto, null, isCreated, isApi);
+            return await base.EditUser(saveDto, null, isApi);
         }
 
 

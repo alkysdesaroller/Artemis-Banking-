@@ -12,7 +12,7 @@ public class IdentifierService : IIdentifierService
     {
         _context = context;
     }
-
+    
     public async Task<string> GenerateIdentifier()
     {
         var connection = _context.Database.GetDbConnection();
@@ -22,13 +22,14 @@ public class IdentifierService : IIdentifierService
         var result = await command.ExecuteScalarAsync();
         return ((long)result).ToString("D9");
     }
+
     public async Task<string> GenerateCreditCardNumber()
     {
         var connection = _context.Database.GetDbConnection();
         await connection.OpenAsync();
         await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT NEXT VALUE FOR dbo.SeqCreditCardsID";
+        command.CommandText = "SELECT NEXT VALUE FOR SeqCreditCardsID";
         var result = await command.ExecuteScalarAsync();
         return ((long)result).ToString("D16");
-    }
+   }
 }

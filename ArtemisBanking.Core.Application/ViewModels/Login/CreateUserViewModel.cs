@@ -2,7 +2,7 @@
 
 namespace ArtemisBanking.Core.Application.ViewModels.Login
 {
-    public class RegisterUserViewModel
+    public class CreateUserViewModel
     {
         [Required(ErrorMessage = "El campo nombre es requerido")]
         [DataType(DataType.Text)]
@@ -12,6 +12,10 @@ namespace ArtemisBanking.Core.Application.ViewModels.Login
         [DataType(DataType.Text)]
         public required string LastName { get; set; }
 
+        [Required(ErrorMessage = "El campo cedula es requerido")]
+        [DataType(DataType.Text)]
+        public required string IdentityCardNumber { get; set; }
+        
         [Required(ErrorMessage = "El campo email es requerido")]
         [DataType(DataType.EmailAddress)]
         public required string Email { get; set; }
@@ -29,9 +33,7 @@ namespace ArtemisBanking.Core.Application.ViewModels.Login
         [DataType(DataType.Password)]
         public required string ConfirmPassword { get; set; }
 
-        [DataType(DataType.Text)]
-        [Required(ErrorMessage = "Debes de proveer un numero de telefono")]
-        public required string Phone { get; set; }
-
+        [Required(ErrorMessage = "Tiene que seleccionar un rol para el usuario")]
+        public required string Role { get; set; }
     }
 }
