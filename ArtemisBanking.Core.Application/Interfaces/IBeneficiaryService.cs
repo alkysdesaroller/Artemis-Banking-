@@ -11,6 +11,6 @@ public interface IBeneficiaryService : IGenericService<int, BeneficiaryDto>
    // Usa Result<> cuando tengas que devolver un objeto junto al resultado, usa Result cuando solamente quieres expresar
    // si la tarea fallo o no.
    
-   // Task<Result<List<BeneficiaryDto>>> GetByUserId(string userId);
-   // Task<bool> AccountNumberExists(string accountNumber);
+    //Task<Result<List<BeneficiaryDto>>> GetByUserId(string userId);
+    //Task<bool> AccountNumberExists(string accountNumber);
 }

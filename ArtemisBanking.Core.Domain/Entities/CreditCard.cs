@@ -6,7 +6,7 @@ public class CreditCard
     public required string ClientId { get; set; } // UserID
     public required string ApprovedByUserId { get; set; }
     public required decimal CreditLimit { get; set; } // limite de la tarjetta
-    public required decimal Balance { get; set; } // el mounto adeudado
+    public required decimal Balance { get; set; } 
     public required string CvcHashed  { get; set; }
     public required int ExpirationMonth { get; set; } // TinyInt
     public required int ExpirationYear { get; set; } // Smallint

@@ -1,0 +1,31 @@
+@model List<ClientsWithDebtViewModel> 
+
+<div class="card p-3">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Deuda Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <input type="radio" name="selectedClientId" value="@item.Client.Id" required/>
+                </td>
+                <td>@item.Client.IdentityCardNumber</td>
+                <td>
+                    @($"{item.Client.FirstName} {item.Client.LastName}")
+                </td>
+                <td>@item.Client.Email</td>
+                <td>@item.Debt.ToString("F2")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

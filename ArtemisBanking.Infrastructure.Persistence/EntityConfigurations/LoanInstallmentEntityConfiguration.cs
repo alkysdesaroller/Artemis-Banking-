@@ -13,6 +13,8 @@ public class LoanInstallmentEntityConfiguration : IEntityTypeConfiguration<LoanI
         builder.Property(x => x.LoanId);
         builder.Property(x => x.Amount).IsRequired().HasColumnType("decimal(18,4)");
         builder.Property(x => x.PaymentDay).IsRequired();
+        builder.Property(x => x.CapitalAmount).IsRequired();
+        builder.Property(x => x.InterestAmount).IsRequired();
         builder.Property(x => x.IsDue).IsRequired().HasDefaultValue(false);
         builder.Property(x => x.IsPaid).IsRequired().HasDefaultValue(false);
         
