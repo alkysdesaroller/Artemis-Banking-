@@ -10,6 +10,6 @@ public class Loan
     public required decimal AnualRate { get; set; }
     public required bool Completed { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
-
+    public required DateTime CreatedAt { get; set; } = DateTime.Now;
     public ICollection<LoanInstallment> LoanInstallments { get; set; } = [];
 }

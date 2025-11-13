@@ -16,6 +16,7 @@ public class LoanSummaryDto
     public required decimal AnualRate { get; set; }
     public required bool Completed { get; set; }
     public required bool IsDue { get; set; } // si esta atrasada
+    public DateTime CreatedAt { get; set; }
     
     public UserDto? Client { get; set; }
     public UserDto? ApprovedByUser { get; set; }

@@ -13,7 +13,7 @@ public interface ILoanService : IGenericService<string, LoanDto>
     // Task<Result<LoanDto>> GetByLoanNumberAsync(string loanNumber);
     // Task<Result<string>> GenerateUniqueLoanNumberAsync();
     
-    /*
-     * Task<PagedResult<LoanDto>> GetPagedAsync(int page, int pageSize, string cedula = null, string status = null);
-     */
+    
+     Task<PaginatedData<LoanSummaryDto>> GetLoansPagedAsync(int page, int pageSize, string? identityCardNumber = null, bool? isCompleted = null);
+     
 }
