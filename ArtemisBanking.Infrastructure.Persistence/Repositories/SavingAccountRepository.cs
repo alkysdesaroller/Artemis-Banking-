@@ -4,17 +4,17 @@ using ArtemisBanking.Infrastructure.Persistence.Context;
 
 namespace ArtemisBanking.Infrastructure.Persistence.Repositories;
 
-public class SavingAccountRepository : GenericRepository<string, SavingAccount>, ISavingAccountRepository
+public class SavingAccountRepository(
+    ArtemisContext context,
+    IIdentifierService identifierService,
+    ISavingAccountRepository savingAccountRepository)
+    : GenericRepository<string, SavingAccount>(context), ISavingAccountRepository
 {
-    private readonly IIdentifierService _identifierService;
-    public SavingAccountRepository(ArtemisContext context, IIdentifierService identifierService) : base(context)
-    {
-        _identifierService = identifierService;
-    }
+    private readonly ISavingAccountRepository _savingAccountRepository = savingAccountRepository;
 
     public override async Task<SavingAccount> AddAsync(SavingAccount entity)
     {
-        entity.Id = await _identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
+        entity.Id = await identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
         return await base.AddAsync(entity);
     }
 
