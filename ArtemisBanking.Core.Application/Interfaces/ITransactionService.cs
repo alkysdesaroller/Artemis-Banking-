@@ -27,6 +27,25 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
     Task<Result<TransactionDto>> ProcessTellerLoanPaymentAsync(TellerLoanPaymentDto dto);
     Task<Result<TransactionSummaryDto>> GetTransactionSummaryAsync();
     Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId);
-    */
     
+    /*
+     * Un Dto por tipo de trasaccion. Una transaccion por tipo de Dto
+     * Task<Result<TransactionDto> ProcessExpressTransferAsync(ExpressTransferDto dto)
+     *   internamente validan los datos del DTO
+     *   Construyen el Transaction Dto adecuado
+     *	 luego llaman al metodo add del servicio para registrar la transaccion
+     *   Acreditan y debitan el dinero en las cuentas, tarjetas y pretamos adecuadas
+     *   Envian un email si es necesario.
+     *
+     *  para los metodos de un cajero creo que solamente tienen dos parametros, adecuado al tipo de transaccion:
+     * {beneficiario, monto}
+     * {Origen, monto}
+     * Task<Result<TransactionDto> ProcessExpressTransferAsync(string origin, decimal amount)
+     *
+     *	Solamente se registra UNA SOLA TRANSACCION EN LA DB, y su tipo {Credito, Debito} se determina desde la perspectiva del ORIGEN
+     *
+     *  Los metodos de las transacciones deberan de llamar a los metodos de otros servicios para hacer su labor. Transacciones
+     * es el servicio central de los cajeros y clientes.
+    */
+
 }

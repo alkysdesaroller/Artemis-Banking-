@@ -4,8 +4,8 @@ namespace ArtemisBanking.Core.Application;
 
 public class PaginatedData<T>
 {
-    public IEnumerable<T> Items { get; set; }
-    public Pagination Pagination { get; set; }
+    public IEnumerable<T> Items { get; set; } // los 20 elementos de una pagina
+    public Pagination Pagination { get; set; } // 
 
     public PaginatedData(IEnumerable<T> items, int totalCount, int currentPage, int pageSize)
     {
@@ -47,10 +47,10 @@ public class PaginatedData<T>
 
 public class Pagination
 {
-    public int TotalCount { get; set; }
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public int PageSize { get; set; }
+    public int TotalCount { get; set; } // 100 elementos
+    public int CurrentPage { get; set; } // 
+    public int TotalPages { get; set; } // 5 paginas de 20 elementtos
+    public int PageSize { get; set; } // 20 elementos
 
     public Pagination(int totalCount, int currentPage, int pageSize)
     {

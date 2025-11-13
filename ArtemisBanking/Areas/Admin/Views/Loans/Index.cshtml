@@ -32,7 +32,7 @@
 
 <div class="row mb-2">
     <div class="justify-content-end">
-        <a class="btn btn-success" asp-controller="Loans" asp-action="CreateLoan">Asignar un prestamo</a>
+        <a class="btn btn-success" asp-controller="Loans" asp-action="SelectUser">Asignar un préstamo</a>
     </div>
 </div>
 
@@ -44,18 +44,17 @@
         </div>
         <div class="card-body">
             <form asp-controller="Loans" asp-action="Index" method="get">
-                <div class="d-flex justify-content-between">
-                    <div class="input-group me-1">
+                <div class="d-flex">
                         
-                        <div class="input-group me-1">
-                            <span class="input-group-text">Cédula</span>
-                            <input type="text" name="identityCardNumber" placeholder="numero de cedula"/>
-                        </div>
+                    <div class="input-group me-1">
+                        <span class="input-group-text">Cédula</span>
+                        <input class="form-control" type="text" name="identityCardNumber" placeholder="numero de cedula"/>
                     </div>
                     
                     <div class="input-group me-1">
+                        <span class="input-group-text">Estado:</span>
                         <select class="form-select" name="isCompleted">
-                            <option value="">Seleccione una opción</option>
+                            <option value="">Seleccione un estado</option>
                             <option value="true">Completado</option>
                             <option value="false">No completado</option>
                         </select>

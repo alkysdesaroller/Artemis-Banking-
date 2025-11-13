@@ -1,6 +1,7 @@
 using ArtemisBanking.Core.Domain.Interfaces;
 using ArtemisBanking.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ArtemisBanking.Infrastructure.Persistence.Repositories;
 

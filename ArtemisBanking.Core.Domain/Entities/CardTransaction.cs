@@ -8,7 +8,8 @@ public class CardTransaction
     
     public required string CreditCardNumber { get; set; }
     public required decimal Amount { get; set; }
-    public required int CommerceId { get; set; }
+    public int? CommerceId { get; set; } // nulable
+    public required bool IsCashAdvance { get; set; }
     public required DateTime Date { get; set; } = DateTime.Now;
     public required CreditCardTransactionStatus Status { get; set; }
     

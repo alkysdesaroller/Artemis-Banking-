@@ -23,11 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <AdditionalFiles Include="Areas\Admin\Views\Shared\Error.cshtml" />
       <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutAdmin.cshtml" />
-      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutAnonymous.cshtml" />
-      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutAtm.cshtml" />
-      <AdditionalFiles Include="Areas\Admin\Views\Shared\_LayoutClient.cshtml" />
       <AdditionalFiles Include="Areas\Admin\Views\Shared\_ValidationScriptsPartial.cshtml" />
     </ItemGroup>
 

@@ -4,6 +4,7 @@ using ArtemisBanking.Core.Application.Dtos.Email;
 using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
+using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
@@ -408,6 +409,40 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             }
             return Result<List<UserDto>>.Ok(listUsersDtos);
         }
+
+        public async Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role)
+        {
+            List<UserDto> listUsersDtos = [];
+            var users = await _userManager.GetUsersInRoleAsync(role.ToString());
+
+            listUsersDtos.AddRange(users.Select(user => new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email ?? "",
+                UserName = user.UserName ?? "",
+                FirstName = user.FirstName ?? "",
+                LastName = user.LastName,
+                IsVerified = user.EmailConfirmed,
+                RegisteredAt = user.RegisteredAt,
+                Role = role.ToString(),
+                IdentityCardNumber = user.IdentityCardNumber
+            }));
+            return Result<List<UserDto>>.Ok(listUsersDtos);
+        }
+
+        public async Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role)
+        {
+            List<string> usersIds = [];
+            var users = await _userManager.GetUsersInRoleAsync(role.ToString());
+            usersIds.AddRange(users.Select(user => user.Id));
+            return Result<List<string>>.Ok(usersIds);
+        }
+
+        public async Task<Result<List<string>>> GetAllUsersIds(bool? isActive)
+        {
+            return Result<List<string>>.Ok(await _userManager.Users.Select(u => u.Id).ToListAsync());
+        }
+
         public virtual async Task<Result> ConfirmAccountAsync(string userId, string token)
         {
             var user = await _userManager.FindByIdAsync(userId);

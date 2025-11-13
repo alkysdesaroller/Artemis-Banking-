@@ -5,9 +5,9 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 
 public interface ILoanInstallmentService : IGenericService<int, LoanInstallmentDto>
 {
-    // Task<Result<List<LoanInstallmentDto>>> GetByLoanIdAsync(string loanId);
-    // Task<Result<AmortizationTableDto>> GenerateAmortizationTableAsync(string loanId);
-    // Task<Result<decimal>> ProcessPaymentAsync(int loanId, decimal amount, string accountNumber);
-    // Task<Result> MarkOverdueInstallmentsAsync();
+     //Task<Result<List<LoanInstallmentDto>>> GetByLoanIdAsync(string loanId);
+     //Task<Result<AmortizationTableDto>> GenerateAmortizationTableAsync(string loanId);
+     //Task<Result<decimal>> ProcessPaymentAsync(int loanId, decimal amount, string accountNumber);
+     //Task<Result> MarkOverdueInstallmentsAsync();
     // Task<Result<decimal>> CalculateMonthlyPaymentAsync(decimal principal, decimal annualRate, int numberOfPayments);
 }
