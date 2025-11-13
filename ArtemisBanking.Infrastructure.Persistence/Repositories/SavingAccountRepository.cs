@@ -17,4 +17,9 @@ public class SavingAccountRepository : GenericRepository<string, SavingAccount>,
         entity.Id = await _identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
         return await base.AddAsync(entity);
     }
+
+    public async Task<object> GetByAccountNumberAsync(string dtoAccountNumber)
+    {
+        throw new NotImplementedException();
+    }
 }

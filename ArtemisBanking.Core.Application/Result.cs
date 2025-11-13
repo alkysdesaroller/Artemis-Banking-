@@ -27,7 +27,7 @@ namespace ArtemisBanking.Core.Application
     {
         public T? Value { get; }
 
-        protected Result(bool isSuccess, T? value, string? generalError, List<string>? errors) :
+        public Result(bool isSuccess, T? value, string? generalError, List<string>? errors) :
             base(isSuccess, generalError, errors)
         {
             Value = value;
