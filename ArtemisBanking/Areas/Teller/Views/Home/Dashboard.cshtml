@@ -1,0 +1,121 @@
+@model TellerDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_LayoutTeller";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-0">Bienvenido, @Model.TellerName</h2>
+            <p class="text-muted">Panel de Control - Cajero</p>
+        </div>
+    </div>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @ViewBag.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Summary != null)
+    {
+        <div class="row g-4">
+            <!-- Resumen de Transacciones -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Transacciones</h6>
+                                <h3 class="mb-0">@Model.Summary.TotalTransactions</h3>
+                            </div>
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-list-ul text-primary fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Transacciones Hoy</h6>
+                                <h3 class="mb-0">@Model.Summary.TodayTransactions</h3>
+                            </div>
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-calendar-day text-success fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Depósitos -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Depósitos</h6>
+                                <h3 class="mb-0">@Model.Summary.TotalDeposits</h3>
+                            </div>
+                            <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-arrow-down-circle text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Hoy: @Model.Summary.TodayDeposits</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Retiros -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Retiros</h6>
+                                <h3 class="mb-0">@Model.Summary.TotalWithdrawals</h3>
+                            </div>
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-arrow-up-circle text-warning fs-4"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Hoy: @Model.Summary.TodayWithdrawals</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Pagos -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Pagos</h6>
+                                <h3 class="mb-0">@Model.Summary.TotalPayments</h3>
+                            </div>
+                            <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                                <i class="bi bi-cash-coin text-danger fs-4"></i>
+                            </div>
+                        </div>
+                        <small class="text-muted">Hoy: @Model.Summary.TodayPayments</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No hay datos de resumen disponibles en este momento.
+        </div>
+    }
+</div>
+

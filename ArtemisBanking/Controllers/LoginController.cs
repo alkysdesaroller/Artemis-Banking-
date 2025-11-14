@@ -144,7 +144,7 @@ public class LoginController : Controller
                     break;
 
                 case Roles.Atm:
-                    return RedirectToRoute(new { area="Cashier" ,controller = "Home", action = "Index" });
+                    return RedirectToRoute(new { area="Teller" ,controller = "Home", action = "Index" });
                 
                 case Roles.Client:
                     return RedirectToRoute(new { area="Client" ,controller = "Home", action = "Index" });

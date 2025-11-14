@@ -1,25 +1,38 @@
 using ArtemisBanking.Core.Domain.Entities;
 using ArtemisBanking.Core.Domain.Interfaces;
 using ArtemisBanking.Infrastructure.Persistence.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArtemisBanking.Infrastructure.Persistence.Repositories;
 
 public class SavingAccountRepository(
     ArtemisContext context,
-    IIdentifierService identifierService,
-    ISavingAccountRepository savingAccountRepository)
+    IIdentifierService identifierService)
     : GenericRepository<string, SavingAccount>(context), ISavingAccountRepository
 {
-    private readonly ISavingAccountRepository _savingAccountRepository = savingAccountRepository;
+    private readonly IIdentifierService _identifierService = identifierService;
 
     public override async Task<SavingAccount> AddAsync(SavingAccount entity)
     {
-        entity.Id = await identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
+        entity.Id = await _identifierService.GenerateIdentifier(); // Genera del ID de 9 digitos 
         return await base.AddAsync(entity);
     }
 
-    public async Task<object> GetByAccountNumberAsync(string dtoAccountNumber)
+    public async Task<SavingAccount?> GetByAccountNumberAsync(string accountNumber)
     {
-        throw new NotImplementedException();
+        // El accountNumber es el Id (PK) de SavingAccount
+        return await GetByIdAsync(accountNumber);
+    }
+
+    public async Task<bool> HasSufficientBalanceAsync(string accountNumber, decimal amount)
+    {
+        var account = await GetByIdAsync(accountNumber);
+        return account != null && account.IsActive && account.Balance >= amount;
+    }
+
+    public async Task<bool> AccountExistsAndIsActiveAsync(string accountNumber)
+    {
+        var account = await GetByIdAsync(accountNumber);
+        return account != null && account.IsActive;
     }
 }
