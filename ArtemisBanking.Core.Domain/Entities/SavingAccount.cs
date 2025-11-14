@@ -9,4 +9,5 @@ public class SavingAccount
     public required string AssignedByUserId { get; set; }
     public required bool IsPrincipalAccount { get; set; }
     public required bool IsActive { get; set; }
+    public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }
