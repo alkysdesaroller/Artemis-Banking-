@@ -10,16 +10,17 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
 {
     
     /*
-     * Veo bien la idea de que por cada tipo de transaccion haiga un DTO especifico.
-     * He comentado los metodos para que el compilador no me pida implementarlos.
-     * Pero si necesitas uno, descomentalo e implementalo - Luis
-     */ 
+     * Estos serian los metodo que implementaria el Client por lo cual no los implemente.
+     * Ya que no se como lo irias a usar Ash o Gaviota(Cualquiera que vea el mensaje),
+     * el punto es que cuando vayas a utilizarlos descomenta aqui y en la implementacion - Alna
+    
     Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber);
     Task<Result<TransactionDto>> ProcessExpressTransferAsync(ExpressTransferDto dto);
     Task<Result<TransactionDto>> ProcessBeneficiaryTransferAsync(BeneficiaryTransferDto dto);
     Task<Result<TransactionDto>> ProcessCreditCardPaymentAsync(CreditCardPaymentDto dto);
     Task<Result<TransactionDto>> ProcessLoanPaymentAsync(LoanPaymentDto dto);
     Task<Result<TransactionDto>> ProcessAccountTransferAsync(AccountTransferDto dto);
+     */ 
     Task<Result<TransactionDto>> ProcessDepositAsync(DepositDto dto);
     Task<Result<TransactionDto>> ProcessWithdrawalAsync(WithdrawalDto dto);
     Task<Result<TransactionDto>> ProcessTellerTransactionAsync(TellerTransactionDto dto);

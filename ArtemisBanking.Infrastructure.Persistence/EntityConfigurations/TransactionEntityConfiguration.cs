@@ -9,14 +9,15 @@ public class TransactionEntityConfiguration : IEntityTypeConfiguration<Transacti
 
     public void Configure(EntityTypeBuilder<Transaction> builder)
     {
-        
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id)
+            .ValueGeneratedOnAdd(); // El ID se genera automáticamente por la base de datos
+        
         builder.Property(x => x.Amount).IsRequired().HasColumnType("decimal(18,4)");
         builder.Property(x => x.Beneficiary).IsRequired();
         builder.Property(x => x.Origin).IsRequired();
         builder.Property(x => x.Date).IsRequired();
         builder.Property(x => x.Status).IsRequired();
-        builder.Property(x => x.Origin).IsRequired();
         builder.Property(x => x.Type).IsRequired();
     }
 }
