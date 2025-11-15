@@ -35,4 +35,14 @@ public class SavingAccountRepository(
         var account = await GetByIdAsync(accountNumber);
         return account != null && account.IsActive;
     }
+
+    public async Task SetStatus(string accountNumber, bool statusToSet)
+    {
+        var account = await GetByIdAsync(accountNumber);
+        if (account != null)
+        {
+            account.IsActive = statusToSet;
+            await Context.SaveChangesAsync();
+        }
+    }
 }

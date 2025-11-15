@@ -15,7 +15,7 @@ public class CreditCardEntityConfiguration : IEntityTypeConfiguration<CreditCard
         builder.Property(x => x.Balance).IsRequired().HasColumnType("decimal(18,4)");
         builder.Property(x => x.CvcHashed).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
-        builder.Property(x => x.CreditLimit).IsRequired();
+        builder.Property(x => x.CreditLimit).IsRequired().HasColumnType("decimal(18,4)");
         builder.Property(x => x.ExpirationMonth).IsRequired();
         builder.Property(x => x.ExpirationYear).IsRequired();
         builder.Property(x => x.IsActive).IsRequired();

@@ -18,4 +18,28 @@ public class CreditCardService : GenericServices<string, CreditCard, CreditCardD
     }
 
 
+    public Task<Result<decimal>> GetAvailableCreditAsync(int creditCardId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result> UpdateLimitAsync(string creditCardNumber, decimal newLimit)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result> CancelCardAsync(string creditCardNumber)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result> ProcessCashAdvanceAsync(CashAdvanceDto dto)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<string>> GenerateEncryptedCVCAsync()
+    {
+        throw new NotImplementedException();
+    }
 }

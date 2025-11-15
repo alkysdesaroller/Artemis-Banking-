@@ -1,5 +1,5 @@
 ﻿using ArtemisBanking.Core.Application.Dtos.Email;
-using ArtemisBanking.Core.Application.;
+using ArtemisBanking.Core.Application.Enums;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Settings;
 using Microsoft.Extensions.Logging;

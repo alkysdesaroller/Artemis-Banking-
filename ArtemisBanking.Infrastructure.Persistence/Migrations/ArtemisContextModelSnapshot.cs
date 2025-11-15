@@ -64,7 +64,7 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<int>("CommerceId")
+                    b.Property<int?>("CommerceId")
                         .HasColumnType("int");
 
                     b.Property<string>("CreditCardNumber")
@@ -73,6 +73,9 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCashAdvance")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -137,7 +140,7 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("CreditLimit")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("CvcHashed")
                         .IsRequired()
@@ -210,6 +213,12 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,4)");
 
+                    b.Property<decimal>("CapitalAmount")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("InterestAmount")
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<bool>("IsDue")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -223,6 +232,9 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                     b.Property<string>("LoanId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,4)");
 
                     b.Property<DateTime>("PaymentDay")
                         .HasColumnType("datetime2");
@@ -274,10 +286,18 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,4)");
 
                     b.Property<string>("Beneficiary")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedById")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -291,10 +311,15 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("SubType")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccountNumber");
 
                     b.ToTable("Transactions");
                 });
@@ -315,8 +340,7 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                     b.HasOne("ArtemisBanking.Core.Domain.Entities.Commerce", "Commerce")
                         .WithMany("CardTransactions")
                         .HasForeignKey("CommerceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("ArtemisBanking.Core.Domain.Entities.CreditCard", "CreditCard")
                         .WithMany("CardTransactions")
@@ -340,6 +364,17 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
                     b.Navigation("Loan");
                 });
 
+            modelBuilder.Entity("ArtemisBanking.Core.Domain.Entities.Transaction", b =>
+                {
+                    b.HasOne("ArtemisBanking.Core.Domain.Entities.SavingAccount", "SavingAccount")
+                        .WithMany("Transactions")
+                        .HasForeignKey("AccountNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SavingAccount");
+                });
+
             modelBuilder.Entity("ArtemisBanking.Core.Domain.Entities.Commerce", b =>
                 {
                     b.Navigation("CardTransactions");
@@ -353,6 +388,11 @@ namespace ArtemisBanking.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ArtemisBanking.Core.Domain.Entities.Loan", b =>
                 {
                     b.Navigation("LoanInstallments");
+                });
+
+            modelBuilder.Entity("ArtemisBanking.Core.Domain.Entities.SavingAccount", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

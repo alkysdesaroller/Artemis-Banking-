@@ -19,5 +19,10 @@ public class TransactionEntityConfiguration : IEntityTypeConfiguration<Transacti
         builder.Property(x => x.Date).IsRequired();
         builder.Property(x => x.Status).IsRequired();
         builder.Property(x => x.Type).IsRequired();
+        builder.Property(x => x.CreatedById).IsRequired();
+        
+        builder.HasOne(t => t.SavingAccount)
+            .WithMany(sc => sc.Transactions)
+            .HasForeignKey(t => t.AccountNumber);
     }
 }

@@ -1,5 +1,6 @@
 using ArtemisBanking.Core.Application.Dtos.Login;
 using ArtemisBanking.Core.Application.Dtos.User;
+using ArtemisBanking.Core.Domain.Common.Enums;
 
 namespace ArtemisBanking.Core.Application.Interfaces;
 
@@ -16,5 +17,8 @@ public interface IBaseAccountService
     Task<Result<UserDto>> GetUserByUserName(string userName);
     Task<Result<UserDto>> GetByIdentityCardNumber(string identityCardNumber);
     Task<Result<List<UserDto>>> GetAllUser(bool? isActive = true);
+    Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role);
+    Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role);
+    Task<Result<List<string>>> GetAllUsersIds(bool? isActive = true);
     Task<Result> ConfirmAccountAsync(string userId, string token);
 }
