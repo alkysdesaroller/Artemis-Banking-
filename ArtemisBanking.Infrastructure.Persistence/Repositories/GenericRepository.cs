@@ -66,4 +66,9 @@ public class GenericRepository<TKey,TEntity> : IGenericRepository<TKey,TEntity> 
     {
         return Context.Set<TEntity>().AsQueryable();
     }
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await Context.SaveChangesAsync();
+    }
 }

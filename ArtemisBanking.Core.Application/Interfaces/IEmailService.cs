@@ -4,5 +4,6 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 
 public interface IEmailService
 {
-    Task SendAsync(EmailRequestDto emailRequestDto); 
+    Task SendAsync(EmailRequestDto emailRequestDto);
+    Task SendTemplateEmailAsync(EmailTemplateData data);
 }

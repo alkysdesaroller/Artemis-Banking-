@@ -1,4 +1,5 @@
-﻿using ArtemisBanking.Core.Application.Dtos.User;
+﻿using ArtemisBanking.Core.Application.Dtos.Transaction;
+using ArtemisBanking.Core.Application.Dtos.User;
 
 namespace ArtemisBanking.Core.Application.Dtos.SavingAccount;
 
@@ -12,6 +13,8 @@ public class SavingAccountDto
     public required string AssignedByUserId { get; set; }
     public required bool IsPrincipalAccount { get; set; }
     public required bool IsActive { get; set; }
+    
+    public ICollection<TransactionDto> Transactions { get; set; } = [];
     
     public UserDto? AssignedByUser { get; set; }
     public UserDto? Client { get; set; }

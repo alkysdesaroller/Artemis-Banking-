@@ -1,7 +1,7 @@
 using ArtemisBanking.Core.Application.Dtos.Loan;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.ViewModels.Loan;
-using ArtemisBanking.Core.Application.ViewModels.Users;
+using ArtemisBanking.Core.Application.ViewModels.User;
 using AutoMapper;
 
 namespace ArtemisBanking.Core.Application.Mappings.DtosAndViewModels;

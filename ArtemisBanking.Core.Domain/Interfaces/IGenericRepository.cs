@@ -9,4 +9,5 @@ public interface IGenericRepository<TKey, TEntity> where TEntity : class
     Task<TEntity?> UpdateAsync(TKey id,TEntity entity);
     Task DeleteAsync(TKey id);
     IQueryable<TEntity> GetAllQueryable();
+    Task<int> SaveChangesAsync(); // lo necesito para hacer update de los installments
 }

@@ -1,4 +1,4 @@
-namespace ArtemisBanking.Core.Application.ViewModels.Users;
+namespace ArtemisBanking.Core.Application.ViewModels.User;
 
 public class ChangeUserStateViewModel
 {

@@ -307,23 +307,23 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
         public virtual async Task<Result<List<UserDto>>> GetUsersByIds(List<string> ids)
         {
-            var users = await _userManager.Users.Where(u => ids.Contains(u.Id))
-                .Select(user => new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email ?? "",
-                    UserName = user.UserName ?? "",
-                    FirstName = user.FirstName ?? "",
-                    LastName = user.LastName,
-                    IsVerified = user.EmailConfirmed,
-                    RegisteredAt = user.RegisteredAt,
-                    Role = _userManager.GetRolesAsync(user)
-                               .Result.FirstOrDefault() ??
-                           "",
-                    IdentityCardNumber = user.IdentityCardNumber
-                })
-                .ToListAsync();
-            return Result<List<UserDto>>.Ok(users);
+            var users = await _userManager.Users.Where(u => ids.Contains(u.Id)).ToListAsync();
+
+            var usersDtos = users.Select(user => new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email ?? "",
+                UserName = user.UserName ?? "",
+                FirstName = user.FirstName ?? "",
+                LastName = user.LastName,
+                IsVerified = user.EmailConfirmed,
+                RegisteredAt = user.RegisteredAt,
+                Role = _userManager.GetRolesAsync(user)
+                           .Result.FirstOrDefault() ??
+                       "",
+                IdentityCardNumber = user.IdentityCardNumber
+            }).ToList();
+            return Result<List<UserDto>>.Ok(usersDtos);
         }
 
         public virtual async Task<Result<UserDto>> GetUserByUserName(string userName)
@@ -410,12 +410,17 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return Result<List<UserDto>>.Ok(listUsersDtos);
         }
 
-        public async Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role)
+        public async Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role, bool isActive = true)
         {
-            List<UserDto> listUsersDtos = [];
             var users = await _userManager.GetUsersInRoleAsync(role.ToString());
-
-            listUsersDtos.AddRange(users.Select(user => new UserDto
+            var usersActives = users.ToList();
+            if (isActive)
+            {
+                usersActives.RemoveAll(u => u.EmailConfirmed == false);
+            }
+            
+            List<UserDto> listUsersDtos = [];
+            listUsersDtos.AddRange(usersActives.Select(user => new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
