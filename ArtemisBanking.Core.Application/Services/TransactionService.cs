@@ -102,7 +102,10 @@ public class TransactionService(
                 Origin = $"TELLER_{dto.TellerId}",
                 Beneficiary = dto.AccountNumber,
                 Date = DateTime.Now,
-                Status = TransactionStatus.Approved
+                Status = TransactionStatus.Approved,
+                AccountNumber =  dto.AccountNumber,
+                CreatedById = dto.TellerId,
+                SubType = TransactionSubType.ExpressTransfer
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -154,7 +157,10 @@ public class TransactionService(
                 Origin = dto.AccountNumber,
                 Beneficiary = "CASH",
                 Date = DateTime.Now,
-                Status = TransactionStatus.Approved
+                Status = TransactionStatus.Approved,
+                AccountNumber = dto.AccountNumber,
+                CreatedById = null!,
+                SubType = TransactionSubType.ExpressTransfer
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -234,7 +240,10 @@ public class TransactionService(
                 Origin = dto.SourceAccountNumber,
                 Beneficiary = dto.DestinationAccountNumber,
                 Date = DateTime.Now,
-                Status = TransactionStatus.Approved
+                Status = TransactionStatus.Approved,
+                AccountNumber = null,
+                CreatedById = null,
+                SubType = TransactionSubType.ExpressTransfer
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -310,7 +319,10 @@ public class TransactionService(
                 Origin = dto.SourceAccountNumber,
                 Beneficiary = dto.CreditCardNumber,
                 Date = DateTime.Now,
-                Status = TransactionStatus.Approved
+                Status = TransactionStatus.Approved,
+                AccountNumber = null,
+                CreatedById = null,
+                SubType = TransactionSubType.ExpressTransfer
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -377,7 +389,10 @@ public class TransactionService(
                 Origin = dto.SourceAccountNumber,
                 Beneficiary = dto.LoanNumber,
                 Date = DateTime.Now,
-                Status = TransactionStatus.Approved
+                Status = TransactionStatus.Approved,
+                AccountNumber = null,
+                CreatedById = null,
+                SubType = TransactionSubType.ExpressTransfer
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
