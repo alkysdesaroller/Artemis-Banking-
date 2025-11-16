@@ -1,0 +1,58 @@
+@model EditCreditCardLimitViewModel
+@{
+    ViewData["Title"] = "Editar limite de credito";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="row">
+    <div class="d-flex justify-content-center">
+        <div class="col-md-5">
+            @* Mensaje de información *@
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @if (ViewBag.Message is string)
+                    {
+                        <p class="text-center">@Html.Raw(ViewBag.Message.Replace("\n", "<br />"))</p>
+                    }
+                    else
+                    {
+                        @foreach (var line in ViewBag.Message)
+                        {
+                            <p class="text-center">@line</p>
+                        }
+                    }
+                    <br />
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-light text-center">
+                    <h3 class="card-title">Rellena este formulario</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="CreditCards" asp-action="EditCreditLimit" method="post">
+                        <input type="hidden" value="@Model.CardNumber" asp-for="@Model.CardNumber"/>
+
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="CreditLimit">Tasa anual:</label>
+                            <input class="form-control" asp-for="CreditLimit" step="0.01" placeholder="nuevo limite"/>
+                            <span class="text-danger" asp-validation-for="CreditLimit"></span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-center mt-2">
+                            <div class="me-1">
+                                <button type="submit" class="btn btn-success">Actualizar limite</button>
+                            </div>
+                            <div class="me-1">
+                                <a asp-controller="CreditCards" asp-action="Index" class="btn btn-warning">Volver</a>
+                            </div>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

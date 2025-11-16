@@ -420,15 +420,14 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
         public async Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role, bool isActive = true)
         {
-            var users = await _userManager.GetUsersInRoleAsync(role.ToString());
-            var usersActives = users.ToList();
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role.ToString());
             if (isActive)
             {
-                usersActives.RemoveAll(u => u.EmailConfirmed == false);
+                usersInRole = usersInRole.Where(u => u.EmailConfirmed).ToList();
             }
             
             List<UserDto> listUsersDtos = [];
-            listUsersDtos.AddRange(usersActives.Select(user => new UserDto
+            listUsersDtos.AddRange(usersInRole.Select(user => new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -443,17 +442,28 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return Result<List<UserDto>>.Ok(listUsersDtos);
         }
 
-        public async Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role)
+        public async Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role, bool isActive = true)
         {
-            List<string> usersIds = [];
-            var users = await _userManager.GetUsersInRoleAsync(role.ToString());
-            usersIds.AddRange(users.Select(user => user.Id));
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role.ToString());
+            if (isActive)
+            {
+                usersInRole = usersInRole.Where(u => u.EmailConfirmed).ToList();
+            }
+            
+            var usersIds =  usersInRole.Select(u => u.Id).ToList();
             return Result<List<string>>.Ok(usersIds);
         }
 
-        public async Task<Result<List<string>>> GetAllUsersIds(bool? isActive)
+        public async Task<Result<List<string>>> GetAllUsersIds(bool isActive = true)
         {
-            return Result<List<string>>.Ok(await _userManager.Users.Select(u => u.Id).ToListAsync());
+            var users = _userManager.Users;
+            if (isActive)
+            {
+                users = users.Where(u => u.EmailConfirmed);
+            }
+
+            var usersIds = await users.Select(u => u.Id).ToListAsync();
+            return Result<List<string>>.Ok(usersIds);
         }
 
         public virtual async Task<Result> ConfirmAccountAsync(string userId, string token)

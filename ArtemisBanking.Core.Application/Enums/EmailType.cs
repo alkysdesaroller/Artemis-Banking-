@@ -9,6 +9,7 @@ public enum EmailType
     
     CreditCardPayment,
     CashAdvance,
+    CreditCardLimitUpdated,
     
     ExpressTransferSender,
     ExpressTransferReceiver,

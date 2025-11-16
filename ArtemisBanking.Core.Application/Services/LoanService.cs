@@ -116,39 +116,14 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
 
         var clientsWithoutActiveLoansIds = allClientIds.Except(clientsWithActiveLoans).ToList();
 
+       
         if (!clientsWithoutActiveLoansIds.Any())
         {
             return Result<List<ClientsWithDebtDto>>.Ok(new List<ClientsWithDebtDto>());
         }
-
-        var usersResult = await _accountServiceForWebApp.GetUsersByIds(clientsWithoutActiveLoansIds);
-        var users = usersResult.Value!;
-
-        if (!string.IsNullOrWhiteSpace(identityCardNumber))
-        {
-            users = users
-                .Where(u => u.IdentityCardNumber.Contains(identityCardNumber, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
-
-        var clientsWithoutLoans = new List<ClientsWithDebtDto>();
-
-        foreach (var u in users)
-        {
-            var debt = await _riskService.CalculateClientTotalDebt(u.Id);
-
-            clientsWithoutLoans.Add(new ClientsWithDebtDto
-            {
-                Client = u,
-                Debt = debt
-            });
-        }
-
-        return Result<List<ClientsWithDebtDto>>.Ok(clientsWithoutLoans);
+        
+        return await _riskService.GetDebtOfTheseUsers(clientsWithoutActiveLoansIds, identityCardNumber);
     }
-
-
-
 
 
     public async Task<PaginatedData<LoanSummaryDto>> GetLoansPagedAsync(

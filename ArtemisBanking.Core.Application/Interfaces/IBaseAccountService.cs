@@ -18,7 +18,8 @@ public interface IBaseAccountService
     Task<Result<UserDto>> GetByIdentityCardNumber(string identityCardNumber);
     Task<Result<List<UserDto>>> GetAllUser(bool? isActive = true);
     Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role, bool isActive = true);
-    Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role);
-    Task<Result<List<string>>> GetAllUsersIds(bool? isActive = true);
+    Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role, bool isActive = true);
+    Task<Result<List<string>>> GetAllUsersIds(bool isActive = true);
     Task<Result> ConfirmAccountAsync(string userId, string token);
+    
 }

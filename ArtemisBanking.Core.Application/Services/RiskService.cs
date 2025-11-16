@@ -1,3 +1,4 @@
+using ArtemisBanking.Core.Application.Dtos.Loan;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Core.Domain.Interfaces;
@@ -62,13 +63,13 @@ public class RiskService : IRiskService
 
     public async Task<decimal> CalculateClientTotalDebt(string userId)
     {
-        var loanDebt = await CalculateClientLoanDebtAsync(userId);
-        var creditDebt = await CalculateClientCreditCardDebtAsync(userId);
+        var loanDebt = await CalculateClientDebtOfAllLoansAsync(userId);
+        var creditDebt = await CalculateClientDebtOfAllCreditCardsAsync(userId);
         return loanDebt + creditDebt;
     }
 
-    // calcula la deuda total de prestamos del cliente
-    public async Task<decimal> CalculateClientLoanDebtAsync(string clientId)
+    // calcula la deuda total de prestamos del cliente. Se incluyen todos los prestamos
+    public async Task<decimal> CalculateClientDebtOfAllLoansAsync(string clientId)
     {
         var totalLoanDebt = await _loanRepository.GetAllQueryable().AsNoTracking()
             .Where(l => l.ClientId == clientId  && l.Completed == false)
@@ -79,8 +80,8 @@ public class RiskService : IRiskService
         return totalLoanDebt;
     }
     
-    // Calcula la deuda total total de tarjetas del cliente
-    public async Task<decimal> CalculateClientCreditCardDebtAsync(string clientId)
+    // Calcula la deuda total de tarjetas del cliente. Se incluyen todas las tarjetas
+    public async Task<decimal> CalculateClientDebtOfAllCreditCardsAsync(string clientId)
     {
         // Obtener tarjetas del cliente
         var creditCardsOfClient = _creditCardRepository.GetAllQueryable().AsNoTracking()
@@ -128,5 +129,38 @@ public class RiskService : IRiskService
         decimal deudaTotal = capital + (decimal)(capitalWithInterests - capitalD);
         
         return deudaTotal;
+    }
+    
+    
+    public async Task<Result<List<ClientsWithDebtDto>>> GetDebtOfTheseUsers(List<string> usersIds, string? identityCardNumber = null)
+    {
+        var usersResult = await _accountServiceForWebApp.GetUsersByIds(usersIds);
+        var users = usersResult.Value!;
+        
+        if (!users.Any())
+        {
+            return Result<List<ClientsWithDebtDto>>.Ok(new List<ClientsWithDebtDto>());
+        }
+
+        if (!string.IsNullOrWhiteSpace(identityCardNumber))
+        {
+            users = users
+                .Where(u => u.IdentityCardNumber.Contains(identityCardNumber, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        
+        var clientsWithoutLoans = new List<ClientsWithDebtDto>();
+        foreach (var u in users)
+        {
+            var debt = await CalculateClientTotalDebt(u.Id);
+
+            clientsWithoutLoans.Add(new ClientsWithDebtDto
+            {
+                Client = u,
+                Debt = debt
+            });
+        }
+
+        return Result<List<ClientsWithDebtDto>>.Ok(clientsWithoutLoans);
     }
 }

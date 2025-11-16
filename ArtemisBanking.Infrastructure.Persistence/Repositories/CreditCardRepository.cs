@@ -31,4 +31,14 @@ public class CreditCardRepository : GenericRepository<string, CreditCard>, ICred
         var card = await GetByIdAsync(cardNumber);
         return card != null && card.IsActive;
     }
+
+    public async Task CancelCreditCardAsync(string creditCardNumber)
+    {
+        var creditCard = await GetByIdAsync(creditCardNumber);
+        if (creditCard != null)
+        {
+            creditCard.IsActive = false;
+            await UpdateAsync(creditCard.CardNumber,  creditCard);
+        }
+    }
 }

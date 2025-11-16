@@ -1,0 +1,47 @@
+@model string
+
+@{
+    ViewBag.Title = "Cambiar estado";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="row">
+    <div class="col-12 col-md-4 offset-4">
+        
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                @if (ViewBag.Message is string)
+                {
+                    <p class="text-center">@Html.Raw(ViewBag.Message.Replace("\n", "<br />"))</p>
+                }
+                else
+                {
+                    @foreach (var line in ViewBag.Message)
+                    {
+                        <p class="text-center">@line</p>
+                    }
+                }
+                <br />
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        <div class="card">
+            <div class="card-header text-center text-light bg-danger">
+                <h5 class="card-title">
+                    ¿Esta seguro de que desea cancelar la tarjeta @($"{Model.Substring(Model.Length - 4)}")?
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="CreditCards" asp-action="CancelPost" method="post">
+                    <input type="hidden" value="@Model" name="cardNumber"/>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-outline-success me-2">Aceptar</button>
+                        <a asp-controller="CreditCards" asp-action="Index" class="btn btn-outline-warning">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
