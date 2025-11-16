@@ -1,18 +1,25 @@
-
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Interfaces;
 using AutoMapper;
 
 namespace ArtemisBanking.Core.Application.Services;
 
-public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, TEntity> repository, IMapper mapper)
-    : IGenericService<TKey, TDtoModel>
+public class GenericServices<TKey, TEntity, TDtoModel> : IGenericService<TKey, TDtoModel>
     where TEntity : class
     where TDtoModel : class
 {
+    private readonly IMapper _mapper;
+    private readonly IGenericRepository<TKey, TEntity> _repository;
+
+    public GenericServices(IGenericRepository<TKey, TEntity> repository, IMapper mapper)
+    {
+        _repository = repository;
+        this._mapper = mapper;
+    }
+
     public virtual async Task<Result<List<TDtoModel>>> GetAllAsync()
     {
-        var dtos = mapper.Map<List<TDtoModel>>(await repository.GetAllAsync());
+        var dtos = _mapper.Map<List<TDtoModel>>(await _repository.GetAllAsync());
         return Result<List<TDtoModel>>.Ok(dtos);
     }
 
@@ -20,12 +27,12 @@ public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, 
     {
         try
         {
-            var entity = await repository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id);
             if (entity == null)
             {
                 return Result<TDtoModel>.Fail("The record was not found");
             }
-            return Result<TDtoModel>.Ok(mapper.Map<TDtoModel>(entity));
+            return Result<TDtoModel>.Ok(_mapper.Map<TDtoModel>(entity));
         }
         catch (Exception e)
         {
@@ -37,10 +44,10 @@ public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, 
     {
         try
         {
-            TEntity entity = mapper.Map<TEntity>(dtoModel);
-            TEntity? returnEntity = await repository.AddAsync(entity);
+            TEntity entity = _mapper.Map<TEntity>(dtoModel);
+            TEntity? returnEntity = await _repository.AddAsync(entity);
 
-            TDtoModel dto = mapper.Map<TDtoModel>(returnEntity);
+            TDtoModel dto = _mapper.Map<TDtoModel>(returnEntity);
             return Result<TDtoModel>.Ok(dto);
         }
         catch (Exception e)
@@ -53,10 +60,10 @@ public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, 
     {
         try
         {
-            List<TEntity> entity = mapper.Map<List<TEntity>>(dtomodels);
-            List<TEntity> returnEntities = await repository.AddRangeAsync(entity);
-            
-            List<TDtoModel> dtos = mapper.Map<List<TDtoModel>>(returnEntities);
+            List<TEntity> entity = _mapper.Map<List<TEntity>>(dtomodels);
+            List<TEntity> returnEntities = await _repository.AddRangeAsync(entity);
+
+            List<TDtoModel> dtos = _mapper.Map<List<TDtoModel>>(returnEntities);
             return Result<List<TDtoModel>>.Ok(dtos);
         }
         catch (Exception e)
@@ -69,19 +76,18 @@ public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, 
     {
         try
         {
-            TEntity entity = mapper.Map<TEntity>(dtoModel);
-            TEntity? returnEntity = await repository.UpdateAsync(id, entity);
+            TEntity entity = _mapper.Map<TEntity>(dtoModel);
+            TEntity? returnEntity = await _repository.UpdateAsync(id, entity);
             if (returnEntity == null)
             {
                 return Result<TDtoModel>.Fail("The record could not be updated");
             }
 
-            var dto = mapper.Map<TDtoModel>(returnEntity);
+            var dto = _mapper.Map<TDtoModel>(returnEntity);
             return Result<TDtoModel>.Ok(dto);
         }
         catch (Exception e)
         {
-
             return Result<TDtoModel>.Fail(e.Message);
         }
     }
@@ -90,7 +96,7 @@ public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, 
     {
         try
         {
-            await repository.DeleteAsync(id);
+            await _repository.DeleteAsync(id);
             return Result.Ok();
         }
         catch (Exception e)
@@ -104,13 +110,10 @@ public class GenericServices<TKey, TEntity, TDtoModel>(IGenericRepository<TKey, 
         try
         {
             //obtenemos las entidades
-            var queryable = repository.GetAllQueryable();
-        
+            var queryable = _repository.GetAllQueryable();
             //mostramos los dtos
-            var dtoQueryable = queryable.Select(e => mapper.Map<TDtoModel>(e));
-        
+            var dtoQueryable = queryable.Select(e => _mapper.Map<TDtoModel>(e));
             var exists = predicate(dtoQueryable);
-        
             return Task.FromResult(Result<bool>.Ok(exists));
         }
         catch (Exception e)

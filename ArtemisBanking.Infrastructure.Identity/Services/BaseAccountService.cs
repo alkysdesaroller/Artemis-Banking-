@@ -39,8 +39,16 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             {
                 return Result<UserDto>.Fail($"this email: {saveDto.Email} is already taken.");
             }
-
+            
             var userWithSameIdentityCardNumber = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.IdentityCardNumber == saveDto.IdentityCardNumber);
+            if (userWithSameIdentityCardNumber != null)
+            {
+                
+                return Result<UserDto>.Fail($"This Identity Card Number: {saveDto.IdentityCardNumber} is already taken.");
+            }
+
+            userWithSameIdentityCardNumber = await _userManager.Users
                 .FirstOrDefaultAsync(u => u.IdentityCardNumber == saveDto.IdentityCardNumber);
             if (userWithSameIdentityCardNumber != null)
             {

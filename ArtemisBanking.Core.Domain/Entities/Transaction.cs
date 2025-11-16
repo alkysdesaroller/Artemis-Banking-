@@ -6,7 +6,7 @@ namespace ArtemisBanking.Core.Domain.Entities;
 
 public class Transaction
 {
-    public required int Id { get; set; }
+    public int Id { get; set; } // Se genera automáticamente por la base de datos
     public required decimal Amount { get; set; }
     public required string AccountNumber { get; set; }
     public required string CreatedById { get; set; }

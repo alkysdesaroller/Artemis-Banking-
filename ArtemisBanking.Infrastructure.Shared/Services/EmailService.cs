@@ -55,7 +55,7 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
             }
         }
 
-        public async Task SendTemplateEmailAsync(EmailTemplateData data)
+        public async Task SendTemplateEmailAsync(EmailTemplateDataDto data)
         {
             string templatePath = GetTemplatePath(data.Type);
             string html = await File.ReadAllTextAsync(templatePath);

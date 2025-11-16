@@ -9,20 +9,19 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 public interface ITransactionService : IGenericService<int, TransactionDto>
 {
     /*
-     * Veo bien la idea de que cada tipo de transacion tenga su propio DTO.
-     * He comentado los métodos para que el compilador no me pida implementarlos.
-     * Si necesitas un metodo de estos, descomentalo e implementalo. -Luis
-     */
-
-    Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto);
-
-    /*
+     * Estos serian los metodo que implementaria el Client por lo cual no los implemente.
+     * Ya que no se como lo irias a usar Ash o Gaviota(Cualquiera que vea el mensaje),
+     * el punto es que cuando vayas a utilizarlos descomenta aqui y en la implementacion - Alna
+    
     Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber);
     Task<Result<TransactionDto>> ProcessExpressTransferAsync(ExpressTransferDto dto);
     Task<Result<TransactionDto>> ProcessBeneficiaryTransferAsync(BeneficiaryTransferDto dto);
     Task<Result<TransactionDto>> ProcessCreditCardPaymentAsync(CreditCardPaymentDto dto);
     Task<Result<TransactionDto>> ProcessLoanPaymentAsync(LoanPaymentDto dto);
     Task<Result<TransactionDto>> ProcessAccountTransferAsync(AccountTransferDto dto);
+     */ 
+     
+    Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto); 
     Task<Result<TransactionDto>> ProcessDepositAsync(DepositDto dto);
     Task<Result<TransactionDto>> ProcessWithdrawalAsync(WithdrawalDto dto);
     Task<Result<TransactionDto>> ProcessTellerTransactionAsync(TellerTransactionDto dto);
@@ -30,8 +29,9 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
     Task<Result<TransactionDto>> ProcessTellerLoanPaymentAsync(TellerLoanPaymentDto dto);
     Task<Result<TransactionSummaryDto>> GetTransactionSummaryAsync();
     Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId);
-    */
-
+    
+    
+    
     /*
      * Un Dto por tipo de trasaccion. Una transaccion por tipo de Dto
      * Task<Result<TransactionDto> ProcessExpressTransferAsync(ExpressTransferDto dto)

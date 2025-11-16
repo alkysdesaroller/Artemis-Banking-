@@ -249,7 +249,7 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         }
         var client = clientResult.Value!;
         var newMontly = MontlyPayment.Calculate(loan.Amount, newRate, loan.TermMonths);
-        await _emailService.SendTemplateEmailAsync(new EmailTemplateData
+        await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto
         {
             Type = EmailType.LoanRateUpdated,
             To = client.Email,
