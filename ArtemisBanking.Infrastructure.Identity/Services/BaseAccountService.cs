@@ -315,23 +315,23 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
 
         public virtual async Task<Result<List<UserDto>>> GetUsersByIds(List<string> ids)
         {
-            var users = await _userManager.Users.Where(u => ids.Contains(u.Id))
-                .Select(user => new UserDto
-                {
-                    Id = user.Id,
-                    Email = user.Email ?? "",
-                    UserName = user.UserName ?? "",
-                    FirstName = user.FirstName ?? "",
-                    LastName = user.LastName,
-                    IsVerified = user.EmailConfirmed,
-                    RegisteredAt = user.RegisteredAt,
-                    Role = _userManager.GetRolesAsync(user)
-                               .Result.FirstOrDefault() ??
-                           "",
-                    IdentityCardNumber = user.IdentityCardNumber
-                })
-                .ToListAsync();
-            return Result<List<UserDto>>.Ok(users);
+            var users = await _userManager.Users.Where(u => ids.Contains(u.Id)).ToListAsync();
+
+            var usersDtos = users.Select(user => new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email ?? "",
+                UserName = user.UserName ?? "",
+                FirstName = user.FirstName ?? "",
+                LastName = user.LastName,
+                IsVerified = user.EmailConfirmed,
+                RegisteredAt = user.RegisteredAt,
+                Role = _userManager.GetRolesAsync(user)
+                           .Result.FirstOrDefault() ??
+                       "",
+                IdentityCardNumber = user.IdentityCardNumber
+            }).ToList();
+            return Result<List<UserDto>>.Ok(usersDtos);
         }
 
         public virtual async Task<Result<UserDto>> GetUserByUserName(string userName)
@@ -418,12 +418,16 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return Result<List<UserDto>>.Ok(listUsersDtos);
         }
 
-        public async Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role)
+        public async Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role, bool isActive = true)
         {
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role.ToString());
+            if (isActive)
+            {
+                usersInRole = usersInRole.Where(u => u.EmailConfirmed).ToList();
+            }
+            
             List<UserDto> listUsersDtos = [];
-            var users = await _userManager.GetUsersInRoleAsync(role.ToString());
-
-            listUsersDtos.AddRange(users.Select(user => new UserDto
+            listUsersDtos.AddRange(usersInRole.Select(user => new UserDto
             {
                 Id = user.Id,
                 Email = user.Email ?? "",
@@ -438,17 +442,28 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return Result<List<UserDto>>.Ok(listUsersDtos);
         }
 
-        public async Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role)
+        public async Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role, bool isActive = true)
         {
-            List<string> usersIds = [];
-            var users = await _userManager.GetUsersInRoleAsync(role.ToString());
-            usersIds.AddRange(users.Select(user => user.Id));
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role.ToString());
+            if (isActive)
+            {
+                usersInRole = usersInRole.Where(u => u.EmailConfirmed).ToList();
+            }
+            
+            var usersIds =  usersInRole.Select(u => u.Id).ToList();
             return Result<List<string>>.Ok(usersIds);
         }
 
-        public async Task<Result<List<string>>> GetAllUsersIds(bool? isActive)
+        public async Task<Result<List<string>>> GetAllUsersIds(bool isActive = true)
         {
-            return Result<List<string>>.Ok(await _userManager.Users.Select(u => u.Id).ToListAsync());
+            var users = _userManager.Users;
+            if (isActive)
+            {
+                users = users.Where(u => u.EmailConfirmed);
+            }
+
+            var usersIds = await users.Select(u => u.Id).ToListAsync();
+            return Result<List<string>>.Ok(usersIds);
         }
 
         public virtual async Task<Result> ConfirmAccountAsync(string userId, string token)

@@ -1,40 +1,53 @@
-﻿using ArtemisBanking.Core.Application.Dtos.Beneficiary;
-using ArtemisBanking.Core.Application.Dtos.CardTransaction;
-using ArtemisBanking.Core.Application.Dtos.CreditCard;
-using ArtemisBanking.Core.Application.Dtos.Loan;
-using ArtemisBanking.Core.Application.Dtos.LoanInstallment;
+﻿using ArtemisBanking.Core.Application.Dtos.CreditCard;
+using ArtemisBanking.Core.Application.Dtos.Email;
 using ArtemisBanking.Core.Application.Dtos.SavingAccount;
 using ArtemisBanking.Core.Application.Dtos.Transaction;
 using ArtemisBanking.Core.Application.Dtos.Transaction.Teller;
+using ArtemisBanking.Core.Application.Enums;
+using ArtemisBanking.Core.Application.Helpers;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Core.Domain.Entities;
 using ArtemisBanking.Core.Domain.Interfaces;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic.CompilerServices;
 
 namespace ArtemisBanking.Core.Application.Services;
 
-public class TransactionService(
-    ITransactionRepository transactionRepository,
-    ISavingAccountRepository accountRepository,
-    ICreditCardRepository creditCardRepository,
-    ILoanRepository loanRepository,
-    ISavingAccountService savingAccountService,
-    IMapper mapper)
-    : GenericServices<int, Transaction, TransactionDto>(transactionRepository, mapper), ITransactionService
+public class TransactionService : GenericServices<int, Transaction, TransactionDto>, ITransactionService
 {
-    private readonly ITransactionRepository _transactionRepository = transactionRepository;
-    private readonly ISavingAccountRepository _accountRepository = accountRepository;
-    private readonly ICreditCardRepository _creditCardRepository = creditCardRepository;
-    private readonly ILoanRepository _loanRepository = loanRepository;
-    private readonly ISavingAccountService _savingAccountService = savingAccountService;
+    private readonly ITransactionRepository _transactionRepository;
+    private readonly ICreditCardRepository _creditCardRepository;
+    private readonly ISavingAccountRepository _accountRepository;
+    private readonly ILoanRepository _loanRepository;
+    private readonly IEmailService _emailService;
+    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly ISavingAccountService _savingAccountService;
+    private readonly IMapper _mapper;
+
+    public TransactionService(ITransactionRepository transactionRepository, IMapper mapper,
+        ICreditCardRepository creditCardRepository, ISavingAccountRepository accountRepository,
+        ILoanRepository loanRepository, IEmailService emailService, IAccountServiceForWebApp accountServiceForWebApp,
+        ISavingAccountService savingAccountService) : base(
+        transactionRepository, mapper)
+    {
+        _transactionRepository = transactionRepository;
+        _mapper = mapper;
+        _creditCardRepository = creditCardRepository;
+        _accountRepository = accountRepository;
+        _loanRepository = loanRepository;
+        _emailService = emailService;
+        _accountServiceForWebApp = accountServiceForWebApp;
+        _savingAccountService = savingAccountService;
+    }
 
     public async Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber)
     {
         try
         {
             var transactions = await _transactionRepository.GetByAccountNumberAsync(accountNumber);
-            var dtos = mapper.Map<List<TransactionDto>>(transactions);
+            var dtos = _mapper.Map<List<TransactionDto>>(transactions);
             return Result<List<TransactionDto>>.Ok(dtos);
         }
         catch (Exception ex)
@@ -42,9 +55,8 @@ public class TransactionService(
             return Result<List<TransactionDto>>.Fail($"Error al obtener transacciones: {ex.Message}");
         }
     }
-/*
- * Hacer aqui la implementacion de los metodos los comente para que me pudiera dejar correr la app 
- * 
+
+    /*
     public async Task<Result<TransactionDto>> ProcessExpressTransferAsync(ExpressTransferDto dto)
     {
         throw new NotImplementedException();
@@ -68,7 +80,8 @@ public class TransactionService(
     public async Task<Result<TransactionDto>> ProcessAccountTransferAsync(AccountTransferDto dto)
     {
         throw new NotImplementedException();
-    }*/
+    }
+    */
 
     public async Task<Result<TransactionDto>> ProcessDepositAsync(DepositDto dto)
     {
@@ -91,7 +104,8 @@ public class TransactionService(
             var updateResult = await _savingAccountService.UpdateBalanceAsync(dto.AccountNumber, newBalance);
             if (updateResult.IsFailure)
             {
-                return Result<TransactionDto>.Fail(updateResult.GeneralError ?? "Error al actualizar el balance de la cuenta.");
+                return Result<TransactionDto>.Fail(updateResult.GeneralError ??
+                                                   "Error al actualizar el balance de la cuenta.");
             }
 
             // Crear la transacción
@@ -99,17 +113,17 @@ public class TransactionService(
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Credit,
-                Origin = $"TELLER_{dto.TellerId}",
+                Origin = $"{dto.TellerId}",
                 Beneficiary = dto.AccountNumber,
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
-                AccountNumber =  dto.AccountNumber,
+                AccountNumber = dto.AccountNumber,
                 CreatedById = dto.TellerId,
                 SubType = TransactionSubType.ExpressTransfer
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
-            var transactionDto = mapper.Map<TransactionDto>(savedTransaction);
+            var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -146,7 +160,8 @@ public class TransactionService(
             var updateResult = await _savingAccountService.UpdateBalanceAsync(dto.AccountNumber, newBalance);
             if (updateResult.IsFailure)
             {
-                return Result<TransactionDto>.Fail(updateResult.GeneralError ?? "Error al actualizar el balance de la cuenta.");
+                return Result<TransactionDto>.Fail(updateResult.GeneralError ??
+                                                   "Error al actualizar el balance de la cuenta.");
             }
 
             // Crear la transacción
@@ -164,7 +179,7 @@ public class TransactionService(
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
-            var transactionDto = mapper.Map<TransactionDto>(savedTransaction);
+            var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -199,7 +214,8 @@ public class TransactionService(
             // Validar que hay suficiente saldo
             if (sourceAccount.Balance < dto.Amount)
             {
-                return Result<TransactionDto>.Fail("La cuenta origen no tiene suficiente saldo para realizar esta transacción.");
+                return Result<TransactionDto>.Fail(
+                    "La cuenta origen no tiene suficiente saldo para realizar esta transacción.");
             }
 
             // Validar cuenta destino
@@ -216,20 +232,24 @@ public class TransactionService(
 
             // Actualizar balance de cuenta origen (disminuir)
             var sourceNewBalance = sourceAccount.Balance - dto.Amount;
-            var sourceUpdateResult = await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
+            var sourceUpdateResult =
+                await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
             if (sourceUpdateResult.IsFailure)
             {
-                return Result<TransactionDto>.Fail(sourceUpdateResult.GeneralError ?? "Error al actualizar el balance de la cuenta origen.");
+                return Result<TransactionDto>.Fail(sourceUpdateResult.GeneralError ??
+                                                   "Error al actualizar el balance de la cuenta origen.");
             }
 
             // Actualizar balance de cuenta destino (aumentar)
             var destinationNewBalance = destinationAccount.Balance + dto.Amount;
-            var destinationUpdateResult = await _savingAccountService.UpdateBalanceAsync(dto.DestinationAccountNumber, destinationNewBalance);
+            var destinationUpdateResult =
+                await _savingAccountService.UpdateBalanceAsync(dto.DestinationAccountNumber, destinationNewBalance);
             if (destinationUpdateResult.IsFailure)
             {
                 // Rollback: revertir el cambio en la cuenta origen
                 await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceAccount.Balance);
-                return Result<TransactionDto>.Fail(destinationUpdateResult.GeneralError ?? "Error al actualizar el balance de la cuenta destino.");
+                return Result<TransactionDto>.Fail(destinationUpdateResult.GeneralError ??
+                                                   "Error al actualizar el balance de la cuenta destino.");
             }
 
             // Crear la transacción
@@ -247,7 +267,7 @@ public class TransactionService(
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
-            var transactionDto = mapper.Map<TransactionDto>(savedTransaction);
+            var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -276,7 +296,8 @@ public class TransactionService(
             // Validar que hay suficiente saldo
             if (sourceAccount.Balance < dto.Amount)
             {
-                return Result<TransactionDto>.Fail("La cuenta origen no tiene suficiente saldo para realizar este pago.");
+                return Result<TransactionDto>.Fail(
+                    "La cuenta origen no tiene suficiente saldo para realizar este pago.");
             }
 
             // Validar tarjeta de crédito
@@ -293,10 +314,12 @@ public class TransactionService(
 
             // Actualizar balance de cuenta origen (disminuir)
             var sourceNewBalance = sourceAccount.Balance - dto.Amount;
-            var sourceUpdateResult = await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
+            var sourceUpdateResult =
+                await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
             if (sourceUpdateResult.IsFailure)
             {
-                return Result<TransactionDto>.Fail(sourceUpdateResult.GeneralError ?? "Error al actualizar el balance de la cuenta origen.");
+                return Result<TransactionDto>.Fail(sourceUpdateResult.GeneralError ??
+                                                   "Error al actualizar el balance de la cuenta origen.");
             }
 
             // Actualizar balance de la tarjeta de crédito (disminuir deuda)
@@ -306,7 +329,7 @@ public class TransactionService(
                 creditCardNewBalance = 0; // No puede ser negativo
             }
 
-            var creditCardDto = mapper.Map<CreditCardDto>(creditCard);
+            var creditCardDto = _mapper.Map<CreditCardDto>(creditCard);
             creditCardDto.Balance = creditCardNewBalance;
             // Nota: Necesitarías un servicio de tarjeta de crédito para actualizar el balance
             // Por ahora, solo registramos la transacción
@@ -326,7 +349,7 @@ public class TransactionService(
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
-            var transactionDto = mapper.Map<TransactionDto>(savedTransaction);
+            var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -355,7 +378,8 @@ public class TransactionService(
             // Validar que hay suficiente saldo
             if (sourceAccount.Balance < dto.Amount)
             {
-                return Result<TransactionDto>.Fail("La cuenta origen no tiene suficiente saldo para realizar este pago.");
+                return Result<TransactionDto>.Fail(
+                    "La cuenta origen no tiene suficiente saldo para realizar este pago.");
             }
 
             // Validar préstamo
@@ -372,10 +396,12 @@ public class TransactionService(
 
             // Actualizar balance de cuenta origen (disminuir)
             var sourceNewBalance = sourceAccount.Balance - dto.Amount;
-            var sourceUpdateResult = await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
+            var sourceUpdateResult =
+                await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
             if (sourceUpdateResult.IsFailure)
             {
-                return Result<TransactionDto>.Fail(sourceUpdateResult.GeneralError ?? "Error al actualizar el balance de la cuenta origen.");
+                return Result<TransactionDto>.Fail(sourceUpdateResult.GeneralError ??
+                                                   "Error al actualizar el balance de la cuenta origen.");
             }
 
             // Nota: Aquí deberías actualizar el préstamo (disminuir el monto pendiente)
@@ -396,7 +422,7 @@ public class TransactionService(
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
-            var transactionDto = mapper.Map<TransactionDto>(savedTransaction);
+            var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -433,5 +459,75 @@ public class TransactionService(
         {
             return Result<TransactionSummaryDto>.Fail($"Error al obtener el resumen de transacciones: {ex.Message}");
         }
+    }
+
+
+    public async Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto)
+    {
+        var loan = await _loanRepository.GetAllQueryable()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(l => l.Id == dto.SourceLoanNumber);
+
+        if (loan == null)
+            return Result<TransactionDto>.Fail("No se encontró ningún préstamo con ese ID");
+
+        var savingAccountResult = await _savingAccountService.GetByIdAsync(dto.DestinationAccountNumber);
+        if (savingAccountResult.IsFailure)
+            return Result<TransactionDto>.Fail(savingAccountResult.GeneralError!);
+
+        if (!savingAccountResult.Value!.IsPrincipalAccount)
+            return Result<TransactionDto>.Fail("esta no es una cuenta principal");
+
+        var transactionDto = new TransactionDto
+        {
+            Id = 0,
+            Amount = dto.Amount,
+            CreatedById = dto.AprovedByAdminId,
+            AccountNumber = dto.DestinationAccountNumber,
+            Type = TransactionType.Credit,
+            Beneficiary = dto.DestinationAccountNumber,
+            Origin = dto.SourceLoanNumber,
+            Date = DateTime.Now,
+            SubType = TransactionSubType.Deposit,
+            Status = TransactionStatus.Approved,
+        };
+
+        var transactionResult = await AddAsync(transactionDto);
+
+        if (transactionResult.IsFailure)
+            return transactionResult;
+
+        var depositResult = await _savingAccountService.DepositToAccountAsync(dto.DestinationAccountNumber, dto.Amount);
+
+        if (depositResult.IsFailure)
+            return Result<TransactionDto>.Fail(depositResult.GeneralError!);
+
+        // para el email
+        var getClient = await _accountServiceForWebApp.GetUserById(loan.ClientId);
+        if (getClient.IsFailure)
+        {
+            return Result<TransactionDto>.Fail(getClient.GeneralError!);
+        }
+
+        var client = getClient.Value!;
+        var account = savingAccountResult.Value!;
+
+        var newMontly = MontlyPayment.Calculate(loan.Amount, loan.AnualRate, loan.TermMonths);
+
+        await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+        {
+            Type = EmailType.LoanApproved,
+            To = client.Email,
+            Variables =
+            {
+                ["LoanNumber"] = loan.Id,
+                ["Amount"] = loan.Amount.ToString("N2"),
+                ["Term"] = loan.TermMonths.ToString(),
+                ["InterestRate"] = loan.TermMonths.ToString(),
+                ["MonthlyPayment"] = newMontly.ToString("N2"),
+            }
+        });
+
+        return transactionResult;
     }
 }

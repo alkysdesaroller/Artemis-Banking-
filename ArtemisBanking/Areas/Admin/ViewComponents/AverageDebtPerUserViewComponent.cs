@@ -6,21 +6,17 @@ namespace ArtemisBanking.Areas.Admin.ViewComponents;
 [Area("Admin")]
 public class AverageDebtPerUserViewComponent : ViewComponent 
 {
-    private readonly ILoanService _loanService;
+    private readonly IRiskService  _riskService;
 
-    public AverageDebtPerUserViewComponent(ILoanService loanService)
+    public AverageDebtPerUserViewComponent(IRiskService riskService)
     {
-        _loanService = loanService;
+        _riskService = riskService;
     }
 
     // GET
     public async Task<IViewComponentResult> InvokeAsync()
     {
-        var averageDebtClientResult = await _loanService.GetAverageClientDebtAsync();
-        if (averageDebtClientResult.IsFailure)
-        {
-            return View(0);
-        }
-        return View(averageDebtClientResult.Value);
+        var averageDebtClientResult = await _riskService.GetSystemAverageClientDebtAsync();
+        return View(averageDebtClientResult);
     }
 }

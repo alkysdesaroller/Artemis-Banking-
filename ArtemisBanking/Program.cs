@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddApplicationLayerIoc(builder.Configuration);
 builder.Services.AddPersistenceLayerIoc(builder.Configuration);
 builder.Services.AddIdentityLayerIocForWebApp(builder.Configuration);
-builder.Services.AddSharedLayerIoc();
+builder.Services.AddSharedLayerIoc(builder.Configuration);
 
 
 var app = builder.Build();

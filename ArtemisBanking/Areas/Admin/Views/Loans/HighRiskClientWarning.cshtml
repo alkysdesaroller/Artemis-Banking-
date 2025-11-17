@@ -1,0 +1,31 @@
+@model CreateLoanViewModel
+
+@{
+    ViewBag.Title = "Cambiar estado";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="row">
+    <div class="col-12 col-md-4 offset-4">
+        <div class="card">
+            <div class="card-header text-center text-light bg-warning">
+                <h5 class="card-title">
+                    @ViewBag?.Message
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Loans" asp-action="CreateLoanFromWarning" method="post">
+                    <input type="hidden" value="@Model.ClientId" asp-for="@Model.ClientId"/>
+                    <input type="hidden" value="@Model.TermMonth" asp-for="@Model.TermMonth"/>
+                    <input type="hidden" value="@Model.Amount" asp-for="@Model.Amount"/>
+                    <input type="hidden" value="@Model.AnualRate" asp-for="@Model.AnualRate"/>
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn bg-success me-2">Asignar de todas formas</button>
+                        <a asp-controller="Loans" asp-action="Index" class="btn btn-outline-warning">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>

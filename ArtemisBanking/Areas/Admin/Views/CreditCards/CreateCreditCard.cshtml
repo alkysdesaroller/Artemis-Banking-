@@ -1,0 +1,56 @@
+@model CreateCreditCardViewModel 
+@{
+    ViewData["Title"] = "asignar tarjeta de credito";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="row">
+    <div class="d-flex justify-content-center">
+        <div class="col-md-5">
+            @* Mensaje de información *@
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    @if (ViewBag.Message is string)
+                    {
+                        <p class="text-center">@Html.Raw(ViewBag.Message.Replace("\n", "<br />"))</p>
+                    }
+                    else
+                    {
+                        @foreach (var line in ViewBag.Message)
+                        {
+                            <p class="text-center">@line</p>
+                        }
+                    }
+                    <br />
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-light text-center">
+                    <h3 class="card-title">Rellena este formulario</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="CreditCards" asp-action="CreateCreditCard" method="post">
+                        <input type="hidden" value="@Model.ClientId" asp-for="ClientId"/>
+                        <div class="mt-2">
+                            <label class="form-label" asp-for="CreditLimit">Limite de crédito:</label>
+                            <input class="form-control" asp-for="CreditLimit" step="0.01"/>
+                            <span class="text-danger" asp-validation-for="CreditLimit"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-4">
+                            <div class="me-1">
+                                <button class="btn btn-success" type="submit">Asignar tarjeta</button>
+                            </div>
+                            <div class="me-1">
+                                <a class="btn btn-warning" asp-controller="CreditCards" asp-action="SelectUser">Volver a seleccionar</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

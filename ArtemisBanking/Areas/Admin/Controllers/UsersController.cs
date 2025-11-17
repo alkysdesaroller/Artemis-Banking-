@@ -4,7 +4,7 @@ using ArtemisBanking.Core.Application.Dtos.SavingAccount;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Application.ViewModels.Login;
-using ArtemisBanking.Core.Application.ViewModels.Users;
+using ArtemisBanking.Core.Application.ViewModels.User;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Extensions;
 using AutoMapper;
@@ -81,7 +81,7 @@ public class UsersController : Controller
                 CreatedAt = DateTime.Now,
                 AssignedByUserId = userInSessionId,
                 IsPrincipalAccount = true,
-                IsActive = true
+                IsActive = true,
             };
             var accountResult = await _savingAccountService.AddAsync(account);
             if (accountResult.IsFailure)

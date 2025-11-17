@@ -1,12 +1,10 @@
 ﻿namespace ArtemisBanking.Core.Application.ViewModels.LoanInstallment;
 
-public class AmortizationTableDta
+public class AmortizationTableViewModel
 {
-    public int LoanId { get; set; }
-    public string LoanNumber { get; set; } = string.Empty;
-    public decimal LoanAmount { get; set; }
-    public decimal AnnualInterestRate { get; set; }
-    public int TotalInstallments { get; set; }
-    public decimal MonthlyPayment { get; set; }
+    public required string LoanId { get; set; }
+    public required decimal LoanAmount { get; set; }
+    public required decimal AnnualInterestRate { get; set; }
+    public required int TotalInstallments { get; set; }
     public List<LoanInstallmentViewModel>? Installments { get; set; } 
 }

@@ -1,5 +1,6 @@
 ﻿using ArtemisBanking.Core.Application.Dtos.LoanInstallment;
-using ArtemisBanking.Core.Application.ViewModels.Users;
+using ArtemisBanking.Core.Application.ViewModels.LoanInstallment;
+using ArtemisBanking.Core.Application.ViewModels.User;
 
 namespace ArtemisBanking.Core.Application.ViewModels.Loan;
 
@@ -18,5 +19,5 @@ public class LoanViewModel
     public required DateTime CreatedAt { get; set; } = DateTime.Now;
     public UserViewModel? Client { get; set; }
     public UserViewModel? ApprovedByUser { get; set; }
-    public ICollection<LoanInstallmentDto> LoanInstallments { get; set; } = [];
+    public ICollection<LoanInstallmentViewModel> LoanInstallments { get; set; } = [];
 }

@@ -8,7 +8,6 @@ namespace ArtemisBanking.Core.Application.Interfaces;
 
 public interface ITransactionService : IGenericService<int, TransactionDto>
 {
-    
     /*
      * Estos serian los metodo que implementaria el Client por lo cual no los implemente.
      * Ya que no se como lo irias a usar Ash o Gaviota(Cualquiera que vea el mensaje),
@@ -21,6 +20,8 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
     Task<Result<TransactionDto>> ProcessLoanPaymentAsync(LoanPaymentDto dto);
     Task<Result<TransactionDto>> ProcessAccountTransferAsync(AccountTransferDto dto);
      */ 
+     
+    Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto); 
     Task<Result<TransactionDto>> ProcessDepositAsync(DepositDto dto);
     Task<Result<TransactionDto>> ProcessWithdrawalAsync(WithdrawalDto dto);
     Task<Result<TransactionDto>> ProcessTellerTransactionAsync(TellerTransactionDto dto);
@@ -49,6 +50,5 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
      *
      *  Los metodos de las transacciones deberan de llamar a los metodos de otros servicios para hacer su labor. Transacciones
      * es el servicio central de los cajeros y clientes.
-    */
-
+     */
 }

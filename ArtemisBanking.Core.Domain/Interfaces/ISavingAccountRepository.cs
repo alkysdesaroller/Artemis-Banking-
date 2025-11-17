@@ -7,5 +7,6 @@ public interface ISavingAccountRepository : IGenericRepository<string, SavingAcc
     Task<SavingAccount?> GetByAccountNumberAsync(string accountNumber);
     Task<bool> HasSufficientBalanceAsync(string accountNumber, decimal amount);
     Task<bool> AccountExistsAndIsActiveAsync(string accountNumber);
-    
+
+    Task SetStatus(string accountNumber, bool statusToSet);
 }

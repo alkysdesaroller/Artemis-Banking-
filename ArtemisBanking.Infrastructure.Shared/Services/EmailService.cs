@@ -55,7 +55,7 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
             }
         }
 
-        public async Task SendTemplateEmailAsync(EmailTemplateData data)
+        public async Task SendTemplateEmailAsync(EmailTemplateDataDto data)
         {
             string templatePath = GetTemplatePath(data.Type);
             string html = await File.ReadAllTextAsync(templatePath);
@@ -100,6 +100,9 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
 
                 EmailType.CashAdvance =>
                     Path.Combine(templatesDir, "CashAdvance.html"),
+                
+                EmailType.CreditCardLimitUpdated =>
+                    Path.Combine(templatesDir, "CreditCardLimitUpdated.html"),               
 
                 EmailType.ExpressTransferSender =>
                     Path.Combine(templatesDir, "ExpressTransferSender.html"),
@@ -131,6 +134,7 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
 
                 EmailType.CreditCardPayment => "Pago a tarjeta de crédito procesado",
                 EmailType.CashAdvance => "Avance de efectivo realizado",
+                EmailType.CreditCardLimitUpdated => "Actualización de límite de su tarjeta de crédito",
 
                 EmailType.ExpressTransferSender => "Transferencia realizada",
                 EmailType.ExpressTransferReceiver => "Has recibido una transferencia",

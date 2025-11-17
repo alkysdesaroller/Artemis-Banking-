@@ -15,18 +15,15 @@ public class TransactionRepository : GenericRepository<int, Transaction>, ITrans
     public async Task<List<Transaction>> GetByAccountNumberAsync(string accountNumber)
     {
         return await Context.Set<Transaction>()
-            .Where(t => t.Origin == accountNumber || t.Beneficiary == accountNumber)
+            .Where(t => t.AccountNumber == accountNumber)
             .OrderByDescending(t => t.Date)
             .ToListAsync();
     }
 
     public async Task<List<Transaction>> GetByTellerIdAsync(string tellerId)
     {
-        // Nota: Si la entidad Transaction no tiene TellerId, necesitaremos agregarlo
-        // Por ahora, asumimos que el TellerId se puede identificar de alguna manera
-        // Esto es un placeholder - necesitarás ajustar según tu modelo de datos
-        return await Context.Set<Transaction>()
-            .Where(t => t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId))
+       return await Context.Set<Transaction>()
+            .Where(t => t.CreatedById == tellerId)
             .OrderByDescending(t => t.Date)
             .ToListAsync();
     }
@@ -34,7 +31,7 @@ public class TransactionRepository : GenericRepository<int, Transaction>, ITrans
     public async Task<List<Transaction>> GetByTellerIdAndDateRangeAsync(string tellerId, DateTime startDate, DateTime endDate)
     {
         return await Context.Set<Transaction>()
-            .Where(t => (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId)) 
+            .Where(t => t.CreatedById == tellerId
                      && t.Date >= startDate 
                      && t.Date <= endDate)
             .OrderByDescending(t => t.Date)
@@ -44,7 +41,7 @@ public class TransactionRepository : GenericRepository<int, Transaction>, ITrans
     public async Task<int> GetTotalTransactionsByTellerAsync(string tellerId)
     {
         return await Context.Set<Transaction>()
-            .CountAsync(t => t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId));
+            .CountAsync(t => t.CreatedById == tellerId);
     }
 
     public async Task<int> GetTodayTransactionsByTellerAsync(string tellerId)
@@ -53,49 +50,51 @@ public class TransactionRepository : GenericRepository<int, Transaction>, ITrans
         var tomorrow = today.AddDays(1);
         
         return await Context.Set<Transaction>()
-            .CountAsync(t => (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId))
-                          && t.Date >= today 
-                          && t.Date < tomorrow);
+            .CountAsync(t => t.CreatedById == tellerId && t.Date >= today && t.Date < tomorrow);
     }
 
     public async Task<int> GetTotalDepositsByTellerAsync(string tellerId)
     {
         // Los depósitos son transacciones de tipo Credit donde el Origin contiene el TellerId
         return await Context.Set<Transaction>()
-            .CountAsync(t => t.Type == TransactionType.Credit 
-                          && (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId)));
+            .Where(t => t.CreatedById == tellerId)
+            .Where(t => t.SubType == TransactionSubType.Deposit)
+            .CountAsync();
+
     }
 
     public async Task<int> GetTodayDepositsByTellerAsync(string tellerId)
     {
         var today = DateTime.Today;
         var tomorrow = today.AddDays(1);
-        
+
         return await Context.Set<Transaction>()
-            .CountAsync(t => t.Type == TransactionType.Credit 
-                          && (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId))
-                          && t.Date >= today 
-                          && t.Date < tomorrow);
+            .Where(t => t.SubType == TransactionSubType.Deposit)
+            .Where(t => t.CreatedById == tellerId)
+            .Where(t => t.Date >= today && t.Date < tomorrow)
+            .CountAsync();
     }
 
     public async Task<int> GetTotalWithdrawalsByTellerAsync(string tellerId)
     {
         // Los retiros son transacciones de tipo Debit
         return await Context.Set<Transaction>()
-            .CountAsync(t => t.Type == TransactionType.Debit 
-                          && (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId)));
+            .Where(t => t.CreatedById == tellerId)
+            .Where(t => t.SubType == TransactionSubType.Withdrawal)
+            .CountAsync();
+
     }
 
     public async Task<int> GetTodayWithdrawalsByTellerAsync(string tellerId)
     {
         var today = DateTime.Today;
         var tomorrow = today.AddDays(1);
-        
+
         return await Context.Set<Transaction>()
-            .CountAsync(t => t.Type == TransactionType.Debit 
-                          && (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId))
-                          && t.Date >= today 
-                          && t.Date < tomorrow);
+            .Where(t => t.SubType == TransactionSubType.Withdrawal)
+            .Where(t => t.CreatedById == tellerId)
+            .Where(t => t.Date >= today && t.Date < tomorrow)
+            .CountAsync();
     }
 
     public async Task<int> GetTotalPaymentsByTellerAsync(string tellerId)
@@ -103,19 +102,22 @@ public class TransactionRepository : GenericRepository<int, Transaction>, ITrans
         // Los pagos incluyen pagos de tarjeta de crédito y préstamos
         // Esto es una aproximación - puedes ajustar según tu lógica de negocio
         return await Context.Set<Transaction>()
-            .CountAsync(t => (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId))
-                          && (t.Beneficiary.Contains("LOAN") || t.Beneficiary.Contains("CARD")));
+            .Where(t => t.CreatedById == tellerId)
+            .Where(t => t.SubType == TransactionSubType.CreditCardPayment ||
+                        t.SubType == TransactionSubType.LoanPayment)
+            .CountAsync();
     }
 
     public async Task<int> GetTodayPaymentsByTellerAsync(string tellerId)
     {
         var today = DateTime.Today;
         var tomorrow = today.AddDays(1);
-        
+
         return await Context.Set<Transaction>()
-            .CountAsync(t => (t.Origin.Contains(tellerId) || t.Beneficiary.Contains(tellerId))
-                          && (t.Beneficiary.Contains("LOAN") || t.Beneficiary.Contains("CARD"))
-                          && t.Date >= today 
-                          && t.Date < tomorrow);
+            .Where(t => t.SubType == TransactionSubType.CreditCardPayment ||
+                        t.SubType == TransactionSubType.LoanPayment)
+            .Where(t => t.CreatedById == tellerId)
+            .Where(t => t.Date >= today && t.Date < tomorrow)
+            .CountAsync();
     }
 }

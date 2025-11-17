@@ -1,4 +1,4 @@
-﻿namespace ArtemisBanking.Core.Application.Enums;
+namespace ArtemisBanking.Core.Application.Enums;
 
 public enum EmailType
 {
@@ -9,10 +9,11 @@ public enum EmailType
     
     CreditCardPayment,
     CashAdvance,
+    CreditCardLimitUpdated,
     
     ExpressTransferSender,
     ExpressTransferReceiver,
     
     BeneficiaryTransferSender,
-    BeneficiaryTransferReceiver
+    BeneficiaryTransferReceiver,
 }

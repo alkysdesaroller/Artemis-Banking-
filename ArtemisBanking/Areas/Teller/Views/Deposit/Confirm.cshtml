@@ -1,4 +1,5 @@
-﻿@model TransactionConfirmationViewModel
+﻿@using ArtemisBanking.Core.Domain.Common.Enums
+@model TransactionConfirmationViewModel
 @{
     ViewData["Title"] = "Confirmación de Depósito";
     Layout = "_LayoutTeller";
@@ -42,7 +43,7 @@
                             <tr>
                                 <th>Estado:</th>
                                 <td>
-                                    @if (Model.Transaction.Status == System.Transactions.TransactionStatus.Committed)
+                                    @if (Model.Transaction.Status == TransactionStatus.Approved)
                                     {
                                         <span class="badge bg-success">Completada</span>
                                     }

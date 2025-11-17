@@ -17,6 +17,22 @@ public class SavingAccountService : GenericServices<string, SavingAccount, Savin
         _mapper = mapper;
     }
 
+    public async Task<Result<bool>> HasSufficientBalanceAsync(string accountNumber, decimal amount)
+    {
+        var account = await _savingAccountRepository.GetByIdAsync(accountNumber);
+        if (account == null)
+        {
+            return Result<bool>.Fail("No se encontro alguna cuenta con este identificador");
+        }
+        
+        if (account.Balance < amount)
+        {
+            return Result<bool>.Fail("La cuenta no tiene suficientes fondos");
+        }
+        
+        return Result<bool>.Ok(true);
+    }
+
     public async Task<Result<SavingAccountDto>> GetMainAccountByUserIdAsync(string userId)
     {
         var account = await _savingAccountRepository.GetAllQueryable()
@@ -52,5 +68,47 @@ public class SavingAccountService : GenericServices<string, SavingAccount, Savin
             return updateResult;
 
         return Result<SavingAccountDto>.Ok(updateResult.Value!);
+    }
+
+    public async Task<Result> DepositToAccountAsync(string accountNumber, decimal amount)
+    {
+        var account = await _savingAccountRepository.GetByIdAsync(accountNumber);
+        
+        if (account == null)
+            return Result<SavingAccountDto>.Fail("No se encontró ninguna cuenta principal para ese usuario");
+
+        if (!account.IsActive)
+            return Result<SavingAccountDto>.Fail("La cuenta se encuentra desactivada/Cancelada en este momento");
+       
+        account.Balance += amount;
+        await _savingAccountRepository.UpdateAsync(account.Id,account);
+        
+        return Result.Ok();
+    }
+
+    public async Task<Result> WithdrawFromAccount(string accountNumber, decimal amount)
+    {
+        var account = await _savingAccountRepository.GetByIdAsync(accountNumber);
+        
+        if (account == null)
+            return Result<SavingAccountDto>.Fail("No se encontró ninguna cuenta principal para ese usuario");
+
+        if (account.Balance < amount)
+            return Result.Fail("Fondos insuficientes");
+        
+        if (!account.IsActive)
+            return Result<SavingAccountDto>.Fail("La cuenta se encuentra desactivada/Cancelada en este momento");
+       
+        account.Balance -= amount;
+        await _savingAccountRepository.UpdateAsync(account.Id,account);
+        
+        return Result.Ok();
+        
+    }
+
+    public async Task<Result> CancelAccountAsync(string accountNumber)
+    {
+        await _savingAccountRepository.SetStatus(accountNumber, false);
+        return Result.Ok();
     }
 }

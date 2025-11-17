@@ -1,6 +1,6 @@
 using ArtemisBanking.Core.Domain.Common.Enums;
 
-namespace ArtemisBanking.Core.Application.ViewModels.Users;
+namespace ArtemisBanking.Core.Application.ViewModels.User;
 
 public class UserViewModel
 {

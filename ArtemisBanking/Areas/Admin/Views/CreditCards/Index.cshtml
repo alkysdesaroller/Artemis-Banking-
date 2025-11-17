@@ -1,0 +1,171 @@
+@model CreditCardIndexViewModel 
+
+@{
+    ViewBag.Title = "Mantenimiento de Tarjetas de credito";
+    Layout = "_LayoutAdmin";
+}
+
+@{
+    if (ViewBag.Message != null)
+    {
+        @if (ViewBag.Message is string)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <p class="text-center">@Html.Raw(ViewBag.Message.Replace("\n", "<br />"))</p>
+                <br/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                @foreach (var line in ViewBag.Message)
+                {
+                    <p class="text-center">@line</p>
+                }
+                <br/>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    }
+}
+
+<div class="row mb-2">
+    <div class="justify-content-end">
+        <a class="btn btn-success" asp-controller="CreditCards" asp-action="SelectUser">Asignar Tarjeta de credito </a>
+    </div>
+</div>
+
+<div class="row">
+    
+    <div class="card mb-3 w-50">
+        <div class="card-header fw-bold">
+            Filtros
+        </div>
+        <div class="card-body">
+            <form asp-controller="CreditCards" asp-action="Index" method="get">
+                <div class="d-flex">
+                        
+                    <div class="input-group me-1">
+                        <span class="input-group-text">Cédula</span>
+                        <input class="form-control" type="text" name="identityCardNumber" placeholder="numero de cedula"/>
+                    </div>
+                    
+                    <div class="input-group me-1">
+                        <span class="input-group-text">Estado:</span>
+                        <select class="form-select" name="IsActive">
+                            <option value="">Seleccione un estado</option>
+                            <option value="true">Activa</option>
+                            <option value="false">Cancelada</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary">
+                        Filtrar
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>
+
+<div class="row">
+    <div class="card">
+        <div class="card-body">
+            <div>
+                @if (Model.Data.Items.Count() == 0)
+                {
+                    <div class="card-text text-muted text-center">No existe informacion de tarjetas</div>
+                }
+                else
+                {
+
+                    <table class="table table-striped w-100">
+                        <thead>
+                        <tr>
+                            <th># Tarjeta</th>
+                            <th>Cliente</th>
+                            <th>Limite de crédito</th>
+                            <th>Fecha de expiración</th>
+                            <th>Monto adeudado</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var creditCard in Model.Data.Items)
+                        {
+                            <tr>
+                                <td>@creditCard.CardNumber</td>
+                                <td>@($"{creditCard.Client?.FirstName} {creditCard.Client?.LastName}")</td>
+                                <td>@creditCard.CreditLimit.ToString("N2")</td>
+                                <td>@($"{creditCard.ExpirationMonth}/{creditCard.ExpirationYear}")</td>
+                                <td>@creditCard.Balance.ToString("N2")</td>
+                                <td>@(creditCard.IsActive ? "Activa" : "Cancelada")</td>
+                               <td>
+                                   <div class="me-2">
+                                       <a class="btn btn-sm btn-outline-primary" asp-controller="CreditCards" asp-action="Details" asp-route-cardNumber="@creditCard.CardNumber">
+                                           Detalles
+                                       </a>
+                                   </div>
+                                   @if (creditCard.IsActive)
+                                   {
+                                       <div>
+                                           <a class="btn btn-sm btn-outline-warning" asp-controller="CreditCards" asp-action="EditCreditLimit" asp-route-cardNumber="@creditCard.CardNumber">
+                                               Editar
+                                           </a>
+                                       </div>
+                                       <div>
+                                           <a class="btn btn-sm btn-outline-danger" asp-controller="CreditCards" asp-action="Cancel" asp-route-cardNumber="@creditCard.CardNumber">
+                                               Cancelar 
+                                           </a>
+                                       </div>
+                                   }
+                               </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-center mt-2">
+        @{
+            int previosPageIndex = Model.Data.Pagination.CurrentPage - 1;
+            int nextPageIndex = Model.Data.Pagination.CurrentPage + 1;
+        }
+        <ul class="pagination">
+            @if (Model.Data.Pagination.CurrentPage > 1)
+            {
+                <li class="page-item"><a class="page-link" asp-controller="CreditCards" asp-action="Index" asp-route-page="@previosPageIndex">Anterior</a></li>
+                <li class="page-item"><a class="page-link" asp-controller="CreditCards" asp-action="Index" asp-route-page="@previosPageIndex">@previosPageIndex</a></li>
+            }
+            else
+            {
+                // Desactivados
+                <li class="page-item"><a class="page-link disabled">Anterior</a></li>
+                <li class="page-item"><a class="page-link disabled">@previosPageIndex</a></li>
+            }
+           
+            <li class="page-item active"><a class="page-link" asp-controller="CreditCards" asp-action="Index" asp-route-page="@Model.Data.Pagination.CurrentPage">@Model.Data.Pagination.CurrentPage</a></li>
+            
+            @if (Model.Data.Pagination.CurrentPage < Model.Data.Pagination.TotalPages)
+            {
+                
+                <li class="page-item"><a class="page-link" asp-controller="CreditCards" asp-action="Index" asp-route-page="@nextPageIndex">@nextPageIndex</a></li>
+                <li class="page-item"><a class="page-link" asp-controller="CreditCards" asp-action="Index" asp-route-page="@(Model.Data.Pagination.CurrentPage + 1)">Siguiente</a></li>
+            }
+            else
+            {
+                //Desactivados
+                <li class="page-item disabled"><a class="page-link">@nextPageIndex</a></li>
+                <li class="page-item disabled"><a class="page-link">Siguiente</a></li>
+            }
+        </ul>
+    </div>
+    
+</div>
