@@ -1,0 +1,148 @@
+@using ArtemisBanking.Core.Domain.Common.Enums
+@model SavingAccountViewModel
+
+@{
+    ViewBag.Title = "Detalles de la cuenta";
+    Layout = "_LayoutAdmin";
+}
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @if (ViewBag.Message is string)
+        {
+            <p class="text-center">@Html.Raw(ViewBag.Message.Replace("\n", "<br />"))</p>
+        }
+        else
+        {
+            @foreach (var line in ViewBag.Message)
+            {
+                <p class="text-center">@line</p>
+            }
+        }
+        <br />
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (Model == null)
+{
+    <div class="alert alert-warning text-center">
+        No se encontró información de la cuenta.
+    </div>
+    return;
+}
+
+@if (Model.Transactions == null || !Model.Transactions.Any())
+{
+    <div class="alert alert-warning text-center">
+        Esta cuenta todavía no tiene transacciones registradas.
+    </div>
+}
+
+
+<div class="row mb-3">
+    <div class="card">
+        <div class="card-header fw-bold">
+            Información de la cuenta.
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Numero de cuenta:</strong></div>
+                <div class="col-md-9">@Model.Id</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Balance:</strong></div>
+                <div class="col-md-9">RD$ @Model.Balance.ToString("N2")</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Cliente:</strong></div>
+                <div class="col-md-9">@($"{Model.Client?.FirstName} {Model.Client?.LastName}")</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Tipo de cuenta:</strong></div>
+                <div class="col-md-9">@(Model.IsPrincipalAccount ? "Principal" : "Secundaria")</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Fecha de creación:</strong></div>
+                <div class="col-md-9">@Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Estado:</strong></div>
+                <div class="col-md-9">
+                    @if (Model.IsActive)
+                    {
+                        <span class="badge bg-success">Activa</span>
+                    }
+                    else 
+                    {
+                        <span class="badge bg-danger">Cancelada</span>
+                    }
+               </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="card">
+        <div class="card-header fw-bold">
+            Transacciones de la cuenta.
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-striped w-100 text-center align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Monto</th>
+                    <th>Tipo</th>
+                    <th>Origen</th>
+                    <th>Beneficiario</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                @foreach (var transaction in Model.Transactions!)
+                {
+                    var estadoTexto =
+                        transaction.Status == TransactionStatus.Approved ? "APROBADA" : "RECHAZADA";
+
+                    var estadoClase =
+                        transaction.Type == TransactionType.Credit ? "table-success" : "table-danger";
+
+
+                    <tr class="@estadoClase">
+                        <td>@transaction.Date.ToShortDateString()</td>
+                        <td>RD$ @transaction.Amount.ToString("N2")</td>
+                        <td>@(transaction.Type == TransactionType.Credit ? "CRÉDITO" : "DÉBITO" )</td>
+                        <td>@transaction.Origin</td>
+                        <td>@transaction.Beneficiary</td>
+                        <td>@estadoTexto</td>
+                    </tr>
+                }
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="d-flex justify-content-center mt-2">
+        <div class="me-1">
+            <a asp-controller="SavingAccounts" asp-action="Index" class="btn btn-warning">Volver</a>
+        </div>
+    </div>
+</div>

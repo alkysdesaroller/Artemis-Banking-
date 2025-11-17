@@ -65,7 +65,6 @@ public class CreditCardsController : Controller
 
     public async Task<IActionResult> SelectUser(string? identityCardNumber = null)
     {
-        // Trae los clientes activos sin préstamo activo
         var users = await _accountServiceForWebApp.GetAllUserIdsOfRole(Roles.Client);
         var usersWithDebtResult = await _riskService.GetDebtOfTheseUsers(users.Value!, identityCardNumber);
         var viewmodels = _mapper.Map<List<ClientsWithDebtViewModel>>(usersWithDebtResult.Value);
@@ -103,7 +102,7 @@ public class CreditCardsController : Controller
             return View("CreateCreditCard", model);
         }
         
-        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
+        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
     }
     
     public async Task<IActionResult> EditCreditLimit(string cardNumber)
@@ -144,7 +143,7 @@ public class CreditCardsController : Controller
             this.SendValidationErrorMessages(result);
             return View("Index");
         }
-        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
+        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
    }
     
     public async Task<IActionResult> Cancel(string cardNumber)
@@ -168,7 +167,7 @@ public class CreditCardsController : Controller
             this.SendValidationErrorMessages(result);
             return View("Cancel");
         }
-        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
+        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
     }
     
 }
