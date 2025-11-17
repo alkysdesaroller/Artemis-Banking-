@@ -7,7 +7,7 @@ namespace ArtemisBanking.Core.Application.Dtos.CardTransaction;
 // Modificado para que sea simetrico con la clase entidad
 public class CardTransactionDto
 {
-    public required int Id { get; set; }
+    public int Id { get; set; }
     public required string CreditCardNumber { get; set; }
     public required decimal Amount { get; set; }
     public int? CommerceId { get; set; } // nulable

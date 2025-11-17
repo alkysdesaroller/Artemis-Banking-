@@ -11,7 +11,7 @@ using ArtemisBanking.Core.Domain.Entities;
 using ArtemisBanking.Core.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic.CompilerServices;
+
 
 namespace ArtemisBanking.Core.Application.Services;
 
@@ -113,13 +113,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Credit,
-                Origin = $"{dto.TellerId}",
-                Beneficiary = dto.AccountNumber,
+                Origin = dto.TellerId, // El cajero que procesa el depósito
+                Beneficiary = dto.AccountNumber, // La cuenta que recibe el depósito
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
-                AccountNumber = dto.AccountNumber,
-                CreatedById = dto.TellerId,
-                SubType = TransactionSubType.ExpressTransfer
+                AccountNumber = dto.AccountNumber, // La cuenta afectada (donde se deposita)
+                CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
+                SubType = TransactionSubType.Deposit // Tipo de transacción: Depósito
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -169,13 +169,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Debit,
-                Origin = dto.AccountNumber,
-                Beneficiary = "CASH",
+                Origin = dto.AccountNumber, // La cuenta de donde se retira
+                Beneficiary = "CASH", // El dinero se retira en efectivo
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
-                AccountNumber = dto.AccountNumber,
-                CreatedById = null!,
-                SubType = TransactionSubType.ExpressTransfer
+                AccountNumber = dto.AccountNumber, // La cuenta afectada (de donde se retira)
+                CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
+                SubType = TransactionSubType.Withdrawal // Tipo de transacción: Retiro
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -257,13 +257,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Debit,
-                Origin = dto.SourceAccountNumber,
-                Beneficiary = dto.DestinationAccountNumber,
+                Origin = dto.SourceAccountNumber, // Cuenta origen de la transferencia
+                Beneficiary = dto.DestinationAccountNumber, // Cuenta destino de la transferencia
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
-                AccountNumber = null,
-                CreatedById = null,
-                SubType = TransactionSubType.ExpressTransfer
+                AccountNumber = dto.SourceAccountNumber, // La cuenta afectada (origen, de donde sale el dinero)
+                CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
+                SubType = TransactionSubType.ThirdPartyTransfer // Tipo de transacción: Transferencia a terceros
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -339,13 +339,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Debit,
-                Origin = dto.SourceAccountNumber,
-                Beneficiary = dto.CreditCardNumber,
+                Origin = dto.SourceAccountNumber, // Cuenta de donde se paga
+                Beneficiary = dto.CreditCardNumber, // Tarjeta de crédito que se paga
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
-                AccountNumber = null,
-                CreatedById = null,
-                SubType = TransactionSubType.ExpressTransfer
+                AccountNumber = dto.SourceAccountNumber, // La cuenta afectada (de donde sale el dinero)
+                CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
+                SubType = TransactionSubType.CreditCardPayment // Tipo de transacción: Pago de tarjeta de crédito
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -404,21 +404,21 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                                                    "Error al actualizar el balance de la cuenta origen.");
             }
 
-            // Nota: Aquí deberías actualizar el préstamo (disminuir el monto pendiente)
-            // Por ahora, solo registramos la transacción
+            // Aquí deberías actualizar el préstamo (disminuir el monto pendiente)
+            // Por ahora, solo registramos la transaccion - ALNA
 
             // Crear la transacción
             var transaction = new Transaction
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Debit,
-                Origin = dto.SourceAccountNumber,
-                Beneficiary = dto.LoanNumber,
+                Origin = dto.SourceAccountNumber, // Cuenta de donde se paga
+                Beneficiary = dto.LoanNumber, // Préstamo que se paga
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
-                AccountNumber = null,
-                CreatedById = null,
-                SubType = TransactionSubType.ExpressTransfer
+                AccountNumber = dto.SourceAccountNumber, // La cuenta afectada (de donde sale el dinero)
+                CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
+                SubType = TransactionSubType.LoanPayment // Tipo de transacción: Pago de préstamo
             };
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
@@ -432,9 +432,87 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         }
     }
 
+    
+    /*
+     * Este metodo entrega toda la info de las transacctiones de manera general por eso ven el (Todas)
+     * Basicamente te va a dar todo de manera bruta sin filtros.
+     * 
+     */
     public async Task<Result<TransactionSummaryDto>> GetTransactionSummaryAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            
+            // Obtener todas las transacciones (sin filtrar por cajero)
+            var allTransactions = _transactionRepository.GetAllQueryable();
+            
+            // Total de transacciones (todas)
+            var totalTransactions = await allTransactions.CountAsync();
+            
+            // Transacciones de hoy (todas)
+            var todayTransactions = await allTransactions
+                .Where(t => t.Date >= today && t.Date < tomorrow)
+                .CountAsync();
+            
+            // Total de depósitos (todas)
+            var totalDeposits = await allTransactions
+                .Where(t => t.SubType == TransactionSubType.Deposit)
+                .CountAsync();
+            
+            // Depósitos de hoy (todas)
+            var todayDeposits = await allTransactions
+                .Where(t => t.SubType == TransactionSubType.Deposit 
+                         && t.Date >= today 
+                         && t.Date < tomorrow)
+                .CountAsync();
+            
+            // Total de retiros (todas)
+            var totalWithdrawals = await allTransactions
+                .Where(t => t.SubType == TransactionSubType.Withdrawal)
+                .CountAsync();
+            
+            // Retiros de hoy (todas)
+            var todayWithdrawals = await allTransactions
+                .Where(t => t.SubType == TransactionSubType.Withdrawal 
+                         && t.Date >= today 
+                         && t.Date < tomorrow)
+                .CountAsync();
+            
+            // Total de pagos (pagos de tarjeta + préstamos)
+            var totalPayments = await allTransactions
+                .Where(t => t.SubType == TransactionSubType.CreditCardPayment 
+                         || t.SubType == TransactionSubType.LoanPayment)
+                .CountAsync();
+            
+            // Pagos de hoy
+            var todayPayments = await allTransactions
+                .Where(t => (t.SubType == TransactionSubType.CreditCardPayment 
+                          || t.SubType == TransactionSubType.LoanPayment)
+                         && t.Date >= today 
+                         && t.Date < tomorrow)
+                .CountAsync();
+            
+            // Construir el resumen
+            var summary = new TransactionSummaryDto
+            {
+                TotalTransactions = totalTransactions,
+                TodayTransactions = todayTransactions,
+                TotalDeposits = totalDeposits,
+                TodayDeposits = todayDeposits,
+                TotalWithdrawals = totalWithdrawals,
+                TodayWithdrawals = todayWithdrawals,
+                TotalPayments = totalPayments,
+                TodayPayments = todayPayments
+            };
+
+            return Result<TransactionSummaryDto>.Ok(summary);
+        }
+        catch (Exception ex)
+        {
+            return Result<TransactionSummaryDto>.Fail($"Error al obtener el resumen de transacciones: {ex.Message}");
+        }
     }
 
     public async Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId)

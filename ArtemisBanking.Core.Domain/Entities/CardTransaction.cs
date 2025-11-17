@@ -4,7 +4,7 @@ namespace ArtemisBanking.Core.Domain.Entities;
 
 public class CardTransaction
 {
-    public required int Id { get; set; }
+    public int Id { get; set; } // Se genera automáticamente por la base de datos
     
     public required string CreditCardNumber { get; set; }
     public required decimal Amount { get; set; }
