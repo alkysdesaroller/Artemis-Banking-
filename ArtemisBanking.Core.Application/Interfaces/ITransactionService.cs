@@ -12,26 +12,24 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
      * Estos serian los metodo que implementaria el Client por lo cual no los implemente.
      * Ya que no se como lo irias a usar Ash o Gaviota(Cualquiera que vea el mensaje),
      * el punto es que cuando vayas a utilizarlos descomenta aqui y en la implementacion - Alna
-    
-    Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber);
+
     Task<Result<TransactionDto>> ProcessExpressTransferAsync(ExpressTransferDto dto);
     Task<Result<TransactionDto>> ProcessBeneficiaryTransferAsync(BeneficiaryTransferDto dto);
     Task<Result<TransactionDto>> ProcessCreditCardPaymentAsync(CreditCardPaymentDto dto);
     Task<Result<TransactionDto>> ProcessLoanPaymentAsync(LoanPaymentDto dto);
     Task<Result<TransactionDto>> ProcessAccountTransferAsync(AccountTransferDto dto);
-     */ 
-     
-    Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto); 
+     */
+
+    Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber);
+    Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto);
     Task<Result<TransactionDto>> ProcessDepositAsync(DepositDto dto);
     Task<Result<TransactionDto>> ProcessWithdrawalAsync(WithdrawalDto dto);
     Task<Result<TransactionDto>> ProcessTellerTransactionAsync(TellerTransactionDto dto);
     Task<Result<TransactionDto>> ProcessTellerCreditCardPaymentAsync(TellerCreditCardPaymentDto dto);
     Task<Result<TransactionDto>> ProcessTellerLoanPaymentAsync(TellerLoanPaymentDto dto);
-    Task<Result<TransactionSummaryDto>> GetTransactionSummaryAsync();
     Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId);
-    
-    
-    
+
+
     /*
      * Un Dto por tipo de trasaccion. Una transaccion por tipo de Dto
      * Task<Result<TransactionDto> ProcessExpressTransferAsync(ExpressTransferDto dto)

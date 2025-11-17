@@ -19,8 +19,9 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
 {
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICreditCardRepository _creditCardRepository;
-    private readonly ISavingAccountRepository _accountRepository;
+    private readonly ISavingAccountRepository _savingAccountRepository;
     private readonly ILoanRepository _loanRepository;
+    
     private readonly IEmailService _emailService;
     private readonly IAccountServiceForWebApp _accountServiceForWebApp;
     private readonly ISavingAccountService _savingAccountService;
@@ -35,7 +36,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         _transactionRepository = transactionRepository;
         _mapper = mapper;
         _creditCardRepository = creditCardRepository;
-        _accountRepository = accountRepository;
+        _savingAccountRepository = accountRepository;
         _loanRepository = loanRepository;
         _emailService = emailService;
         _accountServiceForWebApp = accountServiceForWebApp;
@@ -88,7 +89,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         try
         {
             // Validar que la cuenta existe y está activa
-            var account = await _accountRepository.GetByAccountNumberAsync(dto.AccountNumber);
+            var account = await _savingAccountRepository.GetByAccountNumberAsync(dto.AccountNumber);
             if (account == null)
             {
                 return Result<TransactionDto>.Fail("La cuenta especificada no existe.");
@@ -138,7 +139,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         try
         {
             // Validar que la cuenta existe y está activa
-            var account = await _accountRepository.GetByAccountNumberAsync(dto.AccountNumber);
+            var account = await _savingAccountRepository.GetByAccountNumberAsync(dto.AccountNumber);
             if (account == null)
             {
                 return Result<TransactionDto>.Fail("La cuenta especificada no existe.");
@@ -200,7 +201,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             }
 
             // Validar cuenta origen
-            var sourceAccount = await _accountRepository.GetByAccountNumberAsync(dto.SourceAccountNumber);
+            var sourceAccount = await _savingAccountRepository.GetByAccountNumberAsync(dto.SourceAccountNumber);
             if (sourceAccount == null)
             {
                 return Result<TransactionDto>.Fail("La cuenta origen especificada no existe.");
@@ -219,7 +220,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             }
 
             // Validar cuenta destino
-            var destinationAccount = await _accountRepository.GetByAccountNumberAsync(dto.DestinationAccountNumber);
+            var destinationAccount = await _savingAccountRepository.GetByAccountNumberAsync(dto.DestinationAccountNumber);
             if (destinationAccount == null)
             {
                 return Result<TransactionDto>.Fail("La cuenta destino especificada no existe.");
@@ -282,7 +283,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         try
         {
             // Validar cuenta origen
-            var sourceAccount = await _accountRepository.GetByAccountNumberAsync(dto.SourceAccountNumber);
+            var sourceAccount = await _savingAccountRepository.GetByAccountNumberAsync(dto.SourceAccountNumber);
             if (sourceAccount == null)
             {
                 return Result<TransactionDto>.Fail("La cuenta origen especificada no existe.");
@@ -364,7 +365,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         try
         {
             // Validar cuenta origen
-            var sourceAccount = await _accountRepository.GetByAccountNumberAsync(dto.SourceAccountNumber);
+            var sourceAccount = await _savingAccountRepository.GetByAccountNumberAsync(dto.SourceAccountNumber);
             if (sourceAccount == null)
             {
                 return Result<TransactionDto>.Fail("La cuenta origen especificada no existe.");
@@ -430,11 +431,6 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         {
             return Result<TransactionDto>.Fail($"Error al procesar el pago de préstamo: {ex.Message}");
         }
-    }
-
-    public async Task<Result<TransactionSummaryDto>> GetTransactionSummaryAsync()
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId)
@@ -530,4 +526,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
 
         return transactionResult;
     }
+    
+
+
 }
