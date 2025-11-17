@@ -114,7 +114,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Credit,
-                Origin = dto.TellerId, // El cajero que procesa el depósito
+                Origin = "DEPOSITO", // El cajero que procesa el depósito
                 Beneficiary = dto.AccountNumber, // La cuenta que recibe el depósito
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
@@ -171,7 +171,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 Amount = dto.Amount,
                 Type = TransactionType.Debit,
                 Origin = dto.AccountNumber, // La cuenta de donde se retira
-                Beneficiary = "CASH", // El dinero se retira en efectivo
+                Beneficiary = "RETIRO", // El dinero se retira en efectivo
                 Date = DateTime.Now,
                 Status = TransactionStatus.Approved,
                 AccountNumber = dto.AccountNumber, // La cuenta afectada (de donde se retira)
@@ -266,7 +266,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
                 SubType = TransactionSubType.ThirdPartyTransfer // Tipo de transacción: Transferencia a terceros
             };
-
+            
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
             var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
 
