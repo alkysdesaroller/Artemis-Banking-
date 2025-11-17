@@ -19,6 +19,7 @@ public interface IBaseAccountService
     Task<Result<List<UserDto>>> GetAllUser(bool? isActive = true);
     Task<Result<List<UserDto>>> GetAllUserOfRole(Roles role, bool isActive = true);
     Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role, bool isActive = true);
+    Task<int> CountUsers(Roles? role, bool? countOnlyWithStateOnly = null);
     Task<Result<List<string>>> GetAllUsersIds(bool isActive = true);
     Task<Result> ConfirmAccountAsync(string userId, string token);
     

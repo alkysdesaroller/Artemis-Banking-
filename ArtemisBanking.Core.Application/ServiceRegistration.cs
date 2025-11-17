@@ -22,6 +22,7 @@ namespace ArtemisBanking.Core.Application
             services.AddScoped<ISavingAccountService, SavingAccountService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IRiskService, RiskService>();
+            services.AddScoped<IDashboardService, DashboardService>();
         }
     }
 }

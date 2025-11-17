@@ -454,6 +454,25 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return Result<List<string>>.Ok(usersIds);
         }
 
+        public async Task<int> CountUsers(Roles? role, bool? onlyActive = null)
+        {
+            List<AppUser> users;
+
+            if (role != null)
+                users = (await _userManager.GetUsersInRoleAsync(role.ToString())).ToList();
+            else
+                users = await _userManager.Users.ToListAsync();
+
+            if (onlyActive == true)
+                return users.Count(u => u.EmailConfirmed);
+
+            if (onlyActive == false)
+                return users.Count(u => !u.EmailConfirmed);
+
+            return users.Count;
+        }
+
+
         public async Task<Result<List<string>>> GetAllUsersIds(bool isActive = true)
         {
             var users = _userManager.Users;
@@ -465,6 +484,8 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             var usersIds = await users.Select(u => u.Id).ToListAsync();
             return Result<List<string>>.Ok(usersIds);
         }
+
+
 
         public virtual async Task<Result> ConfirmAccountAsync(string userId, string token)
         {
