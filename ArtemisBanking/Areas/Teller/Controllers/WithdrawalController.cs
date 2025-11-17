@@ -80,7 +80,8 @@ public class WithdrawalController : Controller
         var withdrawalDto = new WithdrawalDto
         {
             AccountNumber = model.AccountNumber,
-            Amount = model.Amount
+            Amount = model.Amount,
+            TellerId = user.Id // ID del cajero que procesa el retiro
         };
 
         // Procesar el retiro

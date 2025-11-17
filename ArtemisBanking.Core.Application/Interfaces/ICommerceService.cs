@@ -18,4 +18,6 @@ public interface ICommerceService : IGenericService<int , CommerceDto>
      *
      * Att: Alna
      */
+    
+    Task<Result<int>> GetCommerceIdByUserIdAsync(string userId);
 }

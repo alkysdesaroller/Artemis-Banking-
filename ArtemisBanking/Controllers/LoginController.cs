@@ -1,17 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
+
 using ArtemisBanking.Core.Application.Dtos.Login;
-using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Application.ViewModels.Login;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Extensions;
 using ArtemisBanking.Infrastructure.Identity.Entities;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace ArtemisBanking.Controllers;
 
