@@ -64,7 +64,6 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 Email = saveDto.Email,
                 UserName = saveDto.UserName,
                 EmailConfirmed = false,
-                PhoneNumber = saveDto.Phone,
                 RegisteredAt = DateTime.Now,
             };
 
@@ -152,7 +151,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             user.UserName = saveDto.UserName;
             user.EmailConfirmed = user.EmailConfirmed && user.Email == saveDto.Email;
             user.Email = saveDto.Email;
-            user.PhoneNumber = saveDto.Phone;
+            user.CommerceId = saveDto.CommerceId;
 
             if (!string.IsNullOrWhiteSpace(saveDto.Password))
             {
@@ -185,6 +184,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 RegisteredAt = user.RegisteredAt,
+                CommerceId = user.CommerceId,
                 Role = updatedRolesList[0],// un solo rol por usuario
                 IdentityCardNumber = user.IdentityCardNumber
             };
@@ -279,6 +279,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
+                CommerceId = user.CommerceId,
                 RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0],
                 IdentityCardNumber = user.IdentityCardNumber
@@ -286,13 +287,13 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
             return Result<UserDto>.Ok(userDto);
         }
         
-        public virtual async Task<Result<UserDto>> GetUserById(string id)
+        public virtual async Task<UserDto?> GetUserById(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             
             if (user == null)
             {
-                return Result<UserDto>.Fail("There is no account registered with this id");
+                return null;
             }
 
             var rolesList = await _userManager.GetRolesAsync(user);
@@ -305,12 +306,13 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
+                CommerceId = user.CommerceId,
                 RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0],
                 IdentityCardNumber = user.IdentityCardNumber
             };
             
-            return Result<UserDto>.Ok(userDto);
+            return userDto;
         }
 
         public virtual async Task<Result<List<UserDto>>> GetUsersByIds(List<string> ids)
@@ -325,6 +327,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
+                CommerceId = user.CommerceId,
                 RegisteredAt = user.RegisteredAt,
                 Role = _userManager.GetRolesAsync(user)
                            .Result.FirstOrDefault() ??
@@ -353,6 +356,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
+                CommerceId = user.CommerceId,
                 RegisteredAt = user.RegisteredAt,
                 Role = rolesList[0],
                 IdentityCardNumber = user.IdentityCardNumber
@@ -379,6 +383,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 RegisteredAt = user.RegisteredAt,
+                CommerceId = user.CommerceId,
                 Role = rolesList[0],
                 IdentityCardNumber = user.IdentityCardNumber
             };
@@ -411,6 +416,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                     LastName = user.LastName,
                     IsVerified = user.EmailConfirmed,
                     RegisteredAt = user.RegisteredAt,
+                    CommerceId = user.CommerceId,
                     Role = roleList[0],
                     IdentityCardNumber = user.IdentityCardNumber
                 });
@@ -436,6 +442,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
                 RegisteredAt = user.RegisteredAt,
+                CommerceId = user.CommerceId,
                 Role = role.ToString(),
                 IdentityCardNumber = user.IdentityCardNumber
             }));
@@ -541,6 +548,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
                 FirstName = user.FirstName ?? "",
                 LastName = user.LastName,
                 IsVerified = user.EmailConfirmed,
+                CommerceId = user.CommerceId,
                 Role = roles.Single(),
                 IdentityCardNumber = user.IdentityCardNumber,
                 RegisteredAt = user.RegisteredAt 
@@ -568,7 +576,34 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
         
         return Result.Ok();
     }
-        #region "Protected methods"
+
+    public async Task<bool> ThisEmailExists(string email, string? id = null)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+        {
+            return await _userManager.Users.AnyAsync(u => u.Email == email && u.Id == id);
+        }
+
+        return await _userManager.Users.AnyAsync(u => u.Email == email);
+    }
+    
+    public async Task<bool> ThisUsernameExists(string userName, string? id)
+    {
+        if (!string.IsNullOrWhiteSpace(id))
+        {
+            return await _userManager.Users.AnyAsync(u => u.UserName == userName && u.Id == id);
+        }
+
+        return await _userManager.Users.AnyAsync(u => u.UserName == userName);
+    }
+
+
+    public async Task<bool> ThisCommerceIdExists(int commerceId)
+    {
+        return await _userManager.Users.AnyAsync(u => u.CommerceId == commerceId); ;
+    }
+    
+    #region "Protected methods"
 
         protected async Task<string> GetVerificationEmailUri(AppUser user, string origin)
         {

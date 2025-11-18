@@ -6,11 +6,13 @@ using ArtemisBanking.Infrastructure.Identity.Entities;
 using ArtemisBanking.Infrastructure.Identity.Seeds;
 using ArtemisBanking.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 
 // Para que la siguiente clase funcionase, tuve que agregar en el CSPROJ de esta biblioteca de clases lo siguiente
@@ -130,6 +132,7 @@ namespace ArtemisBanking.Infrastructure.Identity
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(opt =>
             {
@@ -146,13 +149,37 @@ namespace ArtemisBanking.Infrastructure.Identity
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
-            });
-
-            // Authorization policies
-            services.AddAuthorization(opt =>
+                
+                opt.Events = new JwtBearerEvents()
+                {
+                    OnAuthenticationFailed = af =>
+                    {
+                        af.NoResult();
+                        af.Response.StatusCode = 500;
+                        af.Response.ContentType = "text/plain";
+                        return af.Response.WriteAsync(af.Exception.Message.ToString());
+                    },
+                    OnChallenge = c =>
+                    {
+                        c.HandleResponse();
+                        c.Response.StatusCode = 401;
+                        c.Response.ContentType = "application/json";
+                        var result = JsonConvert.SerializeObject(new { HasError = true, Error = "You are not Authorized" });
+                        return c.Response.WriteAsync(result);
+                    },
+                    OnForbidden = c =>
+                    {
+                        c.Response.StatusCode = 403;
+                        c.Response.ContentType = "application/json";
+                        var result = JsonConvert.SerializeObject(new { HasError = true, Error = "You are not Authorized to access this resource" });
+                        return c.Response.WriteAsync(result);
+                    }
+                };
+            }).AddCookie(IdentityConstants.ApplicationScheme, opt =>
             {
-                opt.AddPolicy("CommerceOnly", policy => policy.RequireRole(nameof(Core.Domain.Common.Enums.Roles.Commerce)));
+                opt.ExpireTimeSpan = TimeSpan.FromMinutes(180);           
             });
+            
 
             services.AddScoped<IBaseAccountService, AccountServiceForWebApi>();
             services.AddScoped<IAccountServiceForWebApi, AccountServiceForWebApi>();

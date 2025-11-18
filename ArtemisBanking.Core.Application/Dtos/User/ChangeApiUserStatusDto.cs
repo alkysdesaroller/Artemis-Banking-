@@ -1,6 +1,6 @@
 ﻿namespace ArtemisBanking.Core.Application.Dtos.User;
 
-public class ChangeUserStatusDto
+public class ChangeApiUserStatusDto
 {
     public bool Status { get; set; }
 }

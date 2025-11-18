@@ -37,19 +37,18 @@ public class CreditCardService : GenericServices<string, CreditCard, CreditCardD
 
     public override async Task<Result<CreditCardDto>> AddAsync(CreditCardDto dtoModel)
     {
-        var clientResult = await _accountServiceForWebApp.GetUserById(dtoModel.ClientId);
-        if (clientResult.IsFailure)
+        var client = await _accountServiceForWebApp.GetUserById(dtoModel.ClientId);
+        if (client is null)
         {
-            return Result<CreditCardDto>.Fail(clientResult.GeneralError!);
+            return Result<CreditCardDto>.Fail("no se encontro al usuario");
         }
         
-        var userWhoApprovedResult = await _accountServiceForWebApp.GetUserById(dtoModel.ApprovedByUserId);
-        if (userWhoApprovedResult.IsFailure)
+        var userWhoApproved = await _accountServiceForWebApp.GetUserById(dtoModel.ApprovedByUserId);
+        if (userWhoApproved is null)
         {
-            return Result<CreditCardDto>.Fail(userWhoApprovedResult.GeneralError!);
+            return Result<CreditCardDto>.Fail("no se encontro al usuario");
         }
 
-        var userWhoApproved = userWhoApprovedResult.Value!;
         if (userWhoApproved.Role != nameof(Roles.Admin))
         {
 
@@ -184,12 +183,11 @@ public class CreditCardService : GenericServices<string, CreditCard, CreditCardD
         
         // para el Email
         
-        var clientResult = await _accountServiceForWebApp.GetUserById(card.ClientId);
-        if (clientResult.IsFailure)
+        var client = await _accountServiceForWebApp.GetUserById(card.ClientId);
+        if (client is null)
         {
-            return Result.Fail(clientResult.GeneralError!);
+            return Result.Fail("No se encontro al cliente");
         }
-        var client = clientResult.Value!;
         
         await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto
         {
@@ -211,7 +209,7 @@ public class CreditCardService : GenericServices<string, CreditCard, CreditCardD
         var card = await _creditCardRepository.GetByIdAsync(creditCardNumber);
         if (card is null)
         {
-            return Result.Fail("No se encontro una tarjeta con ese numero");
+            return Result.Fail("No se encontró una tarjeta con ese numero");
         }
         
         var cardDebtResult  = await CalculateDebtOfThisCreditCardAsync(creditCardNumber);

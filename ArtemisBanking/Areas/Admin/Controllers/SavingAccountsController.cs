@@ -62,10 +62,10 @@ public class SavingAccountsController : Controller
             return View("Details");
         }
         
-        var clientResult = await _accountServiceForWebApp.GetUserById(accountResult.Value!.ClientId);
-        if (clientResult.IsFailure)
+        var client = await _accountServiceForWebApp.GetUserById(accountResult.Value!.ClientId);
+        if (client is null)
         {
-            this.SendValidationErrorMessages(accountResult);
+            ViewBag.Message = "No se encontro al usuario";
             return View("Details");
         }
         
@@ -79,7 +79,7 @@ public class SavingAccountsController : Controller
         
         var account = accountResult.Value!;
         account.Transactions = transactionsResult.Value!;
-        account.Client = clientResult.Value!;
+        account.Client = client;
         return View(_mapper.Map<SavingAccountViewModel>(account));
     }
     

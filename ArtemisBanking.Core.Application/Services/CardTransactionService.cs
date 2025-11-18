@@ -36,10 +36,10 @@ public class CardTransactionService : GenericServices<int, CardTransaction, Card
         if (card == null)
             return Result<CreditCardDto>.Fail("Card not found");
 
-        var clientResult = await _accountServiceForWebApp.GetUserById(card.ClientId);
+        var client = await _accountServiceForWebApp.GetUserById(card.ClientId);
 
-        if (clientResult.IsFailure)
-            return Result<CreditCardDto>.Fail(clientResult.GeneralError!);
+        if (client == null)
+            return Result<CreditCardDto>.Fail("No se encontro al usuario");
             
 
 
@@ -51,7 +51,7 @@ public class CardTransactionService : GenericServices<int, CardTransaction, Card
 
         var cardDto = _mapper.Map<CreditCardDto>(card);
         cardDto.CardTransactions = _mapper.Map<List<CardTransactionDto>>(transactions);
-        cardDto.Client = clientResult.Value!;
+        cardDto.Client = client;
 
         return Result<CreditCardDto>.Ok(cardDto);
     }

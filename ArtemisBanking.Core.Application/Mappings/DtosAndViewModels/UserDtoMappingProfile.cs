@@ -12,5 +12,8 @@ public class UserDtoMappingProfile : Profile
     {
         CreateMap<UserDto, UserViewModel>().ReverseMap();
         CreateMap<ClientsWithDebtDto, ClientsWithDebtViewModel>().ReverseMap();
+        CreateMap<CreateApiUserDto, UserSaveDto>().ReverseMap();
+        CreateMap<UpdateApiUserDto, UserSaveDto >().ReverseMap();
+        CreateMap<UserDto, UserApiDto>().ReverseMap();
     }
 }

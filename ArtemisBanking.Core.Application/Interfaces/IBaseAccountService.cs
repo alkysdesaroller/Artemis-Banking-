@@ -12,7 +12,7 @@ public interface IBaseAccountService
     Task<Result> ResetPasswordAsync(ResetPasswordRequestDto request);
     Task<Result> DeleteAsync(string id);
     Task<Result<UserDto>> GetUserByEmail(string email);
-    Task<Result<UserDto>> GetUserById(string id);
+    Task<UserDto?> GetUserById(string id);
     Task<Result<List<UserDto>>> GetUsersByIds(List<string> ids);
     Task<Result<UserDto>> GetUserByUserName(string userName);
     Task<Result<UserDto>> GetByIdentityCardNumber(string identityCardNumber);
@@ -23,6 +23,9 @@ public interface IBaseAccountService
     Task<Result<List<string>>> GetAllUsersIds(bool isActive = true);
     Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId, int pageNumber = 1, int pageSize = 20, string? role = null);
     Task<Result> SetStateOnUser(string userId, bool state);
+    Task<bool> ThisEmailExists(string email, string? id = null);
+    Task<bool> ThisUsernameExists(string userName, string? id = null);
+    Task<bool> ThisCommerceIdExists(int commerceId);
     Task<Result> ConfirmAccountAsync(string userId, string token);
     
 }

@@ -103,13 +103,12 @@ public class UsersController : Controller
 
     public async Task<IActionResult> EditUser(string userId)
     {
-        var userResult = await _accountServiceForWebApp.GetUserById(userId);
-        if (userResult.IsFailure)
+        var user = await _accountServiceForWebApp.GetUserById(userId);
+        if (user is null)
         {
-            this.SendValidationErrorMessages(userResult);
+            ViewBag.Message = "No se encontro al usuario";
             return View();
         }
-        var user =  userResult.Value!;
         
         return View(new EditUserViewModel() 
         {
@@ -170,12 +169,11 @@ public class UsersController : Controller
 
     public async Task<IActionResult> ChangeUserState(string userId, bool state)
     {
-        var userResult = await _accountServiceForWebApp.GetUserById(userId);
-        if (userResult.IsFailure)
+        var user = await _accountServiceForWebApp.GetUserById(userId);
+        if (user is null)
         {
-            this.SendValidationErrorMessages(userResult);
+            ViewBag.Message = "No se encontro al usuario";
         }
-        var user =  userResult.Value!;
         return View(new ChangeUserStateViewModel
         {
             UserId = user.Id,

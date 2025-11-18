@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using ArtemisBanking.Core.Application;
 using ArtemisBanking.Infrastructure.Identity;
 using ArtemisBanking.Infrastructure.Persistence;
@@ -7,9 +8,11 @@ using ArtemisBankingApi.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(opt =>
+{
+    opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});;
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 // Registrar capas de la aplicación
 builder.Services.AddApplicationLayerIoc(builder.Configuration);
@@ -17,11 +20,15 @@ builder.Services.AddPersistenceLayerIoc(builder.Configuration);
 builder.Services.AddIdentityLayerIocForWebApi(builder.Configuration);
 builder.Services.AddSharedLayerIoc(builder.Configuration);
 
-builder.Services.AddHealthChecks(); // Diagnostica el estado de salud
+builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer(); // Ayuda configurar metada para documentacion (para swagger en realidad)
+builder.Services.AddHealthChecks(); // Diagnostica el estado de salud
 // esto construye swagger
-builder.Services.AddSwaggerExtension(); // metodo de extension
 builder.Services.AddAppiVersioningExtension(); // Metodo de extension
+builder.Services.AddSwaggerExtension(); // metodo de extension
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 
 // CORS configuration (si es necesario para desarrollo)
 builder.Services.AddCors(options =>

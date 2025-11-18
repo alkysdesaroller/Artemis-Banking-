@@ -582,13 +582,12 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             return Result<TransactionDto>.Fail(depositResult.GeneralError!);
 
         // para el email
-        var getClient = await _accountServiceForWebApp.GetUserById(loan.ClientId);
-        if (getClient.IsFailure)
+        var client = await _accountServiceForWebApp.GetUserById(loan.ClientId);
+        if (client is null)
         {
-            return Result<TransactionDto>.Fail(getClient.GeneralError!);
+            return Result<TransactionDto>.Fail("no se encontro el cliente");
         }
 
-        var client = getClient.Value!;
         var account = savingAccountResult.Value!;
 
         var newMontly = MontlyPayment.Calculate(loan.Amount, loan.AnualRate, loan.TermMonths);

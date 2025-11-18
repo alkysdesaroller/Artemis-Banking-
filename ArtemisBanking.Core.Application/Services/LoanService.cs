@@ -47,13 +47,12 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
             return Result<LoanDto>.Fail("El cliente ya tiene un préstamo activo");
         }
         
-        var userResult = await _accountServiceForWebApp.GetUserById(dtoModel.ApprovedByUserId);
-        if (userResult.IsFailure)
+        var userWhoApproved = await _accountServiceForWebApp.GetUserById(dtoModel.ApprovedByUserId);
+        if (userWhoApproved is null)
         {
-            return Result<LoanDto>.Fail(userResult.GeneralError!);
+            return Result<LoanDto>.Fail("No se encontro el usuario");
         }
         
-        var userWhoApproved = userResult.Value!;
         if (userWhoApproved.Role != nameof(Roles.Admin))
         {
             return Result<LoanDto>.Fail("Usted no esta autorizado para asignar prestamos");
@@ -217,12 +216,11 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         
         
         // Email
-        var clientResult = await _accountServiceForWebApp.GetUserById(loan.ClientId);
-        if (clientResult.IsFailure)
+        var client = await _accountServiceForWebApp.GetUserById(loan.ClientId);
+        if (client is null)
         {
-            return Result<LoanDto>.Fail(clientResult.GeneralError!);
+            return Result<LoanDto>.Fail("no se encontro al usuario");
         }
-        var client = clientResult.Value!;
         var newMontly = MontlyPayment.Calculate(loan.Amount, newRate, loan.TermMonths);
         await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto
         {

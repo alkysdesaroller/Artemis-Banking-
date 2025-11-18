@@ -27,22 +27,20 @@ public class SavingAccountService : GenericServices<string, SavingAccount, Savin
 
     public override async Task<Result<SavingAccountDto>> AddAsync(SavingAccountDto dtoModel)
     {
-        var clientResult = await _accountServiceForWebApp.GetUserById(dtoModel.ClientId);
-        if (clientResult.IsFailure)
+        var client = await _accountServiceForWebApp.GetUserById(dtoModel.ClientId);
+        if (client is null)
         {
-            return Result<SavingAccountDto>.Fail(clientResult.GeneralError!);
+            return Result<SavingAccountDto>.Fail("No se encontro al cliente");
         }
         
-        var userWhoApprovedResult = await _accountServiceForWebApp.GetUserById(dtoModel.AssignedByUserId);
-        if (userWhoApprovedResult.IsFailure)
+        var userWhoApproved = await _accountServiceForWebApp.GetUserById(dtoModel.AssignedByUserId);
+        if (userWhoApproved is null)
         {
-            return Result<SavingAccountDto>.Fail(userWhoApprovedResult.GeneralError!);
+            return Result<SavingAccountDto>.Fail("No se encontro al cliente");
         }
 
-        var userWhoApproved = userWhoApprovedResult.Value!;
         if (userWhoApproved.Role != nameof(Roles.Admin))
         {
-
             return Result<SavingAccountDto>.Fail("No estas autorizado para asignar tarjetas de credito");
         }
         
@@ -246,7 +244,7 @@ public async Task<Result> CancelAccountAsync(string accountNumber, string adminW
 }
 
 
-    public async Task<Result<SavingAccountDto>> CreateNewSavingAccountCard(string adminWhoApproved, string clientId, decimal initialAmount)
+    public async Task<Result<SavingAccountDto>> CreateNewSavingAccountCard(string adminWhoApproved, string clientId, decimal initialAmount, bool isPrincipal = false)
     {
         var savingAccount = new SavingAccountDto
         {
@@ -254,7 +252,7 @@ public async Task<Result> CancelAccountAsync(string accountNumber, string adminW
             Balance = initialAmount,
             CreatedAt = DateTime.Now,
             AssignedByUserId = adminWhoApproved,
-            IsPrincipalAccount = false,
+            IsPrincipalAccount = isPrincipal,
             IsActive = true
         };
         
