@@ -102,7 +102,7 @@ public class CreditCardsController : Controller
             return View("CreateCreditCard", model);
         }
         
-        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
+        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
     }
     
     public async Task<IActionResult> EditCreditLimit(string cardNumber)
@@ -143,7 +143,7 @@ public class CreditCardsController : Controller
             this.SendValidationErrorMessages(result);
             return View("Index");
         }
-        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
+        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
    }
     
     public async Task<IActionResult> Cancel(string cardNumber)
@@ -167,7 +167,7 @@ public class CreditCardsController : Controller
             this.SendValidationErrorMessages(result);
             return View("Cancel");
         }
-        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
+        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
     }
     
 }

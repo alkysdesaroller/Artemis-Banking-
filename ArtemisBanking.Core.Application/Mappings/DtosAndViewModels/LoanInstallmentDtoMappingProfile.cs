@@ -9,5 +9,6 @@ public class LoanInstallmentDtoMappingProfile : Profile
     public LoanInstallmentDtoMappingProfile()
     {
         CreateMap<LoanInstallmentDto, LoanInstallmentViewModel>().ReverseMap();
+        CreateMap<LoanInstallmentDto, SimpleLoanInstallmentApiDto>().ReverseMap();
     }
 }

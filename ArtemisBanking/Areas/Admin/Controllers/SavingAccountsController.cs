@@ -124,7 +124,7 @@ public class SavingAccountsController : Controller
             return View("Create", model);
         }
         
-        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
+        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
     }
     
     
@@ -150,7 +150,7 @@ public class SavingAccountsController : Controller
             this.SendValidationErrorMessages(result);
             return View("Cancel");
         }
-        return RedirectToRoute(new { controller = "CreditCards", action = "Index" });
+        return RedirectToRoute(new { controller = "SavingAccounts", action = "Index" });
     }
     
 }
