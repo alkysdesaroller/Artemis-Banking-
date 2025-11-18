@@ -23,13 +23,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
     private readonly ILoanRepository _loanRepository;
     
     private readonly IEmailService _emailService;
-    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly ISavingAccountService _savingAccountService;
     private readonly IMapper _mapper;
 
     public TransactionService(ITransactionRepository transactionRepository, IMapper mapper,
         ICreditCardRepository creditCardRepository, ISavingAccountRepository accountRepository,
-        ILoanRepository loanRepository, IEmailService emailService, IAccountServiceForWebApp accountServiceForWebApp,
+        ILoanRepository loanRepository, IEmailService emailService, IBaseAccountService accountServiceForWebApp,
         ISavingAccountService savingAccountService) : base(
         transactionRepository, mapper)
     {

@@ -22,11 +22,11 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
     private readonly ISavingAccountService _savingAccountService;
     private readonly ITransactionService _transactionService;
     private readonly ILoanInstallmentService _loanInstallmentService;
-    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly IRiskService _riskService;
     private readonly IMapper _mapper;
 
-    public LoanService(ILoanRepository repository, IMapper mapper, IAccountServiceForWebApp accountServiceForWebApp,
+    public LoanService(ILoanRepository repository, IMapper mapper, IBaseAccountService accountServiceForWebApp,
         IRiskService riskService, ILoanInstallmentService loanInstallmentService,
         ITransactionService transactionService, ISavingAccountService savingAccountService, IEmailService emailService) : base(repository, mapper)
     {

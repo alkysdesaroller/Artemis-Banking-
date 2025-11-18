@@ -19,12 +19,12 @@ public class CreditCardService : GenericServices<string, CreditCard, CreditCardD
     private readonly ICardTransactionRepository _cardTransactionRepository;
     
     private readonly IEmailService _emailService;
-    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly IRiskService _riskService;
     private readonly IMapper _mapper;
 
     public CreditCardService(ICreditCardRepository repository, IMapper mapper,
-        IAccountServiceForWebApp accountServiceForWebApp, IRiskService riskService, IEmailService emailService, ITransactionRepository transactionRepository, ICardTransactionRepository cardTransactionRepository) : base(repository, mapper)
+        IBaseAccountService accountServiceForWebApp, IRiskService riskService, IEmailService emailService, ITransactionRepository transactionRepository, ICardTransactionRepository cardTransactionRepository) : base(repository, mapper)
     {
         _creditCardRepository = repository;
         _mapper = mapper;

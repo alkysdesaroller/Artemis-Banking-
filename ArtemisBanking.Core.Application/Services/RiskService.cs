@@ -13,9 +13,9 @@ public class RiskService : IRiskService
     private readonly ILoanInstallmentRepository _loanInstallmentRepository;
     private readonly ICardTransactionRepository _cardTransactionRepository;
     private readonly ITransactionRepository _transactionRepository;
-    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly IBaseAccountService _accountServiceForWebApp;
 
-    public RiskService(ITransactionRepository transactionRepository, IAccountServiceForWebApp accountServiceForWebApp,
+    public RiskService(ITransactionRepository transactionRepository, IBaseAccountService accountServiceForWebApp,
         ICardTransactionRepository cardTransactionRepository, ILoanInstallmentRepository loanInstallmentRepository, ILoanRepository loanRepository, ICreditCardRepository creditCardRepository)
     {
         _transactionRepository = transactionRepository;

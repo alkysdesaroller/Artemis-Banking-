@@ -21,6 +21,8 @@ public interface IBaseAccountService
     Task<Result<List<string>>> GetAllUserIdsOfRole(Roles role, bool isActive = true);
     Task<int> CountUsers(Roles? role, bool? countOnlyWithStateOnly = null);
     Task<Result<List<string>>> GetAllUsersIds(bool isActive = true);
+    Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId, int pageNumber = 1, int pageSize = 20, string? role = null);
+    Task<Result> SetStateOnUser(string userId, bool state);
     Task<Result> ConfirmAccountAsync(string userId, string token);
     
 }

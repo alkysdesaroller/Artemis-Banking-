@@ -15,10 +15,10 @@ public class CardTransactionService : GenericServices<int, CardTransaction, Card
 {
     private readonly ICreditCardRepository _cardRepository;
     private readonly ICardTransactionRepository _cardTransactionRepository;
-    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly ICreditCardService _creditCardService;
     private readonly  IMapper _mapper;
-    public CardTransactionService(ICardTransactionRepository repository, IMapper mapper, ICreditCardRepository cardRepository, IAccountServiceForWebApp accountServiceForWebApp, ICreditCardService creditCardService) : base(repository, mapper)
+    public CardTransactionService(ICardTransactionRepository repository, IMapper mapper, ICreditCardRepository cardRepository, IBaseAccountService accountServiceForWebApp, ICreditCardService creditCardService) : base(repository, mapper)
     {
         _cardTransactionRepository = repository;
         _mapper = mapper;

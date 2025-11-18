@@ -10,7 +10,7 @@ public class DashboardService : IDashboardService
 {
     private readonly ITransactionRepository _transactionRepository;
     private readonly ISavingAccountRepository _savingAccountRepository;
-    private readonly IAccountServiceForWebApp _accountService;
+    private readonly IBaseAccountService _accountService;
     private readonly ILoanRepository _loanRepository;
     private readonly ICreditCardRepository _creditCardRepository;
     private readonly IRiskService _riskService;
@@ -18,7 +18,7 @@ public class DashboardService : IDashboardService
     public DashboardService(
         ITransactionRepository transactionRepository,
         ISavingAccountRepository savingAccountRepository,
-        IAccountServiceForWebApp accountServiceForWebApp,
+        IBaseAccountService accountServiceForWebApp,
         ILoanRepository loanRepository,
         ICreditCardRepository creditCardRepository,
         IRiskService riskService)

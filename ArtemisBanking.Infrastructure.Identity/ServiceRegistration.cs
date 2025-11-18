@@ -67,6 +67,7 @@ namespace ArtemisBanking.Infrastructure.Identity
                 opt.AccessDeniedPath = "/Login/AccessDenied";
             });
 
+            services.AddScoped<IBaseAccountService, AccountServiceForWebApp>();
             services.AddScoped<IAccountServiceForWebApp, AccountServiceForWebApp>();
         }
         
@@ -153,6 +154,7 @@ namespace ArtemisBanking.Infrastructure.Identity
                 opt.AddPolicy("CommerceOnly", policy => policy.RequireRole(nameof(Core.Domain.Common.Enums.Roles.Commerce)));
             });
 
+            services.AddScoped<IBaseAccountService, AccountServiceForWebApi>();
             services.AddScoped<IAccountServiceForWebApi, AccountServiceForWebApi>();
         }
 

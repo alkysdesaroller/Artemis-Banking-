@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using ArtemisBanking.Core.Application.Dtos.CardTransaction;
 using ArtemisBanking.Core.Application.Interfaces;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,12 @@ namespace ArtemisBankingApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = "CommerceOnly")]
+
+[ApiVersion(("1.0"))]
 public class CardTransactionController(
     ICardTransactionService cardTransactionService,
     ICommerceService commerceService)
-    : ControllerBase
+    : BaseApiController 
 {
     /// <summary>
     /// Procesa una transacción de tarjeta de crédito

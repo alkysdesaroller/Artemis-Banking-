@@ -79,65 +79,7 @@ public class AccountServiceForWebApp : BaseAccountService, IAccountServiceForWeb
         await _signInManager.SignOutAsync();
     }
 
-    public async Task<PaginatedData<UserDto>> GetAllTheUsersThatArentCommercesPaginated(string userId,
-        int pageNumber = 1, int pageSize = 20, string? role = null)
-    {
-        var commerces = await _userManager.GetUsersInRoleAsync(nameof(Roles.Commerce));
 
-        var allUsers = new List<AppUser>();
-
-        if (string.IsNullOrWhiteSpace(role))
-        {
-            allUsers = await _userManager.Users
-                .Where(u => u.Id != userId)
-                .ToListAsync();           
-        }
-        else
-        {
-            var usersInRole = await _userManager.GetUsersInRoleAsync(role);
-            allUsers = usersInRole.ToList();
-        }
-
-        var usersToReturn = allUsers.Except(commerces).OrderByDescending(u => u.RegisteredAt);
-        var userDtos = new List<UserDto>();
-        foreach (var user in usersToReturn)
-        {
-            var roles =  await _userManager.GetRolesAsync(user);
-            userDtos.Add(new UserDto()
-            {
-                Id = user.Id,
-                Email = user.Email ?? "",
-                UserName = user.UserName ?? "",
-                FirstName = user.FirstName ?? "",
-                LastName = user.LastName,
-                IsVerified = user.EmailConfirmed,
-                Role = roles.Single(),
-                IdentityCardNumber = user.IdentityCardNumber,
-                RegisteredAt = user.RegisteredAt 
-            });
-        }
-        
-        var data = PaginatedData<UserDto>.Create(userDtos, pageNumber, pageSize);
-        return data;
-    }
-
-    public async Task<Result> SetStateOnUser(string userId, bool state)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null) 
-            return Result.Fail($"There is no account registered with this username: {userId}");
-        
-        user.EmailConfirmed = state;
-        var updateResult = await _userManager.UpdateAsync(user);
-
-        if (!updateResult.Succeeded)
-        {
-            return Result.Fail(updateResult.Errors.Select(s => s.Description).ToList());
-        }
-        
-        return Result.Ok();
-    }
 }
 
 

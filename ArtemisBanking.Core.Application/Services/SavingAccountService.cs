@@ -15,9 +15,9 @@ public class SavingAccountService : GenericServices<string, SavingAccount, Savin
 {
     private readonly ISavingAccountRepository _savingAccountRepository;
     private readonly ITransactionRepository _transactionRepository;
-    private readonly IAccountServiceForWebApp _accountServiceForWebApp;
+    private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly IMapper _mapper;
-    public SavingAccountService(ISavingAccountRepository repository, IMapper mapper, IAccountServiceForWebApp accountServiceForWebApp, ITransactionRepository transactionRepository) : base(repository, mapper)
+    public SavingAccountService(ISavingAccountRepository repository, IMapper mapper, IBaseAccountService accountServiceForWebApp, ITransactionRepository transactionRepository) : base(repository, mapper)
     {
         _savingAccountRepository = repository;
         _mapper = mapper;
