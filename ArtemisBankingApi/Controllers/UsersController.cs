@@ -3,6 +3,7 @@ using ArtemisBanking.Core.Application.Dtos.SavingAccount;
 using ArtemisBanking.Core.Application.Dtos.User;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Common.Enums;
+using ArtemisBanking.Core.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +15,15 @@ public class UsersController : BaseApiController
 {
     private readonly IAccountServiceForWebApi _accountServiceForWebApi;
     private readonly ISavingAccountService _savingAccountService;
+    private readonly ICommerceRepository _commerceRepository;
     private readonly IMapper _mapper;
 
-    public UsersController(IAccountServiceForWebApi accountServiceForWebApi, IMapper mapper, ISavingAccountService savingAccountService)
+    public UsersController(IAccountServiceForWebApi accountServiceForWebApi, IMapper mapper, ISavingAccountService savingAccountService, ICommerceRepository commerceRepository)
     {
         _accountServiceForWebApi = accountServiceForWebApi;
         _mapper = mapper;
         _savingAccountService = savingAccountService;
+        _commerceRepository = commerceRepository;
     }
 
     [HttpGet]
@@ -167,7 +170,7 @@ public class UsersController : BaseApiController
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateCommerceUser([FromQuery] int commerceId ,[FromBody]CreateApiCommerceDto dto)
+    public async Task<IActionResult> CreateCommerceUser([FromRoute]int commerceId ,[FromBody]CreateApiCommerceDto dto)
     {
         try
         {
@@ -189,10 +192,16 @@ public class UsersController : BaseApiController
                 return Conflict("Este nombre de usuario o email ya existen");
             }
             
-            var commerceIdExists = await _accountServiceForWebApi.ThisCommerceIdExists(commerceId);
+            var commerceExits = _commerceRepository.GetAllQueryable().Any(c => c.Id == commerceId);
+            if (!commerceExits)
+            {
+                return BadRequest("Este comercio no existe");
+            }
+            
+            var commerceIdExists = await _accountServiceForWebApi.ThisCommerceHaveAUserAssociated(commerceId);
             if (commerceIdExists)
             {
-                return Conflict("Este comercio ya esta registrado");
+                return Conflict("Este comercio ya esta registrado a un usuario");
             }
             
             var adminInSessionId = User.FindFirst("uid")?.Value ?? "";
@@ -206,6 +215,7 @@ public class UsersController : BaseApiController
                 UserName = dto.UserName,
                 Password = dto.Password,
                 Role = nameof(Roles.Commerce),
+                CommerceId = commerceId
             };
             
             var createUserResult = await _accountServiceForWebApi.RegisterUser(userToCreate, "", true);
@@ -242,7 +252,7 @@ public class UsersController : BaseApiController
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateUser([FromQuery] string id ,[FromBody] UpdateApiUserDto dto)
+    public async Task<IActionResult> UpdateUser([FromRoute] string id ,[FromBody] UpdateApiUserDto dto)
     {
         try
         {
@@ -269,8 +279,11 @@ public class UsersController : BaseApiController
                 return NotFound();
             }
 
+
             var update = _mapper.Map<UserSaveDto>(dto);
+            update.Id = user.Id;
             update.Role = user.Role;
+            update.CommerceId = user.CommerceId;
             await _accountServiceForWebApi.EditUser(update, "", true);
 
             if (update.Role == nameof(Roles.Client))
@@ -297,7 +310,7 @@ public class UsersController : BaseApiController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> EditUser([FromQuery] string id, [FromBody] ChangeApiUserStatusDto dto)
+    public async Task<IActionResult> EditUser([FromRoute] string id, [FromBody] ChangeApiUserStatusDto dto)
     {
         try
         {
@@ -331,7 +344,7 @@ public class UsersController : BaseApiController
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserApiWithDetailsDto))]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> GetUserWithDetails([FromQuery] string id)
+    public async Task<IActionResult> GetUserWithDetails([FromRoute] string id)
     {
      
         var user =  await _accountServiceForWebApi.GetUserById(id);

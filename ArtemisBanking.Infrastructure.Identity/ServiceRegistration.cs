@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using ArtemisBanking.Core.Application.Interfaces;
+using ArtemisBanking.Core.Domain.Interfaces;
 using ArtemisBanking.Core.Domain.Settings;
 using ArtemisBanking.Infrastructure.Identity.Context;
 using ArtemisBanking.Infrastructure.Identity.Entities;
@@ -80,12 +81,14 @@ namespace ArtemisBanking.Infrastructure.Identity
             
             var userManager =  services.GetRequiredService<UserManager<AppUser>>();
             var roleManager =  services.GetRequiredService<RoleManager<IdentityRole>>();
+            var commerceRepository = services.GetService<ICommerceRepository>();
+            var savingAccountRepository = services.GetService<ISavingAccountRepository>();
             
             await DefaultRoles.SeedAsync(roleManager);
             await DefaultAdminUser.SeedAsync(userManager);
             await DefaultAtmUser.SeedAsync(userManager);
             await DefaultClientUser.SeedAsync(userManager);
-            await DefaultCommerceUser.SeedAsync(userManager);
+            await DefaultCommerceUser.SeedAsync(userManager, commerceRepository, savingAccountRepository);
         }
 
         // Extension method para API con JWT

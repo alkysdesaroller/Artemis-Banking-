@@ -25,7 +25,7 @@ public interface IBaseAccountService
     Task<Result> SetStateOnUser(string userId, bool state);
     Task<bool> ThisEmailExists(string email, string? id = null);
     Task<bool> ThisUsernameExists(string userName, string? id = null);
-    Task<bool> ThisCommerceIdExists(int commerceId);
+    Task<bool> ThisCommerceHaveAUserAssociated(int commerceId);
     Task<Result> ConfirmAccountAsync(string userId, string token);
     
 }

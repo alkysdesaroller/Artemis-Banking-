@@ -581,7 +581,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
     {
         if (!string.IsNullOrWhiteSpace(id))
         {
-            return await _userManager.Users.AnyAsync(u => u.Email == email && u.Id == id);
+            return await _userManager.Users.AnyAsync(u => u.Email == email && u.Id != id);
         }
 
         return await _userManager.Users.AnyAsync(u => u.Email == email);
@@ -591,14 +591,13 @@ namespace ArtemisBanking.Infrastructure.Identity.Services
     {
         if (!string.IsNullOrWhiteSpace(id))
         {
-            return await _userManager.Users.AnyAsync(u => u.UserName == userName && u.Id == id);
+            return await _userManager.Users.AnyAsync(u => u.UserName == userName && u.Id != id);
         }
 
         return await _userManager.Users.AnyAsync(u => u.UserName == userName);
     }
 
-
-    public async Task<bool> ThisCommerceIdExists(int commerceId)
+    public async Task<bool> ThisCommerceHaveAUserAssociated(int commerceId)
     {
         return await _userManager.Users.AnyAsync(u => u.CommerceId == commerceId); ;
     }

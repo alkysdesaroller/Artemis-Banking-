@@ -49,7 +49,6 @@ public class AccountController: BaseApiController
 
     }
     
-    [AllowAnonymous]
     [HttpPost("confirm")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -64,8 +63,7 @@ public class AccountController: BaseApiController
                 return BadRequest(ModelState);
             }
         
-            var userId = User.FindFirst("uid")?.Value;
-            var result = await _accountService.ConfirmAccountAsync(userId, dto.Token);
+            var result = await _accountService.ConfirmAccountAsync(dto.UserId, dto.Token);
 
             if (result.IsFailure)
             {
@@ -122,7 +120,7 @@ public class AccountController: BaseApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetResetToken([FromBody] ResetPasswordApiRequestDto dto)
+    public async Task<IActionResult> ResetToken([FromBody] ResetPasswordApiRequestDto dto)
     {
         try
         {
@@ -132,11 +130,6 @@ public class AccountController: BaseApiController
                 return BadRequest(ModelState);
             }
             
-            var userId = User.FindFirst("uid")?.Value ?? "";
-            if (dto.UserId != userId)
-            {
-                return BadRequest(new { message = "Los usersIds no coinciden" });
-            }
             
             if (dto.Password != dto.ConfirmPassword)
             {
