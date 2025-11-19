@@ -540,7 +540,41 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         }
     }
 
+    public async Task<Result<PaginatedData<TransactionDto>>> GetTransactionsByAccountAsync(string accountNumber, int page, int pageSize)
+    {
+        try
+        {
+            var query = _transactionRepository.GetAllQueryable()
+                .AsNoTracking()
+                .Where(t => t.AccountNumber == accountNumber);
 
+          
+            var totalItems = await query.CountAsync();
+            
+            var transactions = await query
+                .OrderByDescending(t => t.Date)
+                .ThenByDescending(t => t.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            
+            var transactionDtos = _mapper.Map<List<TransactionDto>>(transactions);
+            
+            var paginatedData = new PaginatedData<TransactionDto>(
+                transactionDtos,
+                totalItems,
+                page,
+                pageSize);
+
+            return Result<PaginatedData<TransactionDto>>.Ok(paginatedData);
+        }
+        catch (Exception ex)
+        {
+            return Result<PaginatedData<TransactionDto>>.Fail(
+                $"Error al obtener las transacciones: {ex.Message}");
+        }
+    }
+    
     public async Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto)
     {
         var loan = await _loanRepository.GetAllQueryable()

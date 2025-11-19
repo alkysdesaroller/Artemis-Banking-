@@ -18,7 +18,7 @@ public interface ISavingAccountService : IGenericService<string, SavingAccountDt
     Task<Result> DepositToAccountAsync(string accountNumber, decimal amount);
     Task<Result> WithdrawFromAccount(string accountNumber, decimal amount);
     Task<Result> CancelAccountAsync(string accountNumber, string adminWhoCanceled);
-
+    Task<Result<PaginatedData<SavingAccountDto>>> GetSavingAccountsForApiAsync(SavingApiAccountDto filters);
     Task<Result<SavingAccountDto>> CreateNewSavingAccountCard(string adminWhoApproved, string clientId,
         decimal initialAmount, bool isPrincipal = false);
 }

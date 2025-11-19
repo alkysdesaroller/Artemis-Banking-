@@ -28,6 +28,7 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
     Task<Result<TransactionDto>> ProcessTellerCreditCardPaymentAsync(TellerCreditCardPaymentDto dto);
     Task<Result<TransactionDto>> ProcessTellerLoanPaymentAsync(TellerLoanPaymentDto dto);
     Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId);
+    Task<Result<PaginatedData<TransactionDto>>> GetTransactionsByAccountAsync(string accountNumber, int page, int pageSize);
 
 
     /*
@@ -49,4 +50,5 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
      *  Los metodos de las transacciones deberan de llamar a los metodos de otros servicios para hacer su labor. Transacciones
      * es el servicio central de los cajeros y clientes.
      */
+
 }

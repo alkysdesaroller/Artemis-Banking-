@@ -2,6 +2,7 @@
 using ArtemisBanking.Core.Application.Dtos.SavingAccount;
 using ArtemisBanking.Core.Application.Dtos.Transaction;
 using ArtemisBanking.Core.Application.Dtos.User;
+using ArtemisBanking.Core.Application.Enums;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Core.Domain.Entities;
@@ -243,8 +244,107 @@ public async Task<Result> CancelAccountAsync(string accountNumber, string adminW
     return Result.Ok();
 }
 
+public async Task<Result<PaginatedData<SavingAccountDto>>> GetSavingAccountsForApiAsync(SavingApiAccountDto filters)
+{
+    try
+    {
+        const int pageSize = 20; // Tamaño de página fijo según especificación
+        
+        // Query base
+        var query = _savingAccountRepository.GetAllQueryable().AsNoTracking();
+        
+        // Filtrar por cédula si se proporciona
+        if (!string.IsNullOrEmpty(filters.Cedula))
+        {
+            var clientResult = await _accountServiceForWebApp.GetByIdentityCardNumber(filters.Cedula);
+            
+            if (clientResult.IsFailure || clientResult.Value is null)
+            {
+                return Result<PaginatedData<SavingAccountDto>>.Ok(
+                    new PaginatedData<SavingAccountDto>([], 0, filters.Page, pageSize));
+            }
+            
+            query = query.Where(s => s.ClientId == clientResult.Value.Id);
+        }
+        
+        // Filtrar por estado si se proporciona
+        if (filters.State.HasValue)
+        {
+            bool isActive = filters.State.Value switch
+            {
+                StateAccountApi.Active => true,
+                StateAccountApi.Cancelled => false,
+                _ => throw new ArgumentException("Estado inválido")
+            };
+            
+            query = query.Where(s => s.IsActive == isActive);
+        }
+        
+        // Filtrar por tipo si se proporciona
+        if (filters.Type!.HasValue)
+        {
+            bool isPrincipal = filters.Type!.Value switch
+            {
+                TypeAccountApi.Primary => true,
+                TypeAccountApi.Secondary => false,
+                _ => throw new ArgumentException("Tipo inválido")
+            };
+            
+            query = query.Where(s => s.IsPrincipalAccount == isPrincipal);
+        }
+        
+        // Obtener IDs únicos de clientes para cargar información
+        var clientIds = await query.Select(s => s.ClientId).Distinct().ToListAsync();
+        var usersResult = await _accountServiceForWebApp.GetUsersByIds(clientIds);
+        
+        if (usersResult.IsFailure || usersResult.Value is null)
+        {
+            return Result<PaginatedData<SavingAccountDto>>.Fail(
+                "Error al obtener información de los clientes");
+        }
+        
+        var usersDict = usersResult.Value.ToDictionary(user => user.Id, user => user);
+        
+        // Obtener total de items ANTES de paginar
+        var totalItems = await query.CountAsync();
+        
+        // Aplicar paginación y ordenamiento
+        var items = await query
+            .OrderByDescending(s => s.IsActive)
+            .ThenByDescending(s => s.CreatedAt)
+            .Skip((filters.Page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(s => new SavingAccountDto
+            {
+                Id = s.Id,
+                ClientId = s.ClientId,
+                IsActive = s.IsActive,
+                Balance = s.Balance,
+                CreatedAt = s.CreatedAt,
+                AssignedByUserId = s.AssignedByUserId,
+                IsPrincipalAccount = s.IsPrincipalAccount,
+                Client = usersDict.ContainsKey(s.ClientId) ? usersDict[s.ClientId] : null
+            })
+            .ToListAsync();
+        
+        // Crear resultado paginado
+        var paginatedData = new PaginatedData<SavingAccountDto>(
+            items, 
+            totalItems, 
+            filters.Page, 
+            pageSize);
+        
+        return Result<PaginatedData<SavingAccountDto>>.Ok(paginatedData);
+    }
+    catch (Exception ex)
+    {
+        return Result<PaginatedData<SavingAccountDto>>.Fail(
+            $"Error al obtener las cuentas de ahorro: {ex.Message}");
+    }
+}
 
-    public async Task<Result<SavingAccountDto>> CreateNewSavingAccountCard(string adminWhoApproved, string clientId, decimal initialAmount, bool isPrincipal = false)
+
+public async Task<Result<SavingAccountDto>> CreateNewSavingAccountCard(string adminWhoApproved, string clientId, decimal initialAmount, bool isPrincipal = false)
     {
         var savingAccount = new SavingAccountDto
         {

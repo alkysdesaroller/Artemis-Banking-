@@ -11,21 +11,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace ArtemisBankingApi.Controllers;
 
 [Authorize(Roles = $"{nameof(Roles.Admin)}")]
-public class UsersController : BaseApiController
+public class UsersController(
+    IAccountServiceForWebApi accountServiceForWebApi,
+    IMapper mapper,
+    ISavingAccountService savingAccountService,
+    ICommerceRepository commerceRepository)
+    : BaseApiController
 {
-    private readonly IAccountServiceForWebApi _accountServiceForWebApi;
-    private readonly ISavingAccountService _savingAccountService;
-    private readonly ICommerceRepository _commerceRepository;
-    private readonly IMapper _mapper;
-
-    public UsersController(IAccountServiceForWebApi accountServiceForWebApi, IMapper mapper, ISavingAccountService savingAccountService, ICommerceRepository commerceRepository)
-    {
-        _accountServiceForWebApi = accountServiceForWebApi;
-        _mapper = mapper;
-        _savingAccountService = savingAccountService;
-        _commerceRepository = commerceRepository;
-    }
-
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaginatedData<UserDto>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,7 +34,7 @@ public class UsersController : BaseApiController
 
             var userId = User.FindFirst("uid")?.Value ?? "";
             var users =
-                await _accountServiceForWebApi.GetAllTheUsersThatArentCommercesPaginated(
+                await accountServiceForWebApi.GetAllTheUsersThatArentCommercesPaginated(
                     userId,
                     dto.Page,
                     dto.PageSize,
@@ -72,7 +64,7 @@ public class UsersController : BaseApiController
 
             var userId = User.FindFirst("uid")?.Value ?? "";
 
-            var usersCommercesResult = await _accountServiceForWebApi.GetAllUserOfRole(Roles.Commerce, false);
+            var usersCommercesResult = await accountServiceForWebApi.GetAllUserOfRole(Roles.Commerce, false);
             if (usersCommercesResult.IsFailure)
             {
                 return BadRequest(usersCommercesResult.GeneralError);
@@ -113,8 +105,8 @@ public class UsersController : BaseApiController
                 return BadRequest("No se pueden crear comercios desde este endpoint");
             }
             
-            var userNameExists = await _accountServiceForWebApi.ThisUsernameExists(dto.UserName);
-            var userEmailExists = await _accountServiceForWebApi.ThisEmailExists(dto.Email);
+            var userNameExists = await accountServiceForWebApi.ThisUsernameExists(dto.UserName);
+            var userEmailExists = await accountServiceForWebApi.ThisEmailExists(dto.Email);
             if (userEmailExists || userNameExists)
             {
                 return Conflict("Este nombre de usuario o email ya existen");
@@ -133,7 +125,7 @@ public class UsersController : BaseApiController
                 Role = dto.Role.ToString()
             };
             
-            var createUserResult = await _accountServiceForWebApi.RegisterUser(userToCreate, "", true);
+            var createUserResult = await accountServiceForWebApi.RegisterUser(userToCreate, "", true);
 
             if (createUserResult.IsFailure)
             {
@@ -144,7 +136,7 @@ public class UsersController : BaseApiController
             if (dto.Role == Roles.Client)
             {
                 var accountResult =
-                    await _savingAccountService.CreateNewSavingAccountCard(
+                    await savingAccountService.CreateNewSavingAccountCard(
                         adminInSessionId,
                         createdUser.Id,
                         dto.InitialAmount ?? 0,
@@ -185,20 +177,20 @@ public class UsersController : BaseApiController
             }
 
             
-            var userNameExists = await _accountServiceForWebApi.ThisUsernameExists(dto.UserName);
-            var userEmailExists = await _accountServiceForWebApi.ThisUsernameExists(dto.Email);
+            var userNameExists = await accountServiceForWebApi.ThisUsernameExists(dto.UserName);
+            var userEmailExists = await accountServiceForWebApi.ThisUsernameExists(dto.Email);
             if (userEmailExists || userNameExists)
             {
                 return Conflict("Este nombre de usuario o email ya existen");
             }
             
-            var commerceExits = _commerceRepository.GetAllQueryable().Any(c => c.Id == commerceId);
+            var commerceExits = commerceRepository.GetAllQueryable().Any(c => c.Id == commerceId);
             if (!commerceExits)
             {
                 return BadRequest("Este comercio no existe");
             }
             
-            var commerceIdExists = await _accountServiceForWebApi.ThisCommerceHaveAUserAssociated(commerceId);
+            var commerceIdExists = await accountServiceForWebApi.ThisCommerceHaveAUserAssociated(commerceId);
             if (commerceIdExists)
             {
                 return Conflict("Este comercio ya esta registrado a un usuario");
@@ -218,7 +210,7 @@ public class UsersController : BaseApiController
                 CommerceId = commerceId
             };
             
-            var createUserResult = await _accountServiceForWebApi.RegisterUser(userToCreate, "", true);
+            var createUserResult = await accountServiceForWebApi.RegisterUser(userToCreate, "", true);
             if (createUserResult.IsFailure)
             {
                 return BadRequest400WithErrorMessagesFromResult(createUserResult);
@@ -226,7 +218,7 @@ public class UsersController : BaseApiController
 
             var createdUser = createUserResult.Value!;
 
-            var accountResult = await _savingAccountService.CreateNewSavingAccountCard(
+            var accountResult = await savingAccountService.CreateNewSavingAccountCard(
                 adminInSessionId,
                 createdUser.Id,
                 dto.InitialAmount,
@@ -266,34 +258,34 @@ public class UsersController : BaseApiController
                 return BadRequest(ModelState);
             }
             
-            var userNameExists = await _accountServiceForWebApi.ThisUsernameExists(dto.UserName, id);
-            var userEmailExists = await _accountServiceForWebApi.ThisUsernameExists(dto.Email, id);
+            var userNameExists = await accountServiceForWebApi.ThisUsernameExists(dto.UserName, id);
+            var userEmailExists = await accountServiceForWebApi.ThisUsernameExists(dto.Email, id);
             if (userEmailExists || userNameExists)
             {
                 return Conflict("Este nombre de usuario o email ya existen");
             }
 
-            var user = await _accountServiceForWebApi.GetUserById(id);
+            var user = await accountServiceForWebApi.GetUserById(id);
             if (user is null)
             {
                 return NotFound();
             }
 
 
-            var update = _mapper.Map<UserSaveDto>(dto);
+            var update = mapper.Map<UserSaveDto>(dto);
             update.Id = user.Id;
             update.Role = user.Role;
             update.CommerceId = user.CommerceId;
-            await _accountServiceForWebApi.EditUser(update, "", true);
+            await accountServiceForWebApi.EditUser(update, "", true);
 
             if (update.Role == nameof(Roles.Client))
             {
-                var mainAccountResult = await _savingAccountService.GetMainAccountByUserIdAsync(id);
+                var mainAccountResult = await savingAccountService.GetMainAccountByUserIdAsync(id);
                 if (mainAccountResult.IsFailure)
                 {
                     return BadRequest400WithErrorMessagesFromResult(mainAccountResult);
                 }
-                await _savingAccountService.DepositToAccountAsync(mainAccountResult.Value!.Id, dto.AdditionalAmount ?? 0);
+                await savingAccountService.DepositToAccountAsync(mainAccountResult.Value!.Id, dto.AdditionalAmount ?? 0);
             }
             
             return NoContent();
@@ -326,13 +318,13 @@ public class UsersController : BaseApiController
                 return Forbid();
             }
             
-            var user = await _accountServiceForWebApi.GetUserById(id);
+            var user = await accountServiceForWebApi.GetUserById(id);
             if (user is null)
             {
                 return NotFound();
             }
 
-            await _accountServiceForWebApi.SetStateOnUser(id, dto.Status);
+            await accountServiceForWebApi.SetStateOnUser(id, dto.Status);
             return NoContent();
         }
         catch (Exception e)
@@ -347,12 +339,12 @@ public class UsersController : BaseApiController
     public async Task<IActionResult> GetUserWithDetails([FromRoute] string id)
     {
      
-        var user =  await _accountServiceForWebApi.GetUserById(id);
+        var user =  await accountServiceForWebApi.GetUserById(id);
         if (user is null)
         {
             return NotFound();
         }
-        var mainAccount = await _savingAccountService.GetMainAccountByUserIdAsync(id);
+        var mainAccount = await savingAccountService.GetMainAccountByUserIdAsync(id);
         var userDetails = new UserApiWithDetailsDto
         {
             Id = user.Id,
