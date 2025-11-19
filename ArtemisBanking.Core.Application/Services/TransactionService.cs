@@ -538,7 +538,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             // Crear la transacción
             var transaction = new Transaction
             {
-                Amount = dto.Amount,
+                Amount = moneyUsedToPay,
                 Type = TransactionType.Debit,
                 Origin = dto.SourceAccountNumber, // Cuenta de donde se paga
                 Beneficiary = dto.LoanNumber, // Préstamo que se paga
@@ -567,6 +567,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 Variables =
                 {
                     ["LoanNumber"] = loan.Id[^4..],
+                    ["AccountLast4"] = sourceAccount.Id[^4..],
                     ["Amount"] = moneyUsedToPay.ToString("N2"),
                     ["Date"] = DateTime.Now.ToShortDateString(),
                     ["Time"] = DateTime.Now.ToShortTimeString()

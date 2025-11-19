@@ -1,10 +1,10 @@
 ﻿using ArtemisBanking.Core.Application.Dtos.Transaction.Teller;
 using ArtemisBanking.Core.Application.Interfaces;
+using ArtemisBanking.Core.Application.ViewModels.Loan;
 using ArtemisBanking.Core.Application.ViewModels.Teller;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Extensions;
 using ArtemisBanking.Infrastructure.Identity.Entities;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,37 +19,34 @@ public class LoanPaymentController : Controller
     private readonly ISavingAccountService _savingAccountService;
     private readonly ILoanService _loanService;
     private readonly UserManager<AppUser> _userManager;
-    private readonly IMapper _mapper;
 
     public LoanPaymentController(
         ITransactionService transactionService,
         ISavingAccountService savingAccountService,
         ILoanService loanService,
-        UserManager<AppUser> userManager,
-        IMapper mapper)
+        UserManager<AppUser> userManager)
     {
         _transactionService = transactionService;
         _savingAccountService = savingAccountService;
         _loanService = loanService;
         _userManager = userManager;
-        _mapper = mapper;
     }
 
+    // PASO 1: Página inicial
     public IActionResult Index()
     {
         return View(new LoanPaymentViewModel());
     }
 
+    // PASO 2: Validar y mostrar pantalla de confirmación previa
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(LoanPaymentViewModel model)
     {
         if (!ModelState.IsValid)
-        {
             return View(model);
-        }
 
-        // Verificar que la cuenta origen existe
+        // Verificar cuenta
         var accountResult = await _savingAccountService.GetByIdAsync(model.SourceAccountNumber);
         if (accountResult.IsFailure || accountResult.Value == null)
         {
@@ -60,18 +57,17 @@ public class LoanPaymentController : Controller
         var account = accountResult.Value;
         if (!account.IsActive)
         {
-            ModelState.AddModelError("", "La cuenta origen especificada está inactiva.");
+            ModelState.AddModelError("", "La cuenta origen está inactiva.");
             return View(model);
         }
 
-        // Verificar que hay suficiente saldo
         if (account.Balance < model.Amount)
         {
-            ModelState.AddModelError("", "La cuenta no tiene suficiente saldo para realizar este pago.");
+            ModelState.AddModelError("", "Saldo insuficiente en la cuenta para realizar el pago.");
             return View(model);
         }
 
-        // Verificar que el préstamo existe
+        // Verificar préstamo
         var loanResult = await _loanService.GetByIdAsync(model.LoanNumber);
         if (loanResult.IsFailure || loanResult.Value == null)
         {
@@ -79,52 +75,57 @@ public class LoanPaymentController : Controller
             return View(model);
         }
 
-        // Obtener el ID del cajero actual
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            ModelState.AddModelError("", "No se pudo identificar al cajero.");
-            return View(model);
-        }
+        var loan = loanResult.Value;
 
-        // Crear el DTO para el pago de préstamo
-        var paymentDto = new TellerLoanPaymentDto
+        // Obtener nombre del dueño del préstamo
+        var client = await _userManager.FindByIdAsync(loan.ClientId);
+        var clientName = client != null ? $"{client.FirstName} {client.LastName}" : "Desconocido";
+
+        // Preparar modelo de confirmación previa
+        var confirmVm = new ConfirmLoanPaymentViewModel
         {
-            SourceAccountNumber = model.SourceAccountNumber,
-            LoanNumber = model.LoanNumber,
-            Amount = model.Amount,
-            TellerId = user.Id
+            Payment = new LoanPaymentViewModel
+            {
+                SourceAccountNumber = model.SourceAccountNumber,
+                LoanNumber = model.LoanNumber,
+                Amount = model.Amount,
+                Description = model.Description
+            },
+            LoanOwnerName = clientName
         };
 
-        // Procesar el pago
-        var result = await _transactionService.ProcessTellerLoanPaymentAsync(paymentDto);
+        return View("Confirm", confirmVm);
+    }
+
+    // PASO 3: Procesar el pago del préstamo
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProcessPayment(ConfirmLoanPaymentViewModel model)
+    {
+        var teller = await _userManager.GetUserAsync(User);
+        if (teller == null)
+        {
+            ModelState.AddModelError("", "No se pudo identificar al cajero.");
+            return View("Confirm", model);
+        }
+
+        var dto = new TellerLoanPaymentDto
+        {
+            SourceAccountNumber = model.Payment.SourceAccountNumber,
+            LoanNumber = model.Payment.LoanNumber,
+            Amount = model.Payment.Amount,
+            TellerId = teller.Id,
+        };
+
+        var result = await _transactionService.ProcessTellerLoanPaymentAsync(dto);
 
         if (result.IsFailure)
         {
             this.SendValidationErrorMessages(result);
-            return View(model);
+            return View("Confirm", model);
         }
 
-        // Redirigir a la página de confirmación
-        return RedirectToAction("Confirm", new { transactionId = result.Value.Id });
+        return RedirectToRoute(new { controller = "Withdrawal", action = "Index" });
     }
 
-    public async Task<IActionResult> Confirm(int transactionId)
-    {
-        var transactionResult = await _transactionService.GetByIdAsync(transactionId);
-        if (transactionResult.IsFailure || transactionResult.Value == null)
-        {
-            return RedirectToAction("Index");
-        }
-
-        var viewModel = new TransactionConfirmationViewModel
-        {
-            Transaction = transactionResult.Value,
-            TransactionType = "Pago de Préstamo",
-            AccountNumber = transactionResult.Value.Origin,
-            LoanNumber = transactionResult.Value.Beneficiary
-        };
-
-        return View(viewModel);
-    }
 }

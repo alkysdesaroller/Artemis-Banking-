@@ -215,9 +215,15 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
                 TermMonths = l.TermMonths,
                 InstallmentsCount = l.LoanInstallments.Count(),
                 InstallmentsPaidCount = l.LoanInstallments.Count(installment => installment.IsPaid),
-                RemainingBalanceToPay = l.Amount - (l.LoanInstallments
-                    .Where(inst => inst.IsPaid)
-                    .Sum(inst => (decimal?)inst.Amount) ?? 0),
+                RemainingBalanceToPay = Math.Max( // Esto se quedaba en -1, tuve que poner esto para evitarlo
+                    0,
+                    Math.Round(
+                        l.Amount - l.LoanInstallments
+                            .Where(inst => inst.IsPaid)
+                            .Sum(inst => inst.CapitalAmount),
+                        2
+                    )
+                ),
                 AnualRate = l.AnualRate,
                 IsDue = l.IsDue,
                 Client = usersDict[l.ClientId],
@@ -329,7 +335,6 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
             {
                 // pago parcial
                 installment.PaidAmount += remaining;
-                installment.Amount -= remaining;
                 moneyUsed += remaining;
                 remaining = 0;
             }
