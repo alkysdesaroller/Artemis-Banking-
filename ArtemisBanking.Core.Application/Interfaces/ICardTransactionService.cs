@@ -9,4 +9,5 @@ public interface ICardTransactionService : IGenericService<int, CardTransactionD
     Task<Result<CreditCardDto>> GetByCreditCardIdAsync(string cardNumber);
     Task<Result<List<CardTransactionDto>>> GetByCommerceIdAsync(int commerceId, int page, int pageSize);
     Task<Result<CardTransactionDto>> ProcessCardTransactionAsync(ProcessCardTransactionDto dto, int commerceId);
+    Task<Result> ProcessPaymentAsync(ProcessCardTransactionDto dto, int commerceId);
 }
