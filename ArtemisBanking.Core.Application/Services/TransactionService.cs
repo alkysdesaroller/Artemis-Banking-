@@ -25,12 +25,14 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
     private readonly IEmailService _emailService;
     private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly ISavingAccountService _savingAccountService;
+    private readonly ICreditCardService _creditCardService;
+    private readonly ILoanService _loanService;
     private readonly IMapper _mapper;
 
     public TransactionService(ITransactionRepository transactionRepository, IMapper mapper,
         ICreditCardRepository creditCardRepository, ISavingAccountRepository accountRepository,
         ILoanRepository loanRepository, IEmailService emailService, IBaseAccountService accountServiceForWebApp,
-        ISavingAccountService savingAccountService) : base(
+        ISavingAccountService savingAccountService, ICreditCardService creditCardService, ILoanService loanService) : base(
         transactionRepository, mapper)
     {
         _transactionRepository = transactionRepository;
@@ -41,6 +43,8 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         _emailService = emailService;
         _accountServiceForWebApp = accountServiceForWebApp;
         _savingAccountService = savingAccountService;
+        _creditCardService = creditCardService;
+        _loanService = loanService;
     }
 
     public async Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber)
@@ -125,6 +129,26 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
             var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
+            
+            var client = await _accountServiceForWebApp.GetUserById(account.ClientId);
+            if (client == null)
+            {
+                return Result<TransactionDto>.Fail("No se encontró al cliente");
+            }
+            
+            await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+            {
+                Type = EmailType.Deposit,
+                To = client.Email,
+                Variables =
+                {
+                    ["AccountLast4"] = account.Id[^4..],
+                    ["Amount"] = dto.Amount.ToString("N2"),
+                    ["Date"] = DateTime.Now.ToShortDateString(),
+                    ["Time"] = DateTime.Now.ToShortTimeString()
+                }
+            });
+            
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -181,6 +205,25 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
             var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
+            
+            var client = await _accountServiceForWebApp.GetUserById(account.ClientId);
+            if (client == null)
+            {
+                return Result<TransactionDto>.Fail("No se encontró al cliente");
+            }
+            
+            await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+            {
+                Type = EmailType.Withdraw,
+                To = client.Email,
+                Variables =
+                {
+                    ["AccountLast4"] = account.Id[^4..],
+                    ["Amount"] = dto.Amount.ToString("N2"),
+                    ["Date"] = DateTime.Now.ToShortDateString(),
+                    ["Time"] = DateTime.Now.ToShortTimeString()
+                }
+            });
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -254,7 +297,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             }
 
             // Crear la transacción
-            var transaction = new Transaction
+            var transactionDebit = new Transaction
             {
                 Amount = dto.Amount,
                 Type = TransactionType.Debit,
@@ -267,8 +310,61 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 SubType = TransactionSubType.ThirdPartyTransfer // Tipo de transacción: Transferencia a terceros
             };
             
-            var savedTransaction = await _transactionRepository.AddAsync(transaction);
+            var transactionCredit = new Transaction
+            {
+                Amount = dto.Amount,
+                Type = TransactionType.Credit,
+                Origin = dto.SourceAccountNumber, // Cuenta origen de la transferencia
+                Beneficiary = dto.DestinationAccountNumber, // Cuenta destino de la transferencia
+                Date = DateTime.Now,
+                Status = TransactionStatus.Approved,
+                AccountNumber = dto.DestinationAccountNumber, // La cuenta afectada (origen, de donde sale el dinero)
+                CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
+                SubType = TransactionSubType.ThirdPartyTransfer // Tipo de transacción: Transferencia a terceros
+            };
+
+            var savedTransaction = await _transactionRepository.AddAsync(transactionDebit);
             var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
+            
+            
+            var clientSource = await _accountServiceForWebApp.GetUserById(sourceAccount.ClientId);
+            if (clientSource == null)
+            {
+                return Result<TransactionDto>.Fail("No se encontró al cliente");
+            }
+            
+            var clientDestiny = await _accountServiceForWebApp.GetUserById(destinationAccount.ClientId);
+            if (clientDestiny == null)
+            {
+                return Result<TransactionDto>.Fail("No se encontró al cliente");
+            }
+            
+            await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+            {
+                Type = EmailType.ExpressTransferSender,
+                To = clientSource.Email,
+                Variables =
+                {
+                    ["DestAccountLast4"] = destinationAccount.Id[^4..],
+                    ["Amount"] = dto.Amount.ToString("N2"),
+                    ["Date"] = DateTime.Now.ToShortDateString(),
+                    ["Time"] = DateTime.Now.ToShortTimeString()
+               }
+            });
+            
+            await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+            {
+                Type = EmailType.ExpressTransferReceiver,
+                To = clientDestiny.Email,
+                Variables =
+                {
+                    ["OriginAccountLast4"] = sourceAccount.Id[^4..],
+                    ["Amount"] = dto.Amount.ToString("N2"),
+                    ["Date"] = DateTime.Now.ToShortDateString(),
+                    ["Time"] = DateTime.Now.ToShortTimeString()
+                }
+            });
+
 
             return Result<TransactionDto>.Ok(transactionDto);
         }
@@ -312,9 +408,11 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             {
                 return Result<TransactionDto>.Fail("La tarjeta de crédito especificada está inactiva.");
             }
+            
+            var amountToPay = Math.Min(dto.Amount, creditCard.Balance);
 
             // Actualizar balance de cuenta origen (disminuir)
-            var sourceNewBalance = sourceAccount.Balance - dto.Amount;
+            var sourceNewBalance = sourceAccount.Balance - amountToPay;
             var sourceUpdateResult =
                 await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
             if (sourceUpdateResult.IsFailure)
@@ -324,16 +422,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             }
 
             // Actualizar balance de la tarjeta de crédito (disminuir deuda)
-            var creditCardNewBalance = creditCard.Balance - dto.Amount;
+            var creditCardNewBalance = creditCard.Balance - amountToPay;
             if (creditCardNewBalance < 0)
             {
                 creditCardNewBalance = 0; // No puede ser negativo
             }
-
-            var creditCardDto = _mapper.Map<CreditCardDto>(creditCard);
-            creditCardDto.Balance = creditCardNewBalance;
-            // Nota: Necesitarías un servicio de tarjeta de crédito para actualizar el balance
-            // Por ahora, solo registramos la transacción
+            
+            await _creditCardService.UpdateBalanceAsync(creditCard.CardNumber, creditCardNewBalance);
 
             // Crear la transacción
             var transaction = new Transaction
@@ -348,6 +443,28 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 CreatedById = dto.TellerId, // Quien hizo la transacción (el cajero)
                 SubType = TransactionSubType.CreditCardPayment // Tipo de transacción: Pago de tarjeta de crédito
             };
+            
+            
+            var client = await _accountServiceForWebApp.GetUserById(sourceAccount.ClientId);
+            if (client == null)
+            {
+                return Result<TransactionDto>.Fail("No se encontró al cliente");
+            }
+            
+            await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+            {
+                Type = EmailType.CreditCardPayment,
+                To = client.Email,
+                Variables =
+                {
+                    ["CardLast4"] = creditCard.CardNumber[^4..],
+                    ["AccountLast4"] = sourceAccount.Id[^4..],
+                    ["Amount"] = dto.Amount.ToString("N2"),
+                    ["Date"] = DateTime.Now.ToShortDateString(),
+                    ["Time"] = DateTime.Now.ToShortTimeString()
+                }
+            });
+            
 
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
             var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
@@ -395,8 +512,17 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 return Result<TransactionDto>.Fail("El préstamo especificado ya está completado.");
             }
 
+            var moneyUsedToPayResult = await _loanService.PayAsync(loan.Id, dto.Amount);
+
+            if (moneyUsedToPayResult.IsFailure)
+            {
+                Result<TransactionDto>.Fail(moneyUsedToPayResult.GeneralError!);
+            }
+
+            var moneyUsedToPay = moneyUsedToPayResult.Value!;
+
             // Actualizar balance de cuenta origen (disminuir)
-            var sourceNewBalance = sourceAccount.Balance - dto.Amount;
+            var sourceNewBalance = sourceAccount.Balance - moneyUsedToPay;
             var sourceUpdateResult =
                 await _savingAccountService.UpdateBalanceAsync(dto.SourceAccountNumber, sourceNewBalance);
             if (sourceUpdateResult.IsFailure)
@@ -422,8 +548,29 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 SubType = TransactionSubType.LoanPayment // Tipo de transacción: Pago de préstamo
             };
 
+            
             var savedTransaction = await _transactionRepository.AddAsync(transaction);
             var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
+                
+                
+            var client = await _accountServiceForWebApp.GetUserById(sourceAccount.ClientId);
+            if (client == null)
+            {
+                return Result<TransactionDto>.Fail("No se encontró al cliente");
+            }
+            
+            await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+            {
+                Type = EmailType.LoanPayment,
+                To = client.Email,
+                Variables =
+                {
+                    ["LoanNumber"] = loan.Id[^4..],
+                    ["Amount"] = moneyUsedToPay.ToString("N2"),
+                    ["Date"] = DateTime.Now.ToShortDateString(),
+                    ["Time"] = DateTime.Now.ToShortTimeString()
+                }
+            });
 
             return Result<TransactionDto>.Ok(transactionDto);
         }

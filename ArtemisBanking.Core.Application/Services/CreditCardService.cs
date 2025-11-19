@@ -154,6 +154,66 @@ public class CreditCardService : GenericServices<string, CreditCard, CreditCardD
         return Result<decimal>.Ok(totalDebt);
     }
 
+    public async Task<Result> UpdateBalanceAsync(string cardNumber, decimal amount)
+    {
+        var card = await _creditCardRepository.GetByIdAsync(cardNumber);
+        if (card is null)
+        {
+            return Result.Fail("No se encontró una tarjeta con ese numero");
+        }
+
+        if (!card.IsActive)
+        {
+            return Result.Fail("Esta tarjeta se encuentra cancelada");
+        }
+
+        card.Balance = amount;
+        await _creditCardRepository.UpdateAsync(card.CardNumber, card);
+        return Result.Ok();
+    }
+
+    
+    // cuando se paga una tarjeta, se reduce el balance de la misma
+    public async Task<Result> ReduceBalance(string cardNumber, decimal amount)
+    {
+        
+        var card = await _creditCardRepository.GetByIdAsync(cardNumber);
+        if (card is null)
+        {
+            return Result.Fail("No se encontró una tarjeta con ese numero");
+        }
+
+        if (!card.IsActive)
+        {
+            return Result.Fail("Esta tarjeta se encuentra cancelada");
+        }
+
+        card.Balance += amount;
+        await _creditCardRepository.UpdateAsync(card.CardNumber, card);
+        return Result.Ok();
+    }
+
+    
+    // Cuando se usa una tarjeta, se aumenta el balance de la misma.
+    public async Task<Result> IncreaseBalance(string cardNumber, decimal amount)
+    {
+        
+        var card = await _creditCardRepository.GetByIdAsync(cardNumber);
+        if (card is null)
+        {
+            return Result.Fail("No se encontró una tarjeta con ese numero");
+        }
+
+        if (!card.IsActive)
+        {
+            return Result.Fail("Esta tarjeta se encuentra cancelada");
+        }
+
+        card.Balance -= amount;
+        await _creditCardRepository.UpdateAsync(card.CardNumber, card);
+        return Result.Ok();
+    }
+
     public async Task<Result> UpdateLimitAsync(string creditCardNumber, decimal newLimit)
     {
         var card = await _creditCardRepository.GetByIdAsync(creditCardNumber);

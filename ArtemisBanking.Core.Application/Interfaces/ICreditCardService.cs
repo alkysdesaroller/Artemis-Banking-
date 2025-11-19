@@ -16,5 +16,12 @@ public interface ICreditCardService : IGenericService<string, CreditCardDto>
     Task<PaginatedData<CreditCardDto>> GetCreditCardsPagedAsync(int page, int pageSize, string? identityCardNumber = null, bool? isActive = null);
     Task<Result<CreditCardDto>> CreateNewCreditCard(string adminWhoApproved, string clientId, decimal creditLimit);
     Task<Result<decimal>> CalculateDebtOfThisCreditCardAsync(string creditCardNumber);
+    
+    Task<Result> UpdateBalanceAsync(string cardNumber, decimal amount);
+    // cuando se paga una tarjeta, se reduce el balance de la misma
+    Task<Result> ReduceBalance(string cardNumber, decimal amount);
+    
+    // Cuando se usa una tarjeta, se aumenta el balance de la misma.
+    Task<Result> IncreaseBalance(string accountNumber, decimal amount);
 
 }

@@ -15,4 +15,5 @@ public interface ILoanService : IGenericService<string, LoanDto>
     Task<Result<LoanDto>> GetAmortizationTableAsync(string loanId);
     Task<Result<LoanDto>> UpdateInterestRateAsync(string loanId, decimal newRate);
     //Task<Result<bool>> IsHighRiskClientAsync(string userId, decimal newLoanAmount);
+    Task<Result<decimal>> PayAsync(string loanId, decimal amount);
 }

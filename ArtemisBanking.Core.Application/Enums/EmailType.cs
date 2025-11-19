@@ -16,4 +16,7 @@ public enum EmailType
     
     BeneficiaryTransferSender,
     BeneficiaryTransferReceiver,
+    
+    Deposit,
+    Withdraw
 }

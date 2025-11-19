@@ -17,6 +17,7 @@ namespace ArtemisBanking.Core.Application.Services;
 public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService 
 {
     private readonly ILoanRepository _loanRepository;
+    private readonly ILoanInstallmentRepository _loanInstallmentRepository;
 
     private readonly IEmailService _emailService;
     private readonly ISavingAccountService _savingAccountService;
@@ -28,7 +29,7 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
 
     public LoanService(ILoanRepository repository, IMapper mapper, IBaseAccountService accountServiceForWebApp,
         IRiskService riskService, ILoanInstallmentService loanInstallmentService,
-        ITransactionService transactionService, ISavingAccountService savingAccountService, IEmailService emailService) : base(repository, mapper)
+        ITransactionService transactionService, ISavingAccountService savingAccountService, IEmailService emailService, ILoanInstallmentRepository loanInstallmentRepository) : base(repository, mapper)
     {
         _loanRepository = repository;
         _mapper = mapper;
@@ -38,6 +39,7 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         _transactionService = transactionService;
         _savingAccountService = savingAccountService;
         _emailService = emailService;
+        _loanInstallmentRepository = loanInstallmentRepository;
     }
 
     public override async Task<Result<LoanDto>> AddAsync(LoanDto dtoModel)
@@ -239,8 +241,75 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         return Result<LoanDto>.Ok(updateResult.Value!);
     }
 
+    // Paga la cantidad maxima de cuotas posibles con el monto dado y devuelve la cantidad REAL de dinero usado del monto
+    public async Task<Result<decimal>> PayAsync(string loanId, decimal amount)
+    {
+        var loan = await _loanRepository.GetByIdAsync(loanId);
+        if (loan is null)
+            return Result<decimal>.Fail("Ese préstamo no existe");
 
-    
+        if (loan.Completed)
+            return Result<decimal>.Fail("El préstamo ya está pagado");
+
+        var installments = await _loanInstallmentRepository.GetAllQueryable()
+            .Where(inst => inst.LoanId == loanId && !inst.IsPaid)
+            .OrderBy(inst => inst.PaymentDay)  
+            .ToListAsync();
+
+        var pendingTotal = installments.Sum(i => i.Amount);
+
+        var amountToUse = Math.Min(amount, pendingTotal);
+
+        var remaining = amountToUse;
+        decimal moneyUsed = 0;
+
+        for (int i = 0; i < installments.Count; i++)
+        {
+            if (remaining <= 0)
+                break;
+
+            var installment = installments[i];
+
+            if (remaining >= installment.Amount)
+            {
+                // pagar cuota completa
+                installment.PaidAmount += installment.Amount;
+                remaining -= installment.Amount;
+                moneyUsed += installment.Amount;
+
+                installment.IsPaid = true;
+                installment.IsDue = false;
+            }
+            else
+            {
+                // pago parcial
+                installment.PaidAmount += remaining;
+                installment.Amount -= remaining;
+                moneyUsed += remaining;
+                remaining = 0;
+            }
+        }
+
+        await _loanInstallmentRepository.SaveChangesAsync();
+
+        // comprobar si todas están pagadas
+        var allPaid = await _loanInstallmentRepository
+            .GetAllQueryable()
+            .Where(inst => inst.LoanId == loanId)
+            .AllAsync(inst => inst.IsPaid);
+
+        if (allPaid)
+        {
+            loan.Completed = true;
+            loan.IsDue = false;
+            await _loanRepository.UpdateAsync(loan.Id, loan);
+        }
+
+        return Result<decimal>.Ok(moneyUsed);
+    }
+
+
+
     public async Task RecalculateInstallmentsAndUpdate(string loanId, decimal newAnnualRate)
     {
         var loan = await _loanRepository.GetAllQueryable()

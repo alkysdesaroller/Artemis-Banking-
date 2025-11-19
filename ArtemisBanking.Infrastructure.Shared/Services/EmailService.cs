@@ -59,16 +59,18 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
         {
             string templatePath = GetTemplatePath(data.Type);
             string html = await File.ReadAllTextAsync(templatePath);
+            string subject = GetSubjectFor(data.Type);
 
             foreach (var variable in data.Variables)
             {
                 html = html.Replace($"{{{{{variable.Key}}}}}", variable.Value);
+                subject = subject.Replace($"{{{{{variable.Key}}}}}", variable.Value);
             }
 
             await SendAsync(new EmailRequestDto
             {
                 To = data.To,
-                Subject = GetSubjectFor(data.Type),
+                Subject = subject,
                 HtmlBody = html
             });
         }
@@ -115,6 +117,12 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
 
                 EmailType.BeneficiaryTransferReceiver =>
                     Path.Combine(templatesDir, "BeneficiaryTransferReceiver.html"),
+                
+                EmailType.Deposit =>
+                    Path.Combine(templatesDir, "Deposit.html"),
+
+                EmailType.Withdraw =>
+                    Path.Combine(templatesDir, "Withdraw.html"),
 
                 _ => throw new Exception($"No existe plantilla para {type}")
             };
@@ -130,17 +138,20 @@ namespace ArtemisBanking.Infrastructure.Shared.Services
                 EmailType.LoanApproved => "Tu préstamo ha sido aprobado",
                 EmailType.LoanRateUpdated => "Actualización de tasa de tu préstamo",
                 EmailType.LoanDisbursement => "Desembolso de préstamo realizado",
-                EmailType.LoanPayment => "Pago de préstamo procesado",
+                EmailType.LoanPayment => "Pago realizado al préstamo {{LoanNumber}}",
 
-                EmailType.CreditCardPayment => "Pago a tarjeta de crédito procesado",
+                EmailType.CreditCardPayment => "Pago realizado a la tarjeta {{CardLast4}}",
                 EmailType.CashAdvance => "Avance de efectivo realizado",
                 EmailType.CreditCardLimitUpdated => "Actualización de límite de su tarjeta de crédito",
 
-                EmailType.ExpressTransferSender => "Transferencia realizada",
-                EmailType.ExpressTransferReceiver => "Has recibido una transferencia",
+                EmailType.ExpressTransferSender => "Transacción realizada a la cuenta {{DestAccountLast4}}",
+                EmailType.ExpressTransferReceiver => "Transacción enviada desde la cuenta {{OriginAccountLast4}}",
 
                 EmailType.BeneficiaryTransferSender => "Transferencia enviada a beneficiario",
                 EmailType.BeneficiaryTransferReceiver => "Has recibido una transferencia de beneficiario",
+                
+                EmailType.Deposit => "Depósito realizado a su cuenta {{AccountLast4}}",
+                EmailType.Withdraw => "Retiro realizado de su cuenta {{AccountLast4}}",
 
                 _ => "Notificación – ArtemisBanking"
             };
