@@ -60,7 +60,7 @@ public class CreditCardController : BaseApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Get(CreateCreditCardApiDto dto)
+    public async Task<IActionResult> CreateCreditCard(CreateCreditCardApiDto dto)
     {
 
         try
@@ -93,7 +93,7 @@ public class CreditCardController : BaseApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Get([FromRoute] string cardNumber)
+    public async Task<IActionResult> Details([FromRoute] string cardNumber)
     {
 
         try
@@ -124,7 +124,7 @@ public class CreditCardController : BaseApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetLimit([FromRoute] string cardNumber, [FromBody] UpdateCreditcardLimitApiDto dto)
+    public async Task<IActionResult> UpdateLimit([FromRoute] string cardNumber, [FromBody] UpdateCreditcardLimitApiDto dto)
     {
 
         try
@@ -160,7 +160,7 @@ public class CreditCardController : BaseApiController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetLimit([FromRoute] string cardNumber)
+    public async Task<IActionResult> Cancel([FromRoute] string cardNumber)
     {
 
         try
