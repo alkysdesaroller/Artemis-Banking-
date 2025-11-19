@@ -1,4 +1,5 @@
-﻿using ArtemisBanking.Core.Application.Dtos.SavingAccount;
+﻿using System.Security.Claims;
+using ArtemisBanking.Core.Application.Dtos.SavingAccount;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Application.ViewModels.Teller;
 using ArtemisBanking.Core.Domain.Common.Enums;
@@ -8,6 +9,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArtemisBanking.Areas.Teller.Controllers;
 
@@ -46,7 +48,6 @@ public class DepositController : Controller
             return View(model);
         }
 
-        // Verificar que la cuenta existe
         var accountResult = await _savingAccountService.GetByIdAsync(model.AccountNumber);
         if (accountResult.IsFailure || accountResult.Value == null)
         {
@@ -60,51 +61,58 @@ public class DepositController : Controller
             ModelState.AddModelError("", "La cuenta especificada está inactiva.");
             return View(model);
         }
-
-        // Obtener el ID del cajero actual
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        
+        var client = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == account.ClientId);
+        if (client == null)
         {
-            ModelState.AddModelError("", "No se pudo identificar al cajero.");
+            ModelState.AddModelError("", "No se encontro al cliente de esta cuenta");
             return View(model);
         }
 
-        // Crear el DTO para el depósito
+
+        var confirmDeposit = new ConfirmDepositViewModel()
+        {
+            Deposit = new DepositViewModel()
+            {
+                AccountNumber = model.AccountNumber,
+                Amount = model.Amount,
+                Description = "",
+                
+            },
+            ClientName = $"{client.FirstName} {client.LastName}"
+        };
+        
+        return View("Confirm", confirmDeposit);
+
+    }
+    
+    public async Task<IActionResult> Confirm(ConfirmDepositViewModel model)
+    {
+
+        return View(model);
+        
+        
+ 
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ProcessDeposit(ConfirmDepositViewModel model)
+    {
         var depositDto = new DepositDto
         {
-            AccountNumber = model.AccountNumber,
-            Amount = model.Amount,
-            TellerId = user.Id
+            AccountNumber = model.Deposit.AccountNumber,
+            Amount = model.Deposit.Amount,
+            TellerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "",
         };
-
-        // Procesar el depósito
+        
         var result = await _transactionService.ProcessDepositAsync(depositDto);
 
         if (result.IsFailure)
         {
             this.SendValidationErrorMessages(result);
-            return View(model);
+            return View("Index", new DepositViewModel());
         }
 
-        // Redirigir a la página de confirmación
-        return RedirectToAction("Confirm", new { transactionId = result.Value.Id });
-    }
-
-    public async Task<IActionResult> Confirm(int transactionId)
-    {
-        var transactionResult = await _transactionService.GetByIdAsync(transactionId);
-        if (transactionResult.IsFailure || transactionResult.Value == null)
-        {
-            return RedirectToAction("Index");
-        }
-
-        var viewModel = new TransactionConfirmationViewModel
-        {
-            Transaction = transactionResult.Value,
-            TransactionType = "Depósito",
-            AccountNumber = transactionResult.Value.Origin
-        };
-
-        return View(viewModel);
+        return RedirectToRoute(new {controller ="Deposit", action = "Index"});
     }
 }

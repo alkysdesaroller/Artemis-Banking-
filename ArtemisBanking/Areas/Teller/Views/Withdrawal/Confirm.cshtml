@@ -1,7 +1,6 @@
-﻿@using ArtemisBanking.Core.Domain.Common.Enums
-@model TransactionConfirmationViewModel
+﻿@model ConfirmWithdrawalViewModel
 @{
-    ViewData["Title"] = "Confirmación de Retiro";
+    ViewData["Title"] = "Confirmar Retiro";
     Layout = "_LayoutTeller";
 }
 
@@ -10,60 +9,63 @@
         <div class="col-12 col-md-8 col-lg-6 mx-auto">
             <div class="card shadow-sm border-warning">
                 <div class="card-header bg-warning text-white">
-                    <h4 class="mb-0"><i class="bi bi-check-circle"></i> Retiro Procesado Exitosamente</h4>
+                    <h4 class="mb-0">
+                        <i class="bi bi-cash"></i> Confirmación de Retiro
+                    </h4>
                 </div>
+
                 <div class="card-body">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill"></i> La transacción se ha completado correctamente.
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Verifica los datos antes de procesar el retiro.
                     </div>
 
                     <div class="mb-4">
-                        <h5 class="mb-3">Detalles de la Transacción</h5>
+                        <h5 class="mb-3">Datos del Cliente</h5>
+                        <p class="fw-bold">@Model.ClientName</p>
+
+                        <h5 class="mb-3">Detalles del Retiro</h5>
                         <table class="table table-bordered">
                             <tr>
-                                <th>Número de Transacción:</th>
-                                <td>@Model.Transaction.Id</td>
-                            </tr>
-                            <tr>
-                                <th>Tipo:</th>
-                                <td>@Model.TransactionType</td>
-                            </tr>
-                            <tr>
                                 <th>Cuenta:</th>
-                                <td>@Model.AccountNumber</td>
+                                <td>@Model.Withdrawal.AccountNumber</td>
                             </tr>
+
                             <tr>
-                                <th>Monto:</th>
-                                <td class="fw-bold text-warning">$@Model.Transaction.Amount.ToString("N2")</td>
-                            </tr>
-                            <tr>
-                                <th>Fecha:</th>
-                                <td>@Model.Transaction.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                            </tr>
-                            <tr>
-                                <th>Estado:</th>
-                                <td>
-                                    @if (Model.Transaction.Status == TransactionStatus.Approved)
-                                    {
-                                        <span class="badge bg-success">Completada</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning">@Model.Transaction.Status</span>
-                                    }
+                                <th>Monto a Retirar:</th>
+                                <td class="fw-bold text-danger">
+                                    $@Model.Withdrawal.Amount.ToString("N2")
                                 </td>
                             </tr>
                         </table>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-area="Teller" asp-controller="Withdrawal" asp-action="Index" class="btn btn-warning">
-                            <i class="bi bi-plus-circle"></i> Nuevo Retiro
-                        </a>
-                        <a asp-area="Teller" asp-controller="Home" asp-action="Dashboard" class="btn btn-secondary">
-                            <i class="bi bi-house"></i> Volver al Dashboard
-                        </a>
-                    </div>
+                    <form asp-area="Teller"
+                          asp-controller="Withdrawal"
+                          asp-action="ProcessWithdrawal"
+                          method="post">
+                        
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Withdrawal.AccountNumber" />
+                        <input type="hidden" asp-for="Withdrawal.Amount" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-area="Teller"
+                               asp-controller="Withdrawal"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-warning">
+                                <i class="bi bi-check-circle"></i> Confirmar Retiro
+                            </button>
+                        </div>
+                    </form>
+
                 </div>
             </div>
         </div>

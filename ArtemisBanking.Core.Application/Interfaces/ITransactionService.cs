@@ -24,7 +24,7 @@ public interface ITransactionService : IGenericService<int, TransactionDto>
     Task<Result<TransactionDto>> ProcessLoanDisbursementTransfer(LoanDisbursementTransactionDto dto);
     Task<Result<TransactionDto>> ProcessDepositAsync(DepositDto dto);
     Task<Result<TransactionDto>> ProcessWithdrawalAsync(WithdrawalDto dto);
-    Task<Result<TransactionDto>> ProcessTellerTransactionAsync(TellerTransactionDto dto);
+    Task<Result> ProcessTellerTransactionAsync(TellerTransactionDto dto);
     Task<Result<TransactionDto>> ProcessTellerCreditCardPaymentAsync(TellerCreditCardPaymentDto dto);
     Task<Result<TransactionDto>> ProcessTellerLoanPaymentAsync(TellerLoanPaymentDto dto);
     Task<Result<TransactionSummaryDto>> GetTellerTransactionSummaryAsync(string tellerId);
