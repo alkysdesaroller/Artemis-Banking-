@@ -31,7 +31,7 @@ namespace ArtemisBanking.Infrastructure.Identity.Seeds
                 if(entityUser == null)
                 {
                     await userManager.CreateAsync(user, "123Pa$$word!");
-                    await userManager.AddToRoleAsync(user, nameof(Roles.Commerce));
+                    await userManager.AddToRoleAsync(user, nameof(Roles.Client));
                    
                     var userJustCreated = await userManager.FindByEmailAsync(user.Email);
                     userId = userJustCreated.Id;

@@ -4,7 +4,6 @@ using ArtemisBanking.Core.Application.ViewModels.Teller;
 using ArtemisBanking.Core.Domain.Common.Enums;
 using ArtemisBanking.Extensions;
 using ArtemisBanking.Infrastructure.Identity.Entities;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,18 +17,15 @@ public class ThirdPartyTransactionController : Controller
     private readonly ITransactionService _transactionService;
     private readonly ISavingAccountService _savingAccountService;
     private readonly UserManager<AppUser> _userManager;
-    private readonly IMapper _mapper;
 
     public ThirdPartyTransactionController(
         ITransactionService transactionService,
         ISavingAccountService savingAccountService,
-        UserManager<AppUser> userManager,
-        IMapper mapper)
+        UserManager<AppUser> userManager)
     {
         _transactionService = transactionService;
         _savingAccountService = savingAccountService;
         _userManager = userManager;
-        _mapper = mapper;
     }
 
     public IActionResult Index()
@@ -42,100 +38,97 @@ public class ThirdPartyTransactionController : Controller
     public async Task<IActionResult> Index(ThirdPartyTransactionViewModel model)
     {
         if (!ModelState.IsValid)
-        {
             return View(model);
-        }
 
-        // Verificar que las cuentas no sean la misma
         if (model.SourceAccountNumber == model.DestinationAccountNumber)
         {
             ModelState.AddModelError("", "La cuenta origen y destino no pueden ser la misma.");
             return View(model);
         }
 
-        // Verificar que la cuenta origen existe
         var sourceAccountResult = await _savingAccountService.GetByIdAsync(model.SourceAccountNumber);
         if (sourceAccountResult.IsFailure || sourceAccountResult.Value == null)
         {
-            ModelState.AddModelError("", "La cuenta origen especificada no existe.");
+            ModelState.AddModelError("", "La cuenta origen no existe.");
             return View(model);
         }
 
-        var sourceAccount = sourceAccountResult.Value;
-        if (!sourceAccount.IsActive)
+        var source = sourceAccountResult.Value;
+
+        if (!source.IsActive)
         {
-            ModelState.AddModelError("", "La cuenta origen especificada está inactiva.");
+            ModelState.AddModelError("", "La cuenta origen está inactiva.");
             return View(model);
         }
 
-        // Verificar que hay suficiente saldo
-        if (sourceAccount.Balance < model.Amount)
+        if (source.Balance < model.Amount)
         {
-            ModelState.AddModelError("", "La cuenta origen no tiene suficiente saldo para realizar esta transacción.");
+            ModelState.AddModelError("", "Saldo insuficiente en cuenta origen.");
             return View(model);
         }
 
-        // Verificar que la cuenta destino existe
-        var destinationAccountResult = await _savingAccountService.GetByIdAsync(model.DestinationAccountNumber);
-        if (destinationAccountResult.IsFailure || destinationAccountResult.Value == null)
+        var destAccountResult = await _savingAccountService.GetByIdAsync(model.DestinationAccountNumber);
+        if (destAccountResult.IsFailure || destAccountResult.Value == null)
         {
-            ModelState.AddModelError("", "La cuenta destino especificada no existe.");
+            ModelState.AddModelError("", "La cuenta destino no existe.");
             return View(model);
         }
 
-        var destinationAccount = destinationAccountResult.Value;
-        if (!destinationAccount.IsActive)
+        var dest = destAccountResult.Value;
+
+        if (!dest.IsActive)
         {
-            ModelState.AddModelError("", "La cuenta destino especificada está inactiva.");
+            ModelState.AddModelError("", "La cuenta destino está inactiva.");
             return View(model);
         }
 
-        // Obtener el ID del cajero actual
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-        {
-            ModelState.AddModelError("", "No se pudo identificar al cajero.");
-            return View(model);
-        }
+        var user = await _userManager.FindByIdAsync(dest.ClientId);
+        var receiverName = user != null ? $"{user.FirstName} {user.LastName}" : "Desconocido";
 
-        // Crear el DTO para la transacción
-        var transactionDto = new TellerTransactionDto
+        var confirmVm = new ConfirmThirdPartyTransactionViewModel
         {
-            SourceAccountNumber = model.SourceAccountNumber,
-            DestinationAccountNumber = model.DestinationAccountNumber,
-            Amount = model.Amount,
-            TellerId = user.Id
+            Transaction = new ThirdPartyTransactionViewModel
+            {
+                SourceAccountNumber = model.SourceAccountNumber,
+                DestinationAccountNumber = model.DestinationAccountNumber,
+                Amount = model.Amount,
+                Description = model.Description
+            },
+            DestinationClientName = receiverName
         };
 
-        // Procesar la transacción
-        var result = await _transactionService.ProcessTellerTransactionAsync(transactionDto);
+        return View("Confirm", confirmVm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProcessTransfer(ConfirmThirdPartyTransactionViewModel model)
+    {
+        var teller = await _userManager.GetUserAsync(User);
+        if (teller == null)
+        {
+            ModelState.AddModelError("", "No se pudo identificar al cajero.");
+            return View("Confirm", model);
+        }
+
+        var dto = new TellerTransactionDto
+        {
+            SourceAccountNumber = model.Transaction.SourceAccountNumber,
+            DestinationAccountNumber = model.Transaction.DestinationAccountNumber,
+            Amount = model.Transaction.Amount,
+            TellerId = teller.Id,
+        };
+
+        var result = await _transactionService.ProcessTellerTransactionAsync(dto);
 
         if (result.IsFailure)
         {
             this.SendValidationErrorMessages(result);
-            return View(model);
+            return View("Confirm", model);
         }
 
-        // Redirigir a la página de confirmación
-        return RedirectToAction("Confirm", new { transactionId = result.Value.Id });
+        return RedirectToRoute(new { controller = "ThirdPartyTransaction", action = "Index" });
     }
 
-    public async Task<IActionResult> Confirm(int transactionId)
-    {
-        var transactionResult = await _transactionService.GetByIdAsync(transactionId);
-        if (transactionResult.IsFailure || transactionResult.Value == null)
-        {
-            return RedirectToAction("Index");
-        }
 
-        var viewModel = new TransactionConfirmationViewModel
-        {
-            Transaction = transactionResult.Value,
-            TransactionType = "Transferencia a Terceros",
-            AccountNumber = transactionResult.Value.Origin,
-            DestinationAccountNumber = transactionResult.Value.Beneficiary
-        };
-
-        return View(viewModel);
-    }
 }

@@ -160,5 +160,17 @@ public class LoginController : Controller
     {
         return View();
     }
+    
+
+    
+    public async Task<IActionResult> ConfirmEmail(string userId,string token)
+    {
+        var result = await _accountServiceForWebApp.ConfirmAccountAsync(userId, token);
+        if (result.IsFailure)
+        {
+            return View("ConfirmEmail", result.GeneralError);
+        }
+        return View("ConfirmEmail", "Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión");
+    }
 
 }

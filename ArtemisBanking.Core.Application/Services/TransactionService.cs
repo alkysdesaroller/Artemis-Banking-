@@ -233,7 +233,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         }
     }
 
-    public async Task<Result<TransactionDto>> ProcessTellerTransactionAsync(TellerTransactionDto dto)
+    public async Task<Result> ProcessTellerTransactionAsync(TellerTransactionDto dto)
     {
         try
         {
@@ -323,8 +323,8 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 SubType = TransactionSubType.ThirdPartyTransfer // Tipo de transacción: Transferencia a terceros
             };
 
-            var savedTransaction = await _transactionRepository.AddAsync(transactionDebit);
-            var transactionDto = _mapper.Map<TransactionDto>(savedTransaction);
+            var savedTransactionDebit = await _transactionRepository.AddAsync(transactionDebit);
+            var savedTransactionCredit = await _transactionRepository.AddAsync(transactionCredit);
             
             
             var clientSource = await _accountServiceForWebApp.GetUserById(sourceAccount.ClientId);
@@ -354,8 +354,9 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             
             await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
             {
+                // clientDestiny.Email,
                 Type = EmailType.ExpressTransferReceiver,
-                To = clientDestiny.Email,
+                To = "urenaperdomo@gmail.com",
                 Variables =
                 {
                     ["OriginAccountLast4"] = sourceAccount.Id[^4..],
@@ -366,7 +367,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
             });
 
 
-            return Result<TransactionDto>.Ok(transactionDto);
+            return Result.Ok();
         }
         catch (Exception ex)
         {

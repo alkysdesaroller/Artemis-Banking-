@@ -1,4 +1,5 @@
-﻿using ArtemisBanking.Core.Application.Dtos.SavingAccount;
+﻿using System.Security.Claims;
+using ArtemisBanking.Core.Application.Dtos.SavingAccount;
 using ArtemisBanking.Core.Application.Interfaces;
 using ArtemisBanking.Core.Application.ViewModels.Teller;
 using ArtemisBanking.Core.Domain.Common.Enums;
@@ -8,6 +9,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArtemisBanking.Areas.Teller.Controllers;
 
@@ -18,18 +20,15 @@ public class WithdrawalController : Controller
     private readonly ITransactionService _transactionService;
     private readonly ISavingAccountService _savingAccountService;
     private readonly UserManager<AppUser> _userManager;
-    private readonly IMapper _mapper;
 
     public WithdrawalController(
         ITransactionService transactionService,
         ISavingAccountService savingAccountService,
-        UserManager<AppUser> userManager,
-        IMapper mapper)
+        UserManager<AppUser> userManager)
     {
         _transactionService = transactionService;
         _savingAccountService = savingAccountService;
         _userManager = userManager;
-        _mapper = mapper;
     }
 
     public IActionResult Index()
@@ -42,11 +41,8 @@ public class WithdrawalController : Controller
     public async Task<IActionResult> Index(WithdrawalViewModel model)
     {
         if (!ModelState.IsValid)
-        {
             return View(model);
-        }
 
-        // Verificar que la cuenta existe
         var accountResult = await _savingAccountService.GetByIdAsync(model.AccountNumber);
         if (accountResult.IsFailure || accountResult.Value == null)
         {
@@ -61,57 +57,56 @@ public class WithdrawalController : Controller
             return View(model);
         }
 
-        // Verificar que hay suficiente saldo
         if (account.Balance < model.Amount)
         {
-            ModelState.AddModelError("", "La cuenta no tiene suficiente saldo para realizar este retiro.");
+            ModelState.AddModelError("", "La cuenta no tiene suficiente saldo para este retiro.");
             return View(model);
         }
 
-        // Obtener el ID del cajero actual
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
+        var client = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == account.ClientId);
+        if (client == null)
         {
-            ModelState.AddModelError("", "No se pudo identificar al cajero.");
+            ModelState.AddModelError("", "No se encontró al cliente de esta cuenta.");
             return View(model);
         }
 
-        // Crear el DTO para el retiro
-        var withdrawalDto = new WithdrawalDto
+        var confirmModel = new ConfirmWithdrawalViewModel
         {
-            AccountNumber = model.AccountNumber,
-            Amount = model.Amount,
-            TellerId = user.Id // ID del cajero que procesa el retiro
+            Withdrawal = new WithdrawalViewModel
+            {
+                AccountNumber = model.AccountNumber,
+                Amount = model.Amount,
+                Description = model.Description
+            },
+            ClientName = $"{client.FirstName} {client.LastName}"
         };
 
-        // Procesar el retiro
-        var result = await _transactionService.ProcessWithdrawalAsync(withdrawalDto);
+        return View("Confirm", confirmModel);
+    }
+
+    public IActionResult Confirm(ConfirmWithdrawalViewModel model)
+    {
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ProcessWithdrawal(ConfirmWithdrawalViewModel model)
+    {
+        var dto = new WithdrawalDto
+        {
+            AccountNumber = model.Withdrawal.AccountNumber,
+            Amount = model.Withdrawal.Amount,
+            TellerId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ""
+        };
+
+        var result = await _transactionService.ProcessWithdrawalAsync(dto);
 
         if (result.IsFailure)
         {
             this.SendValidationErrorMessages(result);
-            return View(model);
+            return View("Index", new WithdrawalViewModel());
         }
 
-        // Redirigir a la página de confirmación
-        return RedirectToAction("Confirm", new { transactionId = result.Value.Id });
-    }
-
-    public async Task<IActionResult> Confirm(int transactionId)
-    {
-        var transactionResult = await _transactionService.GetByIdAsync(transactionId);
-        if (transactionResult.IsFailure || transactionResult.Value == null)
-        {
-            return RedirectToAction("Index");
-        }
-
-        var viewModel = new TransactionConfirmationViewModel
-        {
-            Transaction = transactionResult.Value,
-            TransactionType = "Retiro",
-            AccountNumber = transactionResult.Value.Origin
-        };
-
-        return View(viewModel);
+        return RedirectToRoute(new { controller = "Withdrawal", action = "Index" });
     }
 }

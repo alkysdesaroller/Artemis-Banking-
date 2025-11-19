@@ -14,33 +14,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArtemisBanking.Core.Application.Services;
 
-public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService 
+public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
 {
     private readonly ILoanRepository _loanRepository;
     private readonly ILoanInstallmentRepository _loanInstallmentRepository;
+    private readonly ITransactionRepository _transactionRepository;
 
     private readonly IEmailService _emailService;
     private readonly ISavingAccountService _savingAccountService;
-    private readonly ITransactionService _transactionService;
     private readonly ILoanInstallmentService _loanInstallmentService;
     private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly IRiskService _riskService;
     private readonly IMapper _mapper;
 
-    public LoanService(ILoanRepository repository, IMapper mapper, IBaseAccountService accountServiceForWebApp,
-        IRiskService riskService, ILoanInstallmentService loanInstallmentService,
-        ITransactionService transactionService, ISavingAccountService savingAccountService, IEmailService emailService, ILoanInstallmentRepository loanInstallmentRepository) : base(repository, mapper)
+    public LoanService(ILoanInstallmentRepository loanInstallmentRepository,
+        ITransactionRepository transactionRepository, IEmailService emailService,
+        ISavingAccountService savingAccountService, ILoanInstallmentService loanInstallmentService,
+        IBaseAccountService accountServiceForWebApp, IRiskService riskService, IMapper mapper,
+        ILoanRepository loanRepository) : base(loanRepository, mapper)
     {
-        _loanRepository = repository;
-        _mapper = mapper;
+        _loanInstallmentRepository = loanInstallmentRepository;
+        _transactionRepository = transactionRepository;
+        _emailService = emailService;
+        _savingAccountService = savingAccountService;
+        _loanInstallmentService = loanInstallmentService;
         _accountServiceForWebApp = accountServiceForWebApp;
         _riskService = riskService;
-        _loanInstallmentService = loanInstallmentService;
-        _transactionService = transactionService;
-        _savingAccountService = savingAccountService;
-        _emailService = emailService;
-        _loanInstallmentRepository = loanInstallmentRepository;
+        _mapper = mapper;
+        _loanRepository = loanRepository;
     }
+
 
     public override async Task<Result<LoanDto>> AddAsync(LoanDto dtoModel)
     {
@@ -48,30 +51,31 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         {
             return Result<LoanDto>.Fail("El cliente ya tiene un préstamo activo");
         }
-        
+
         var userWhoApproved = await _accountServiceForWebApp.GetUserById(dtoModel.ApprovedByUserId);
         if (userWhoApproved is null)
         {
             return Result<LoanDto>.Fail("No se encontro el usuario");
         }
-        
+
         if (userWhoApproved.Role != nameof(Roles.Admin))
         {
             return Result<LoanDto>.Fail("Usted no esta autorizado para asignar prestamos");
         }
-        
-        var validTermMonths = new[] {6, 12, 18, 24, 30, 36, 42, 48, 54, 60};
+
+        var validTermMonths = new[] { 6, 12, 18, 24, 30, 36, 42, 48, 54, 60 };
         if (!validTermMonths.Contains(dtoModel.TermMonths))
         {
             return Result<LoanDto>.Fail("Los plazos solamente pueden ser de: 6, 12, 18, 24, 30, 36, 42, 48, 54, 60");
         }
-        
+
+        // creamos el prestamo y sus cuotas
         var createLoanResult = await base.AddAsync(dtoModel);
         if (createLoanResult.IsFailure)
         {
             return createLoanResult;
         }
-        
+
         var installments = GenerateLoansInstallments(createLoanResult.Value!);
         var createLoanInstallmentResult = await _loanInstallmentService.AddRangeAsync(installments);
         if (createLoanInstallmentResult.IsFailure)
@@ -85,14 +89,55 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
             return Result<LoanDto>.Fail(mainAccountResult.GeneralError!);
         }
 
-
-        await _transactionService.ProcessLoanDisbursementTransfer(new LoanDisbursementTransactionDto
+        // registramos la transaccion
+        var transaction = new Transaction
         {
-            SourceLoanNumber = createLoanResult.Value!.Id,
-            DestinationAccountNumber = mainAccountResult.Value!.Id,
-            AprovedByAdminId = dtoModel.ApprovedByUserId,
+            Id = 0,
             Amount = dtoModel.Amount,
+            CreatedById = userWhoApproved.Id,
+            AccountNumber = mainAccountResult.Value!.Id,
+            Type = TransactionType.Credit,
+            Beneficiary = mainAccountResult.Value!.Id,
+            Origin = createLoanResult.Value!.Id,
+            Date = DateTime.Now,
+            SubType = TransactionSubType.Deposit,
+            Status = TransactionStatus.Approved,
+        };
+
+        var transactionResult = await _transactionRepository.AddAsync(transaction);
+        var depositResult =
+            await _savingAccountService.DepositToAccountAsync(mainAccountResult.Value!.Id, dtoModel.Amount);
+
+        if (depositResult.IsFailure)
+            return Result<LoanDto>.Fail(depositResult.GeneralError!);
+
+        // para el email
+        var client = await _accountServiceForWebApp.GetUserById(dtoModel.ClientId);
+        if (client is null)
+        {
+            return Result<LoanDto>.Fail("no se encontro el cliente");
+        }
+
+        var newMontly = MontlyPayment.Calculate(
+            createLoanResult.Value!.Amount,
+            createLoanResult.Value!.AnualRate,
+            createLoanResult.Value.TermMonths
+        );
+
+        await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto()
+        {
+            Type = EmailType.LoanApproved,
+            To = client.Email,
+            Variables =
+            {
+                ["LoanNumber"] = createLoanResult.Value.Id,
+                ["Amount"] = createLoanResult.Value.Amount.ToString("N2"),
+                ["Term"] = createLoanResult.Value.TermMonths.ToString(),
+                ["InterestRate"] = createLoanResult.Value!.AnualRate.ToString("N2"),
+                ["MonthlyPayment"] = newMontly.ToString("N2"),
+            }
         });
+
         return createLoanResult;
     }
 
@@ -117,12 +162,12 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
 
         var clientsWithoutActiveLoansIds = allClientIds.Except(clientsWithActiveLoans).ToList();
 
-       
+
         if (!clientsWithoutActiveLoansIds.Any())
         {
             return Result<List<ClientsWithDebtDto>>.Ok(new List<ClientsWithDebtDto>());
         }
-        
+
         return await _riskService.GetDebtOfTheseUsers(clientsWithoutActiveLoansIds, identityCardNumber);
     }
 
@@ -144,21 +189,21 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
             client = clientResult.Value;
         }
 
-        var query = _loanRepository.GetAllQueryable().AsNoTracking(); 
+        var query = _loanRepository.GetAllQueryable().AsNoTracking();
 
         if (client is not null)
-            query = query.Where(l => l.ClientId == client.Id); 
+            query = query.Where(l => l.ClientId == client.Id);
 
         if (isCompleted.HasValue)
-            query = query.Where(l => l.Completed == isCompleted.Value); 
-        
-        var usersIds = await  query.Select(l => l.ClientId).Distinct().ToListAsync();
+            query = query.Where(l => l.Completed == isCompleted.Value);
+
+        var usersIds = await query.Select(l => l.ClientId).Distinct().ToListAsync();
         var usersResult = await _accountServiceForWebApp.GetUsersByIds(usersIds);
         var usersDict = usersResult.Value!.ToDictionary(user => user.Id, user => user);
-        
+
         var items = query
-            .OrderByDescending(l => l.Completed) 
-            .ThenByDescending(l => l.CreatedAt) 
+            .OrderByDescending(l => l.Completed)
+            .ThenByDescending(l => l.CreatedAt)
             .Select(l => new LoanSummaryDto
             {
                 Id = l.Id,
@@ -176,10 +221,9 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
                 AnualRate = l.AnualRate,
                 IsDue = l.IsDue,
                 Client = usersDict[l.ClientId],
-                
             });
 
-        
+
         var data = PaginatedData<LoanSummaryDto>.Create(items, page, pageSize);
         return data;
     }
@@ -189,13 +233,13 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         var loan = await _loanRepository.GetAllQueryable().AsNoTracking()
             .Include(l => l.LoanInstallments)
             .FirstOrDefaultAsync(l => l.Id == loanId);
-        
+
         if (loan is null)
         {
-            return  Result<LoanDto>.Fail("Loan not found");
+            return Result<LoanDto>.Fail("Loan not found");
         }
-    
-        return  Result<LoanDto>.Ok(_mapper.Map<LoanDto>(loan));
+
+        return Result<LoanDto>.Ok(_mapper.Map<LoanDto>(loan));
     }
 
     public async Task<Result<LoanDto>> UpdateInterestRateAsync(string loanId, decimal newRate)
@@ -213,16 +257,17 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
         {
             return updateResult;
         }
-        
+
         await RecalculateInstallmentsAndUpdate(loan.Id, newRate);
-        
-        
+
+
         // Email
         var client = await _accountServiceForWebApp.GetUserById(loan.ClientId);
         if (client is null)
         {
             return Result<LoanDto>.Fail("no se encontro al usuario");
         }
+
         var newMontly = MontlyPayment.Calculate(loan.Amount, newRate, loan.TermMonths);
         await _emailService.SendTemplateEmailAsync(new EmailTemplateDataDto
         {
@@ -231,13 +276,13 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
             Variables =
             {
                 ["LoanId"] = loan.Id,
-                ["LoanAmount"] =loan.Amount.ToString("N2"),
+                ["LoanAmount"] = loan.Amount.ToString("N2"),
                 ["NewRate"] = newRate.ToString("N2"),
                 ["NewMonthlyPayment"] = newMontly.ToString("n2"),
                 ["Date"] = DateTime.Now.ToShortDateString(),
             }
         });
-        
+
         return Result<LoanDto>.Ok(updateResult.Value!);
     }
 
@@ -253,7 +298,7 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
 
         var installments = await _loanInstallmentRepository.GetAllQueryable()
             .Where(inst => inst.LoanId == loanId && !inst.IsPaid)
-            .OrderBy(inst => inst.PaymentDay)  
+            .OrderBy(inst => inst.PaymentDay)
             .ToListAsync();
 
         var pendingTotal = installments.Sum(i => i.Amount);
@@ -309,13 +354,12 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
     }
 
 
-
     public async Task RecalculateInstallmentsAndUpdate(string loanId, decimal newAnnualRate)
     {
         var loan = await _loanRepository.GetAllQueryable()
             .Include(l => l.LoanInstallments)
             .FirstOrDefaultAsync(l => l.Id == loanId);
-    
+
         // 1. Filtrar y modificar cuotas futuras
         var futureInstallments = loan.LoanInstallments
             .Where(i => i.PaymentDay > DateTime.Now && !i.IsPaid)
@@ -336,32 +380,31 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
 
         await _loanRepository.SaveChangesAsync();
     }
-    
+
     // Metodo axiliar para recalcular las cuotas luego de actualizar la tasa 
     private static List<LoanInstallment> RecalculateInstallments(
         decimal remainingCapital, decimal newAnnualRate, int remainingTerm)
     {
-        
         var newInstallments = new List<LoanInstallment>();
         decimal monthlyRate = newAnnualRate / 100 / 12;
-    
+
         // Recalcular cuota fija con nuevo interés
         decimal newFixedPayment = MontlyPayment.Calculate(remainingCapital, newAnnualRate, remainingTerm);
-    
+
         decimal remainingBalance = remainingCapital;
-    
+
         for (int i = 1; i <= remainingTerm; i++)
         {
             decimal interestAmount = Math.Round(remainingBalance * monthlyRate, 2);
             decimal capitalAmount = newFixedPayment - interestAmount;
-        
+
             // Ajuste última cuota
             if (i == remainingTerm)
             {
                 capitalAmount = remainingBalance;
                 newFixedPayment = capitalAmount + interestAmount;
             }
-        
+
             newInstallments.Add(new LoanInstallment
             {
                 Id = 0,
@@ -374,10 +417,10 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
                 CapitalAmount = Math.Round(capitalAmount, 2),
                 InterestAmount = Math.Round(interestAmount, 2)
             });
-        
+
             remainingBalance -= capitalAmount;
         }
-    
+
         return newInstallments;
     }
 
@@ -385,40 +428,40 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
     private static List<LoanInstallmentDto> GenerateLoansInstallments(LoanDto loan)
     {
         var installments = new List<LoanInstallmentDto>();
-        
+
         // 1. Calcular tasa de interés mensual
         decimal monthlyRate = loan.AnualRate / 100 / 12;
-        
+
         // 2. Calcular cuota fija (fórmula sistema francés)
         var fixedPayment = MontlyPayment.Calculate(loan.Amount, loan.AnualRate, loan.TermMonths);
         int term = loan.TermMonths;
-        
+
         decimal fixedPaymentDecimal = Math.Round(fixedPayment, 2);
-        
+
         // 3. Generar cada cuota
         decimal remainingBalance = loan.Amount;
         DateTime dueDate = DateTime.Now.AddMonths(1); // Primera cuota en 1 mes
-        
+
         for (int i = 1; i <= term; i++)
         {
             // Calcular interés de esta cuota
             decimal interestAmount = Math.Round(remainingBalance * monthlyRate, 2);
-            
+
             // Calcular capital de esta cuota
             decimal capitalAmount = fixedPaymentDecimal - interestAmount;
-            
+
             // Ajustar última cuota para evitar desfases por redondeo
             if (i == term)
             {
                 capitalAmount = remainingBalance;
                 fixedPaymentDecimal = capitalAmount + interestAmount;
             }
-            
+
             // Crear la cuota
             var installment = new LoanInstallmentDto
             {
                 Id = 0,
-                Amount = Math.Round(fixedPaymentDecimal,2),
+                Amount = Math.Round(fixedPaymentDecimal, 2),
                 CapitalAmount = Math.Round(capitalAmount),
                 InterestAmount = Math.Round(interestAmount),
                 LoanId = loan.Id,
@@ -426,14 +469,14 @@ public class LoanService : GenericServices<string, Loan, LoanDto>, ILoanService
                 IsPaid = false,
                 IsDue = false,
             };
-            
+
             installments.Add(installment);
-            
+
             // Actualizar balance y fecha para siguiente cuota
             remainingBalance -= capitalAmount;
             dueDate = dueDate.AddMonths(1);
         }
-        
+
         return installments;
     }
 }

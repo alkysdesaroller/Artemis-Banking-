@@ -1,74 +1,93 @@
-﻿@using ArtemisBanking.Core.Domain.Common.Enums
-@model TransactionConfirmationViewModel
+﻿@model ConfirmThirdPartyTransactionViewModel
 @{
-    ViewData["Title"] = "Confirmación de Transferencia";
+    ViewData["Title"] = "Confirmar Transferencia";
     Layout = "_LayoutTeller";
 }
 
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12 col-md-8 col-lg-6 mx-auto">
+
             <div class="card shadow-sm border-success">
                 <div class="card-header bg-success text-white">
-                    <h4 class="mb-0"><i class="bi bi-check-circle"></i> Transferencia Procesada Exitosamente</h4>
+                    <h4 class="mb-0">
+                        <i class="bi bi-arrow-left-right"></i> Confirmación de Transferencia
+                    </h4>
                 </div>
+
                 <div class="card-body">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill"></i> La transacción se ha completado correctamente.
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Verifica los datos antes de procesar la transferencia.
                     </div>
 
                     <div class="mb-4">
-                        <h5 class="mb-3">Detalles de la Transacción</h5>
+
+                        <h5 class="mb-3">Datos del Beneficiario</h5>
+                        <p class="fw-bold">@Model.DestinationClientName</p>
+
+                        <h5 class="mb-3">Detalles de la Transferencia</h5>
+
                         <table class="table table-bordered">
-                            <tr>
-                                <th>Número de Transacción:</th>
-                                <td>@Model.Transaction.Id</td>
-                            </tr>
-                            <tr>
-                                <th>Tipo:</th>
-                                <td>@Model.TransactionType</td>
-                            </tr>
+
                             <tr>
                                 <th>Cuenta Origen:</th>
-                                <td>@Model.AccountNumber</td>
+                                <td>@Model.Transaction.SourceAccountNumber</td>
                             </tr>
+
                             <tr>
                                 <th>Cuenta Destino:</th>
-                                <td>@Model.DestinationAccountNumber</td>
+                                <td>@Model.Transaction.DestinationAccountNumber</td>
                             </tr>
+
                             <tr>
                                 <th>Monto:</th>
-                                <td class="fw-bold text-success">$@Model.Transaction.Amount.ToString("N2")</td>
-                            </tr>
-                            <tr>
-                                <th>Fecha:</th>
-                                <td>@Model.Transaction.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                            </tr>
-                            <tr>
-                                <th>Estado:</th>
-                                <td>
-                                    @if (Model.Transaction.Status == TransactionStatus.Approved)
-                                    {
-                                        <span class="badge bg-success">Completada</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning">@Model.Transaction.Status</span>
-                                    }
+                                <td class="fw-bold text-success">
+                                    $@Model.Transaction.Amount.ToString("N2")
                                 </td>
                             </tr>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Transaction.Description))
+                            {
+                                <tr>
+                                    <th>Descripción:</th>
+                                    <td>@Model.Transaction.Description</td>
+                                </tr>
+                            }
                         </table>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-area="Teller" asp-controller="ThirdPartyTransaction" asp-action="Index" class="btn btn-success">
-                            <i class="bi bi-plus-circle"></i> Nueva Transferencia
-                        </a>
-                        <a asp-area="Teller" asp-controller="Home" asp-action="Dashboard" class="btn btn-secondary">
-                            <i class="bi bi-house"></i> Volver al Dashboard
-                        </a>
-                    </div>
+                    <form asp-area="Teller"
+                          asp-controller="ThirdPartyTransaction"
+                          asp-action="ProcessTransfer"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Transaction.SourceAccountNumber" />
+                        <input type="hidden" asp-for="Transaction.DestinationAccountNumber" />
+                        <input type="hidden" asp-for="Transaction.Amount" />
+                        <input type="hidden" asp-for="Transaction.Description" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+
+                            <a asp-area="Teller"
+                               asp-controller="ThirdPartyTransaction"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Confirmar Transferencia
+                            </button>
+
+                        </div>
+                    </form>
+
                 </div>
+
             </div>
         </div>
     </div>
