@@ -1,7 +1,6 @@
-﻿@using ArtemisBanking.Core.Domain.Common.Enums
-@model TransactionConfirmationViewModel
+﻿@model ConfirmCreditCardPaymentViewModel
 @{
-    ViewData["Title"] = "Confirmación de Pago";
+    ViewData["Title"] = "Confirmar Pago de Tarjeta";
     Layout = "_LayoutTeller";
 }
 
@@ -10,64 +9,46 @@
         <div class="col-12 col-md-8 col-lg-6 mx-auto">
             <div class="card shadow-sm border-info">
                 <div class="card-header bg-info text-white">
-                    <h4 class="mb-0"><i class="bi bi-check-circle"></i> Pago Procesado Exitosamente</h4>
+                    <h4 class="mb-0"><i class="bi bi-exclamation-circle"></i> Confirmar Pago de Tarjeta</h4>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill"></i> La transacción se ha completado correctamente.
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Está a punto de realizar un pago a la tarjeta del cliente:
+                        <strong>@Model.CardOwnerName</strong>.
                     </div>
 
-                    <div class="mb-4">
-                        <h5 class="mb-3">Detalles de la Transacción</h5>
-                        <table class="table table-bordered">
-                            <tr>
-                                <th>Número de Transacción:</th>
-                                <td>@Model.Transaction.Id</td>
-                            </tr>
-                            <tr>
-                                <th>Tipo:</th>
-                                <td>@Model.TransactionType</td>
-                            </tr>
-                            <tr>
-                                <th>Cuenta Origen:</th>
-                                <td>@Model.AccountNumber</td>
-                            </tr>
-                            <tr>
-                                <th>Tarjeta de Crédito:</th>
-                                <td>@Model.CreditCardNumber</td>
-                            </tr>
-                            <tr>
-                                <th>Monto:</th>
-                                <td class="fw-bold text-info">$@Model.Transaction.Amount.ToString("N2")</td>
-                            </tr>
-                            <tr>
-                                <th>Fecha:</th>
-                                <td>@Model.Transaction.Date.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                            </tr>
-                            <tr>
-                                <th>Estado:</th>
-                                <td>
-                                    @if (Model.Transaction.Status ==TransactionStatus.Approved)
-                                    {
-                                        <span class="badge bg-success">Completada</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning">@Model.Transaction.Status</span>
-                                    }
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
+                    <h5 class="mb-3">Detalles del Pago</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Cuenta Origen</th>
+                            <td>@Model.Payment.SourceAccountNumber</td>
+                        </tr>
+                        <tr>
+                            <th>Tarjeta de Crédito</th>
+                            <td>@Model.Payment.CreditCardNumber</td>
+                        </tr>
+                        <tr>
+                            <th>Monto</th>
+                            <td class="fw-bold text-info">$@Model.Payment.Amount.ToString("N2")</td>
+                        </tr>
+                    </table>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a asp-area="Teller" asp-controller="CreditCardPayment" asp-action="Index" class="btn btn-info text-white">
-                            <i class="bi bi-plus-circle"></i> Nuevo Pago
-                        </a>
-                        <a asp-area="Teller" asp-controller="Home" asp-action="Dashboard" class="btn btn-secondary">
-                            <i class="bi bi-house"></i> Volver al Dashboard
-                        </a>
-                    </div>
+                    <form asp-action="ProcessPayment" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="Payment.SourceAccountNumber" />
+                        <input type="hidden" asp-for="Payment.CreditCardNumber" />
+                        <input type="hidden" asp-for="Payment.Amount" />
+                        <input type="hidden" asp-for="Payment.Description" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-info text-white">Confirmar Pago</button>
+                        </div>
+                    </form>
+
                 </div>
             </div>
         </div>
