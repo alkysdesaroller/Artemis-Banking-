@@ -16,11 +16,12 @@ public class PayController(
     IAccountServiceForWebApi accountService)
     : BaseApiController
 {
-    /// <summary>
-    /// Obtiene un listado paginado de las transacciones registradas para un comercio.
-    /// Si el usuario es Commerce, el commerceId se obtiene del token JWT.
-    /// Si el usuario es Admin, el commerceId debe proporcionarse en la URL.
-    /// </summary>
+    /*
+     * Obtiene un listado paginado de las transacciones registradas para un comercio.
+     * Si el usuario es Commerce, el commerceId se obtiene del token JWT.
+     * Si el usuario es Admin, el commerceId debe proporcionarse en la URL. - Alna
+     */
+   
     [HttpGet("get-transactions/{commerceId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -89,11 +90,11 @@ public class PayController(
         }
     }
 
-    /// <summary>
-    /// Recibe los datos de un pago para ser procesado.
-    /// Si el usuario es Commerce, el commerceId se obtiene del token JWT.
-    /// Si el usuario es Admin, el commerceId debe proporcionarse en la URL.
-    /// </summary>
+   
+    /* Recibe los datos de un pago para ser procesado.
+     * Si el usuario es Admin, el commerceId debe proporcionarse en la URL.
+     * Si el usuario es Commerce, el commerceId se obtiene del token JWT. - Alna 
+     */
     [HttpPost("process-payment/{commerceId}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

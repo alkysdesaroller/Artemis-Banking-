@@ -11,6 +11,7 @@ using ArtemisBanking.Core.Domain.Entities;
 using ArtemisBanking.Core.Domain.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace ArtemisBanking.Core.Application.Services;
@@ -26,13 +27,13 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
     private readonly IBaseAccountService _accountServiceForWebApp;
     private readonly ISavingAccountService _savingAccountService;
     private readonly ICreditCardService _creditCardService;
-    private readonly ILoanService _loanService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IMapper _mapper;
 
     public TransactionService(ITransactionRepository transactionRepository, IMapper mapper,
         ICreditCardRepository creditCardRepository, ISavingAccountRepository accountRepository,
         ILoanRepository loanRepository, IEmailService emailService, IBaseAccountService accountServiceForWebApp,
-        ISavingAccountService savingAccountService, ICreditCardService creditCardService, ILoanService loanService) : base(
+        ISavingAccountService savingAccountService, ICreditCardService creditCardService, IServiceProvider serviceProvider) : base(
         transactionRepository, mapper)
     {
         _transactionRepository = transactionRepository;
@@ -44,7 +45,7 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
         _accountServiceForWebApp = accountServiceForWebApp;
         _savingAccountService = savingAccountService;
         _creditCardService = creditCardService;
-        _loanService = loanService;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<Result<List<TransactionDto>>> GetByAccountNumberAsync(string accountNumber)
@@ -512,7 +513,9 @@ public class TransactionService : GenericServices<int, Transaction, TransactionD
                 return Result<TransactionDto>.Fail("El préstamo especificado ya está completado.");
             }
 
-            var moneyUsedToPayResult = await _loanService.PayAsync(loan.Id, dto.Amount);
+            // Resolver ILoanService de forma diferida para evitar dependencia circular
+            var loanService = _serviceProvider.GetRequiredService<ILoanService>();
+            var moneyUsedToPayResult = await loanService.PayAsync(loan.Id, dto.Amount);
 
             if (moneyUsedToPayResult.IsFailure)
             {
