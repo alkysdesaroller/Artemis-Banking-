@@ -4,6 +4,7 @@ using ArtemisBanking.Infrastructure.Identity;
 using ArtemisBanking.Infrastructure.Persistence;
 using ArtemisBanking.Infrastructure.Shared;
 using ArtemisBankingApi.Extensions;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddApplicationLayerIoc(builder.Configuration);
 builder.Services.AddPersistenceLayerIoc(builder.Configuration);
 builder.Services.AddIdentityLayerIocForWebApi(builder.Configuration);
 builder.Services.AddSharedLayerIoc(builder.Configuration);
+builder.Services.AddHangfireConfiguration(builder.Configuration);
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer(); // Ayuda configurar metada para documentacion (para swagger en realidad)
@@ -42,8 +44,8 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-// Ejecutar seed de Identity
+app.UseHangFireJobs();
+app.UseHangfireDashboard("/hangfire");
 await app.Services.RunIdentitySeedAsync();
 
 // Configure the HTTP request pipeline.

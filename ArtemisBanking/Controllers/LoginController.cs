@@ -156,4 +156,9 @@ public class LoginController : Controller
         });
     }
 
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
+
 }

@@ -87,7 +87,7 @@ namespace ArtemisBanking.Infrastructure.Identity
             await DefaultRoles.SeedAsync(roleManager);
             await DefaultAdminUser.SeedAsync(userManager);
             await DefaultAtmUser.SeedAsync(userManager);
-            await DefaultClientUser.SeedAsync(userManager);
+            await DefaultClientUser.SeedAsync(userManager, savingAccountRepository);
             await DefaultCommerceUser.SeedAsync(userManager, commerceRepository, savingAccountRepository);
         }
 
@@ -158,9 +158,7 @@ namespace ArtemisBanking.Infrastructure.Identity
                     OnAuthenticationFailed = af =>
                     {
                         af.NoResult();
-                        af.Response.StatusCode = 500;
-                        af.Response.ContentType = "text/plain";
-                        return af.Response.WriteAsync(af.Exception.Message.ToString());
+                        return Task.CompletedTask;
                     },
                     OnChallenge = c =>
                     {
